@@ -19,7 +19,7 @@ class Ui_MainWindow(object):
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.centralwidget)#垂直布局
         self.verticalLayout.setObjectName("verticalLayout")
-        self.frame = QtWidgets.QFrame(self.centralwidget)#QFrame是是基本控件的基类
+        self.frame = statusLabel.StatusFrame(self.centralwidget)#QFrame是是基本控件的基类
         self.frame.setFrameShape(QtWidgets.QFrame.Panel)
         self.frame.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.frame.setObjectName("frame")
@@ -75,6 +75,11 @@ class Ui_MainWindow(object):
         self.action.setChecked(False)
         self.action.setObjectName("action")
         self.action.setShortcut(QtGui.QKeySequence("Space"))
+        self.action_re = QtWidgets.QAction(MainWindow)
+        self.action_re.setCheckable(False)
+        self.action_re.setChecked(False)
+        self.action_re.setObjectName("action")
+        self.action_re.setShortcut(QtGui.QKeySequence("R"))
         self.action_B = QtWidgets.QAction(MainWindow)
         self.action_B.setCheckable(True)
         self.action_B.setObjectName("action_B")
@@ -101,6 +106,7 @@ class Ui_MainWindow(object):
         self.action_counter.setObjectName("action_counter")
         self.action_counter.setShortcut(QtGui.QKeySequence("C"))
         self.menu.addAction(self.action)
+        self.menu.addAction(self.action_re)
         self.menu.addSeparator()
         self.menu.addAction(self.action_B)
         self.menu.addAction(self.action_I)
@@ -125,6 +131,7 @@ class Ui_MainWindow(object):
         self.label_3.setText(_translate("MainWindow", "0"))
         self.menu.setTitle(_translate("MainWindow", "游戏"))
         self.action.setText(_translate("MainWindow", "新游戏"))
+        self.action_re.setText(_translate("MainWindow", "重玩"))
         self.action_B.setText(_translate("MainWindow", "初级"))
         self.action_I.setText(_translate("MainWindow", "中级"))
         self.action_E.setText(_translate("MainWindow", "高级"))
