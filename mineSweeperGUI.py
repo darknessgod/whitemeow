@@ -1,8 +1,9 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt, QTimer, QCoreApplication
-from PyQt5.QtGui import QPalette, QPixmap, QFont, QIcon
+from PyQt5.QtGui import QPalette, QPixmap, QFont, QIcon 
 from PyQt5.QtWidgets import QLineEdit, QInputDialog
-import superGUI, mineLabel,selfDefinedParameter
+from queue import Queue
+import superGUI, mineLabel,selfDefinedParameter,preference
 import random, sip
 import time
 import sys
@@ -14,6 +15,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.row = 16
         self.column = 16
         self.mineNum = 40
+        self.oldinttime =0
         self.tmplist=[]
         self.leftHeld = False
         self.leftAndRightHeld = False  # 鼠标是否被按下的标志位
@@ -27,6 +29,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.setupUi(self.mainWindow)
         
         self.mineLabel = []#局面
+        self.num0queue=Queue()
         self.num0seen,self.islandseen,self.isbv=[],[],[]
         self.num0get,self.bvget=0,0
         self.ops,self.solvedops,self.bbbv,self.solvedbbbv,self.islands,self.solvedislands=0,0,0,0,0,0
@@ -50,7 +53,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
                    5:pixmap5,6:pixmap6,7:pixmap7,8:pixmap8,9:pixmap9,10:pixmap10}
         
         self.timer = QTimer()
-        self.timer.setInterval(1000)
+        self.timer.setInterval(43)
         self.timer.timeout.connect(self.timeCount)
         self.timeStart = False
         self.initMineArea()
@@ -58,17 +61,13 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.showcounter()
         self.label_2.leftRelease.connect(self.gameStart)
         self.frame.leftRelease.connect(self.gameStart)
-        pixmap = QPixmap("media/f0.png")
-        self.label_2.setPixmap(pixmap)
+        pixmap = QPixmap("media/smileface.svg")
+        size=pixmap.size()
+        scaled_pixmap=pixmap.scaled(size/8.5)
+        self.label_2.setPixmap(scaled_pixmap)
         self.label_2.setScaledContents(True)
-        pe = QPalette()
-        pe.setColor(QPalette.WindowText, Qt.black)  # 设置字体颜色
-        self.label_3.setPalette(pe)
-        self.label_3.setFont(QFont("Roman times", 12, QFont.Bold))
-        self.label.setPalette(pe)
-        self.label.setFont(QFont("Roman times", 12, QFont.Bold))
-        self.label.setText(str(self.mineNum))
-        
+        self.showminenum(self.mineNum)
+        self.showtimenum(self.intervaltime)
 
         # 绑定菜单栏事件
         
@@ -81,11 +80,9 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.action_C.triggered.connect(self.action_CEvent)
         self.action_X_2.triggered.connect(QCoreApplication.instance().quit)
         self.action_counter.triggered.connect(self.showcounter)
+        self.action_settings.triggered.connect(self.action_setevent)
         self.actionChecked('I')  # 默认选择中级
         
-        
-
-
     def showcounter(self):
         self.action_counter.setChecked(True)
         self.counterWindow = QtWidgets.QMainWindow ()
@@ -95,10 +92,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
             self.changecounter(2)
         else:
             self.changecounter(1)
-
-        
-
-    
+   
     def outOfBorder(self, i, j):
         if i < 0 or i >= self.row or j < 0 or j >= self.column:
             return True
@@ -145,27 +139,30 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
             self.gridLayout.addLayout(row_layout, i, 0, 1,self.column)#把子控件添加到网格布局管理器中
 
     def timeCount(self):
-        self.label_3.setText(str('%.0f'%((float(self.label_3.text()) + 1))))
+        self.intervaltime=time.time()-self.starttime
+        inttime=int(self.intervaltime+0.9999)
+        if inttime!=self.oldinttime:
+            self.showtimenum(self.intervaltime)
+        self.changecounter(1)
 
-
-    def DFS(self, i, j, start0):
+    def BFS(self, i, j ,start0):
+        #print(self.num0queue.qsize())
         if self.mineLabel[i][j].status == 0:
             self.mineLabel[i][j].status = 1
-            if self.mineLabel[i][j].num >= 0:
-                if not self.timeStart:
-                    self.timeStart = True
-                    self.timer.start()
-                    self.starttime=time.time()
-                self.mineLabel[i][j].setPixmap(self.pixmapNum[self.mineLabel[i][j].num])
-            if self.isGameFinished():
-                self.gameWin()
-            if self.mineLabel[i][j].num == 0:
+        if self.mineLabel[i][j].num >= 0:
+            if not self.timeStart:
+                self.timeStart = True
+                self.timer.start()
+                self.starttime=time.time()
+            self.mineLabel[i][j].setPixmap(self.pixmapNum[self.mineLabel[i][j].num])
+            if self.mineLabel[i][j].num == 0: #左键开op递归
                 for r in range(i - 1, i + 2):
                     for c in range(j - 1, j + 2):
                         if not self.outOfBorder(r, c) and self.mineLabel[r][
                             c].status == 0 and self.mineLabel[r][c].num != -1:
-                            self.DFS(r, c, start0)
-            elif self.mineLabel[i][j].num > 0:
+                            self.mineLabel[r][c].status = 1
+                            self.num0queue.put([r,c,start0])
+            elif self.mineLabel[i][j].num > 0: #双键递归，此处为假条件，将来会替换为递归开关
                 flagged=0
                 for r in range(i - 1, i + 2):
                     for c in range(j - 1, j + 2):
@@ -177,9 +174,8 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
                         for c in range(j - 1, j + 2):
                             if not self.outOfBorder(r, c) and self.mineLabel[r][
                                 c].status == 0 and self.mineLabel[r][c].num != -1:
-                                self.DFS(r, c, start0)
-                if self.isGameFinished():
-                    self.gameWin()
+                                self.mineLabel[r][c].status = 1
+                                self.num0queue.put([r,c,start0])
 
     def mineAreaLeftRelease(self, i, j):
         if self.leftHeld and not self.finish:
@@ -192,7 +188,11 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
                     self.changecounter(1)
                     self.mineLabel[i][j].setPixmap(self.pixmapNum[9])
                     if self.mineLabel[i][j].num >= 0:
-                        self.DFS(i, j, self.mineLabel[i][j].num == 0)
+                        self.num0queue=Queue()
+                        self.num0queue.put([i,j,self.mineLabel[i][j].num == 0])
+                        while(self.num0queue.empty()==False):
+                            getqueuehead=self.num0queue.get()
+                            self.BFS(getqueuehead[0], getqueuehead[1],getqueuehead[2])
                         if self.isGameFinished():
                             self.gameWin()
                     else:
@@ -223,7 +223,11 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
                                                 if not self.outOfBorder(rr, cc) and self.mineLabel[rr][cc].num==-1:
                                                     count+=1
                                         self.mineLabel[ii][jj].num=count
-                            self.DFS(i, j, self.mineLabel[i][j].num == 0)
+                            self.num0queue=Queue()
+                            self.num0queue.put([i,j,self.mineLabel[i][j].num == 0])
+                            while(self.num0queue.empty()==False):
+                                getqueuehead=self.num0queue.get()
+                                self.BFS(getqueuehead[0], getqueuehead[1],getqueuehead[2])
                             if self.isGameFinished():
                                 self.gameWin()         
                         else:
@@ -245,14 +249,16 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
                 self.mineLabel[i][j].setPixmap(pixmap)
                 self.mineLabel[i][j].setScaledContents(True)
                 self.mineLabel[i][j].status = 2
-                self.label.setText(str(int(self.label.text()) - 1))
+                self.showminenum(self.mineNum-self.allclicks[3])
+                #self.label.setText(str(int(self.label.text()) - 1))
             elif self.mineLabel[i][j].status == 2:
                 self.eclicks[1]+=1
                 self.allclicks[3]-=1
                 self.changecounter(1)
                 self.mineLabel[i][j].setPixmap(self.pixmapNum[9])
                 self.mineLabel[i][j].status = 0
-                self.label.setText(str(int(self.label.text()) + 1))
+                self.showminenum(self.mineNum-self.allclicks[3])
+                #self.label.setText(str(int(self.label.text()) + 1))
             elif self.mineLabel[i][j].status == 1 and self.mineLabel[i][j].num != 0:
                 count=0
                 for r in range(i - 1, i + 2):
@@ -270,7 +276,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
                                     self.mineLabel[r][c].setPixmap(self.pixmapNum[10])
                                     self.allclicks[3]+=1
                                     eright=True
-                                    self.label.setText(str(int(self.label.text()) - 1))
+                                    self.showminenum(self.mineNum-self.allclicks[3])
                     if eright==True:
                         self.eclicks[1]+=1
                         self.changecounter(1)
@@ -334,7 +340,11 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
                             if self.mineLabel[r][c].status == 0:
                                 edouble=True
                                 if self.mineLabel[r][c].num >= 0:
-                                    self.DFS(r, c, self.mineLabel[r][c].num == 0)
+                                    self.num0queue=Queue()
+                                    self.num0queue.put([r,c,self.mineLabel[r][c].num == 0])
+                                    while(self.num0queue.empty()==False):
+                                        getqueuehead=self.num0queue.get()
+                                        self.BFS(getqueuehead[0], getqueuehead[1],getqueuehead[2])
                                     if self.isGameFinished():
                                         self.gameWin()
                                 else:
@@ -386,6 +396,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
                 elif self.leftHeld:
                     if self.mineLabel[ii][jj].status == 0:
                         self.mineLabel[ii][jj].setPixmap(self.pixmapNum[9])
+ 
     def gamereStart(self):
         pixmap = QPixmap("media/f01.png")
         self.label_2.setPixmap(pixmap)
@@ -406,13 +417,14 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
                 self.gridLayout.removeWidget(j)
                 sip.delete(j)
         if self.gamemode==1:
-            pixmap = QPixmap("media/f0.png")
+            pixmap = QPixmap("media/smileface.svg")
         elif self.gamemode==2:
-            pixmap = QPixmap("media/f01.png")
-        self.label_2.setPixmap(pixmap)
+            pixmap = QPixmap("media/smileface.svg")
+        size=pixmap.size()
+        scaled_pixmap=pixmap.scaled(size/8.5)
+        self.label_2.setPixmap(scaled_pixmap)
         self.label_2.setScaledContents(True)
-        self.label.setText(str(self.mineNum))
-        self.label_3.setText("0")
+        self.showminenum(self.mineNum)
         self.timeStart = False
         self.finish = False
         self.timer.stop()
@@ -420,14 +432,11 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.mineLabel = []
         self.initMineArea()
         self.createMine(self.gamemode)
-        self.bbbv=0
-        self.solvedbbbv=0
-        self.ops=0
-        self.solvedops=0
-        self.intervaltime=0
-        self.allclicks=[0,0,0,0]
-        self.eclicks=[0,0,0]
+        self.bbbv,self.solvedbbbv,self.ops,self.solvedops=0,0,0,0
+        self.intervaltime,self.oldinttime =0,0
+        self.allclicks,self.eclicks=[0,0,0,0],[0,0,0]
         self.changecounter(1)
+        self.showtimenum(self.intervaltime)
         self.mainWindow.setMinimumSize(0, 0)
         self.mainWindow.resize(self.mainWindow.minimumSize())
 
@@ -460,17 +469,23 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
             for i in range(len(self.counterui.valuelabelarray)):
                 self.counterui.valuelabelarray[i].setText(values[i])
         elif status==1:
-            rt=0
+            rt=self.intervaltime
             allbv='-'
             if eclicks==0:
                 corr=0
             else:
                 corr=eclicks/allclicks
+            if rt==0:
+                cls='-'
+                ces='-'
+            else:
+                cls='%.3f'%(float(allclicks/rt))
+                ces='%.3f'%(float(eclicks/rt))
             values=['%.2f'%(rt),'-','-','-','-','-','-','-']
             values+=['%d/%d/%d'%(self.allclicks[0],self.allclicks[1],self.allclicks[2])]
             values+=['%d'%(self.allclicks[3])]
-            values+=['%d@%s'%(allclicks,'-')]
-            values+=['%d@%s'%(eclicks,'-')]
+            values+=['%d@%s'%(allclicks,cls)]
+            values+=['%d@%s'%(eclicks,ces)]
             values+=['%s'%('-'),'%.3f'%(corr),'%s'%('-')]
             for i in range(len(self.counterui.valuelabelarray)):
                 self.counterui.valuelabelarray[i].setText(values[i])
@@ -483,7 +498,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.cal_3bv()
         self.changecounter(2)
         #self.label_3.setText("%.2f"%(self.intervaltime))
-        self.label_3.setText("%d"%(int(self.intervaltime)))
+        self.showtimenum(self.intervaltime)
         for i in self.mineLabel:
             for j in i:
                 if result==2:#输了
@@ -594,7 +609,16 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
             self.mineNum = ui.mineNum
             self.newgameStart()
 
-    def findop_dfs(self,i,j,num):
+    def action_setevent(self):
+        self.gameStart()
+        self.counterWindow.close()
+        ui = preference.Ui_SettingDialog()
+        ui.Dialog.setModal(True)
+        ui.Dialog.show()
+        ui.Dialog.exec_()
+
+
+    def findopis_bfs(self,i,j,num):
         for ii in range(i-1,i+2):
             if ii<0 or ii>=self.row:
                 continue
@@ -602,51 +626,50 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
                 if jj<0 or jj>=self.column:
                     continue
                 if num==1:
+                    if self.mineLabel[ii][jj].num>=0 and self.mineLabel[ii][jj].status==0:
+                        self.thisopsolved=False
                     if self.mineLabel[ii][jj].num==0 and self.num0seen[ii][jj]==False:
                         self.num0seen[ii][jj]=True
                         self.num0get+=1
-                        self.findop_dfs(ii,jj,1)
+                        self.num0queue.put([ii,jj])
                 elif num==2:
                     if self.isbv[ii][jj]==True and self.islandseen[ii][jj]==False:
                         if self.mineLabel[ii][jj].status==0:
                             self.thisislandsolved=False
                         self.islandseen[ii][jj]=True
                         self.bvget+=1
-                        self.findop_dfs(ii,jj,2)
+                        self.num0queue.put([ii,jj])
                         
-
     def cal_3bv(self):
-        self.islands=0
-        self.solvedislands=0
-        self.ops=0
-        self.solvedops=0
-        self.solvedbbbv=0
-        solvedelse=0
-        num0=0
-        self.bvget=0
+        self.islands,self.solvedislands,self.ops,self.solvedops,self.solvedbbbv=0,0,0,0,0
+        solvedelse,num0,numelse=0,0,0
+        self.bvget,self.num0get=0,0
         self.num0seen = [[False for j in range(self.column)] for i in range(self.row)]
         self.islandseen = [[False for j in range(self.column)] for i in range(self.row)]
         self.isbv = [[False for j in range(self.column)] for i in range(self.row)]
-        self.num0get=0
-        numelse=0
-        for i in range(self.row):
+        for i in range(self.row):#对0格计数
             for j in range(self.column):
                 if self.mineLabel[i][j].num==0:
                     num0+=1
         for i in range(self.row):
             for j in range(self.column):
-                if self.num0get==num0:
+                if self.num0get==num0:#所有0被染色，标志op计算完全，终止
                     break
                 if self.mineLabel[i][j].num==0:
                     if self.num0seen[i][j]==True:
                         continue
                     else:
-                        self.ops+=1
-                        if self.mineLabel[i][j].status==1:
-                            self.solvedops+=1
+                        self.ops+=1#找到新的op
+                        self.thisopsolved=True
                         self.num0seen[i][j]=True
                         self.num0get+=1
-                        self.findop_dfs(i,j,1)
+                        self.num0queue=Queue()
+                        self.num0queue.put([i,j])
+                        while(self.num0queue.empty()==False):
+                            getqueuehead=self.num0queue.get()
+                            self.findopis_bfs(getqueuehead[0], getqueuehead[1],1)
+                        if self.thisopsolved==True:
+                            self.solvedops+=1
                         
         for i in range(self.row):
             for j in range(self.column):
@@ -681,9 +704,13 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
                             self.thisislandsolved=False
                         self.islandseen[i][j]=True
                         self.bvget+=1
-                        self.findop_dfs(i,j,2)
+                        self.num0queue=Queue()
+                        self.num0queue.put([i,j])
+                        while(self.num0queue.empty()==False):
+                            getqueuehead=self.num0queue.get()
+                            self.findopis_bfs(getqueuehead[0], getqueuehead[1],2)
                         if self.thisislandsolved==True:
                             self.solvedislands+=1
         self.bbbv=self.ops+numelse
         self.solvedbbbv=self.solvedops+solvedelse
-        #print(self.islands,self.solvedislands)
+        

@@ -36,8 +36,8 @@ class Ui_Dialog (object):
         self.gridLayout.addWidget (self.label, 0, 0, 1, 1)
         self.spinBox = QtWidgets.QSpinBox (self.widget)
         self.spinBox.setAlignment (QtCore.Qt.AlignCenter)
-        self.spinBox.setMinimum (8)
-        self.spinBox.setMaximum (30)
+        self.spinBox.setMinimum (4)
+        self.spinBox.setMaximum (50)
         self.spinBox.setProperty ("value", 8)
         self.spinBox.setObjectName ("spinBox")
         self.gridLayout.addWidget (self.spinBox, 0, 1, 1, 1)
@@ -46,7 +46,7 @@ class Ui_Dialog (object):
         self.gridLayout.addWidget (self.label_2, 1, 0, 1, 1)
         self.spinBox_2 = QtWidgets.QSpinBox (self.widget)
         self.spinBox_2.setAlignment (QtCore.Qt.AlignCenter)
-        self.spinBox_2.setMinimum (8)
+        self.spinBox_2.setMinimum (4)
         self.spinBox_2.setMaximum (50)
         self.spinBox_2.setObjectName ("spinBox_2")
         self.gridLayout.addWidget (self.spinBox_2, 1, 1, 1, 1)
@@ -56,7 +56,7 @@ class Ui_Dialog (object):
         self.spinBox_3 = QtWidgets.QSpinBox (self.widget)
         self.spinBox_3.setAlignment (QtCore.Qt.AlignCenter)
         self.spinBox_3.setMinimum (1)
-        self.spinBox_3.setMaximum (1500)
+        self.spinBox_3.setMaximum (999)
         self.spinBox_3.setObjectName ("spinBox_3")
         self.gridLayout.addWidget (self.spinBox_3, 2, 1, 1, 1)
         self.horizontalLayout.addWidget (self.widget)
@@ -98,5 +98,5 @@ class Ui_Dialog (object):
             self.alter = True
             self.row = r
             self.column = c
-            self.mineNum = min (max (n, r*c//7), (r - 1) * (c - 1))
+            self.mineNum = min (max (n, 4), r*c//2)
         self.Dialog.close ()
