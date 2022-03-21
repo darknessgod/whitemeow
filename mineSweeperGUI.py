@@ -22,7 +22,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.leftAndRightHeld = False  # 鼠标是否被按下的标志位
         self.oldCell = (0, 0)  # 鼠标的上个停留位置，用于绘制按下去时的阴影
         self.finish = False
-        self.needtorefresh=True
+        self.needtorefresh=True 
         self.gamemode=1 #游戏模式，1为正常，2为重玩
         self.starttime,self.intervaltime=0,0
         self.mainWindow = MainWindow
@@ -72,14 +72,15 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.action_settings.triggered.connect(self.action_setevent)
         self.action_gridup.triggered.connect(self.gridup)
         self.action_griddown.triggered.connect(self.griddown)
-        self.mainWindow.closeEvent_.connect(self.counterWindow.close)
         self.action_gridsize.setText('当前尺寸：%d'%(self.gridsize))
         self.actionChecked('I')  # 默认选择中级
+        self.needtorefresh=False
         
     def showcounter(self):
         self.action_counter.setChecked(True)
         self.counterWindow = QtWidgets.QMainWindow ()
         self.counterui = Counter(self.counterWindow)
+        self.mainWindow.closeEvent_.connect(self.counterWindow.close)
         self.counterWindow.show()
         if self.finish==True:
             self.changecounter(2)
@@ -582,6 +583,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
             self.needtorefresh=True
         self.mineNum = 10
         self.newgameStart()
+        self.needtorefresh=False
 
     def action_IEvent(self):
         self.actionChecked('I')
@@ -594,6 +596,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
             self.needtorefresh=True
         self.mineNum = 40
         self.newgameStart()
+        self.needtorefresh=False
 
 
     def action_Event(self):
@@ -607,6 +610,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
             self.needtorefresh=True
         self.mineNum = 99
         self.newgameStart()
+        self.needtorefresh=False
 
     def action_CEvent(self):
         self.actionChecked('C')
@@ -621,6 +625,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
             self.mineNum = ui.mineNum
             self.needtorefresh=True
             self.newgameStart()
+            self.needtorefresh=False
 
     def action_setevent(self):
         self.gameStart()
