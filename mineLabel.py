@@ -130,18 +130,13 @@ class mineLabel (QtWidgets.QLabel):
         painter.end()
         
     def getPixmap(i, j):
-        pressed=self.pressed[i][j]
-        if pressed>=0:
-            return self.pixmaps[getPixmapIndex(pressed)]
+        if self.pressed[i][j]>=2:
+            return self.pixmaps[pressed+9]
+        elif self.pressed[i][j]==1:
+            return self.pixmaps[0]
+        elif self.status[i][j]==2:
+            return self.pixmaps[10]
+        elif self.status[i][j]==0:
+            return self.pixmaps[9]
         else:
             return self.pixmaps[self.num[i][j]]
-
-    def getPixmapIndex(pressed):
-        if pressed>=2:
-            return pressed+9
-        elif pressed==1:
-            return 0
-        elif pressed==2:
-            return 10
-        elif pressed==0:
-            return 9
