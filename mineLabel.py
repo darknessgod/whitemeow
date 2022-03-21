@@ -126,13 +126,17 @@ class mineLabel (QtWidgets.QLabel):
         size=self.pixSize
         for i in range(self.row):
             for j in range(self.column):
-                if self.pressed[i][j]>=0:
-                    painter.drawPixmap(j*size,i*size,self.pixmaps[getPixmap(self.pressed[i][j])])
-                else:
-                    painter.drawPixmap(j*size,i*size,self.pixmaps[self.num[i][j]])
+                painter.drawPixmap(j*size,i*size,getPixmap(i,j))
         painter.end()
+        
+    def getPixmap(i, j):
+        pressed=self.pressed[i][j]
+        if pressed>=0:
+            return self.pixmaps[getPixmapIndex(pressed)]
+        else:
+            return self.pixmaps[self.num[i][j]]
 
-    def getPixmap(pressed):
+    def getPixmapIndex(pressed):
         if pressed>=2:
             return pressed+9
         elif pressed==1:
