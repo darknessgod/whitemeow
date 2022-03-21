@@ -18,6 +18,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.tmplist=[]
         self.gridsize=32
         self.leftHeld = False
+        self.rightHeld = False
         self.rightfirst = False 
         self.leftAndRightHeld = False  # 鼠标是否被按下的标志位
         self.oldCell = (0, 0)  # 鼠标的上个停留位置，用于绘制按下去时的阴影
@@ -75,6 +76,13 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.action_gridsize.setText('当前尺寸：%d'%(self.gridsize))
         self.actionChecked('I')  # 默认选择中级
         self.needtorefresh=False
+    
+    def left(self):
+        return self.leftHeld
+    def right(self):
+        return self.rightHeld
+    def chord(self):
+        return self.left() and self.right()
         
     def showcounter(self):
         self.action_counter.setChecked(True)
