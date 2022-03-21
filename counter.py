@@ -27,7 +27,7 @@ class Counter(object):
             self.valuelabelarray[i].resize=(columnwidth[1],self.lineheight)
             self.valuelabelarray[i].setText('0')
             self.valuelabelarray[i].setAlignment(QtCore.Qt.AlignLeft)
-            self.valuelabelarray[i].setStyleSheet("font-size:12px;font-family:YF补 汉仪夏日体;")
+            #self.valuelabelarray[i].setStyleSheet("font-size:12px;")
             #valuelabelarray[i].setFrameShadow(QtWidgets.QFrame.Raised)
             #valuelabelarray[i].setStyleSheet('border-width: 1px;border-color: rgb(255, 255, 255)')
             self.valuelabelarray[i].move(columnwidth[0],self.lineheight*i)

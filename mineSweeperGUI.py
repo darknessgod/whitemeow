@@ -1,12 +1,11 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt, QTimer, QCoreApplication
-from PyQt5.QtGui import QPalette, QPixmap, QFont, QIcon 
+from PyQt5.QtGui import QPalette, QPixmap, QFont, QIcon ,QPainter
 from PyQt5.QtWidgets import QLineEdit, QInputDialog
 from queue import Queue
 import superGUI, mineLabel,selfDefinedParameter,preference
-import random, sip
+import random
 import time
-import sys
 from counter import Counter
 
 
@@ -17,10 +16,13 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.mineNum = 40
         self.oldinttime =0
         self.tmplist=[]
+        self.gridsize=32
         self.leftHeld = False
+        self.rightfirst = False 
         self.leftAndRightHeld = False  # 鼠标是否被按下的标志位
         self.oldCell = (0, 0)  # 鼠标的上个停留位置，用于绘制按下去时的阴影
         self.finish = False
+        self.needtorefresh=True
         self.gamemode=1 #游戏模式，1为正常，2为重玩
         self.starttime,self.intervaltime=0,0
         self.mainWindow = MainWindow
@@ -28,7 +30,6 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.mainWindow.setFixedSize(self.mainWindow.minimumSize())
         self.setupUi(self.mainWindow)
         
-        self.mineLabel = []#局面
         self.num0queue=Queue()
         self.num0seen,self.islandseen,self.isbv=[],[],[]
         self.num0get,self.bvget=0,0
@@ -37,20 +38,8 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.counterWindow =None
         self.counterui=None
         self.thisislandsolved,self.thisopsolved=False,False
-        
-        pixmap0=QPixmap("media/10.png")
-        pixmap1=QPixmap("media/11.png")
-        pixmap2=QPixmap("media/12.png")
-        pixmap3=QPixmap("media/13.png")
-        pixmap4=QPixmap("media/14.png")
-        pixmap5=QPixmap("media/15.png")
-        pixmap6=QPixmap("media/16.png")
-        pixmap7=QPixmap("media/17.png")
-        pixmap8=QPixmap("media/18.png")
-        pixmap9=QPixmap("media/00.png")
-        pixmap10=QPixmap("media/03.png")
-        self.pixmapNum={0:pixmap0,1:pixmap1,2:pixmap2,3:pixmap3,4:pixmap4,
-                   5:pixmap5,6:pixmap6,7:pixmap7,8:pixmap8,9:pixmap9,10:pixmap10}
+        self.label=None
+
         
         self.timer = QTimer()
         self.timer.setInterval(43)
@@ -61,7 +50,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.showcounter()
         self.label_2.leftRelease.connect(self.gameStart)
         self.frame.leftRelease.connect(self.gameStart)
-        pixmap = QPixmap("media/smileface.svg")
+        pixmap = QPixmap("media/svg/smileface.svg")
         size=pixmap.size()
         scaled_pixmap=pixmap.scaled(size/8.5)
         self.label_2.setPixmap(scaled_pixmap)
@@ -81,6 +70,10 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.action_X_2.triggered.connect(QCoreApplication.instance().quit)
         self.action_counter.triggered.connect(self.showcounter)
         self.action_settings.triggered.connect(self.action_setevent)
+        self.action_gridup.triggered.connect(self.gridup)
+        self.action_griddown.triggered.connect(self.griddown)
+        self.mainWindow.closeEvent_.connect(self.counterWindow.close)
+        self.action_gridsize.setText('当前尺寸：%d'%(self.gridsize))
         self.actionChecked('I')  # 默认选择中级
         
     def showcounter(self):
@@ -98,7 +91,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
             return True
         return False
 
-    def createMine(self,mode):    #mineLabel[r][c].num是真实局面，-1为雷，数字为数字
+    def createMine(self,mode):    
         num = self.mineNum
         if len(self.tmplist)!=self.column*self.row:
             self.tmplist=[i for i in range(self.column*self.row)]
@@ -108,35 +101,29 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         for i in range(num):
             r= int(self.tmplist[i]/self.column)
             c= self.tmplist[i]-r*self.column
-            self.mineLabel[r][c].num=-1
+            self.label.num[r][c]=-1
             for i in range(r - 1, r + 2):
                 for j in range(c - 1, c + 2):
                     if not self.outOfBorder(i, j) and (
-                        self.mineLabel[i][j].num != -1):
-                        self.mineLabel[i][j].num += 1
+                        self.label.num[i][j] != -1):
+                        self.label.num[i][j] += 1
 
     def initMineArea(self):
-        self.gridLayout.setSpacing(0)#网格布局间距为0
-        for i in range(0, self.row):
-            self.mineLabel.append([])
-            row_layout =QtWidgets.QHBoxLayout()
-            for j in range(0, self.column):
-                label = mineLabel.mineLabel(i, j, 0, "")
-                label.setPixmap(self.pixmapNum[9])
-                label.setMinimumSize(16, 16)
-                label.setAlignment(Qt.AlignCenter)
-
-                # 绑定雷区点击事件
-                label.leftPressed.connect(self.mineAreaLeftPressed)
-                label.leftAndRightPressed.connect(self.mineAreaLeftAndRightPressed)
-                label.leftAndRightRelease.connect(self.mineAreaLeftAndRightRelease)
-                label.leftRelease.connect(self.mineAreaLeftRelease)
-                label.rightPressed.connect(self.mineAreaRightPressed)
-                label.mouseMove.connect(self.mineMouseMove)
-                label.setStyleSheet("border:0px solid red")
-                self.mineLabel[i].append(label)
-                row_layout.addWidget(label)
-            self.gridLayout.addLayout(row_layout, i, 0, 1,self.column)#把子控件添加到网格布局管理器中
+        for i in range(self.gridLayout.count()):
+            w = self.gridLayout.itemAt(i).widget()
+            w.setParent(None)
+        self.label = mineLabel.mineLabel(self.row, self.column, self.gridsize)
+        self.label.setMinimumSize(QtCore.QSize(self.gridsize*self.column, self.gridsize*self.row))
+        self.label.leftPressed.connect(self.mineAreaLeftPressed)
+        self.label.leftRelease.connect(self.mineAreaLeftRelease)
+        self.label.leftAndRightPressed.connect(self.mineAreaLeftAndRightPressed)
+        self.label.leftAndRightRelease.connect(self.mineAreaLeftAndRightRelease)
+        self.label.rightPressed.connect(self.mineAreaRightPressed)
+        self.label.setObjectName("label")
+        self.label.resize(QtCore.QSize(self.gridsize*self.column, self.gridsize*self.row))
+        self.gridLayout.addWidget(self.label, 0, 0, 1, 1)
+        self.label.mouseMove.connect(self.mineMouseMove)
+        
 
     def timeCount(self):
         self.intervaltime=time.time()-self.starttime
@@ -147,87 +134,88 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
 
     def BFS(self, i, j ,start0):
         #print(self.num0queue.qsize())
-        if self.mineLabel[i][j].status == 0:
-            self.mineLabel[i][j].status = 1
-        if self.mineLabel[i][j].num >= 0:
+        if self.label.status[i][j] == 0:
+            self.label.status[i][j] = 1
+        if self.label.num[i][j] >= 0:
             if not self.timeStart:
                 self.timeStart = True
                 self.timer.start()
                 self.starttime=time.time()
-            self.mineLabel[i][j].setPixmap(self.pixmapNum[self.mineLabel[i][j].num])
-            if self.mineLabel[i][j].num == 0: #左键开op递归
+                self.label.update()
+            if self.label.num[i][j] == 0: #左键开op递归
                 for r in range(i - 1, i + 2):
                     for c in range(j - 1, j + 2):
-                        if not self.outOfBorder(r, c) and self.mineLabel[r][
-                            c].status == 0 and self.mineLabel[r][c].num != -1:
-                            self.mineLabel[r][c].status = 1
+                        if not self.outOfBorder(r, c) and self.label.status[r][c] == 0 and self.label.num[r][c] != -1:
+                            self.label.status[r][c] = 1
                             self.num0queue.put([r,c,start0])
-            elif self.mineLabel[i][j].num > 0: #双键递归，此处为假条件，将来会替换为递归开关
+                self.label.update()
+            elif self.label.num[i][j] > 0: #双键递归，此处为假条件，将来会替换为递归开关
                 flagged=0
                 for r in range(i - 1, i + 2):
                     for c in range(j - 1, j + 2):
-                        if not self.outOfBorder(r, c) and self.mineLabel[r][
-                            c].status == 2:
+                        if not self.outOfBorder(r, c) and self.label.status[r][c] == 2:
                             flagged+=1
-                if flagged==self.mineLabel[i][j].num:
+                if flagged==self.label.num[i][j]:
                     for r in range(i - 1, i + 2):
                         for c in range(j - 1, j + 2):
-                            if not self.outOfBorder(r, c) and self.mineLabel[r][
-                                c].status == 0 and self.mineLabel[r][c].num != -1:
-                                self.mineLabel[r][c].status = 1
+                            if not self.outOfBorder(r, c) and self.label.status[r][c] == 0 and self.label.num[r][c] != -1:
+                                self.label.status[r][c] = 1
                                 self.num0queue.put([r,c,start0])
+                    self.label.update()
 
     def mineAreaLeftRelease(self, i, j):
         if self.leftHeld and not self.finish:
             self.leftHeld = False  # 防止双击中的左键弹起被误认为真正的左键弹起
-            self.allclicks[0]+=1
-            self.changecounter(1)
             if not self.outOfBorder(i, j) and not self.finish:
-                if self.mineLabel[i][j].status == 0:
+                self.allclicks[0]+=1
+                self.label.pressed[i][j]=0
+                if self.label.status[i][j] == 0:
                     self.eclicks[0]+=1
                     self.changecounter(1)
-                    self.mineLabel[i][j].setPixmap(self.pixmapNum[9])
-                    if self.mineLabel[i][j].num >= 0:
+                    self.label.update()
+                    if self.label.num[i][j] >= 0:
                         self.num0queue=Queue()
-                        self.num0queue.put([i,j,self.mineLabel[i][j].num == 0])
+                        self.num0queue.put([i,j,self.label.num[i][j] == 0])
                         while(self.num0queue.empty()==False):
                             getqueuehead=self.num0queue.get()
                             self.BFS(getqueuehead[0], getqueuehead[1],getqueuehead[2])
+                        self.label.update()
                         if self.isGameFinished():
                             self.gameWin()
                     else:
                         if not self.timeStart and self.gamemode==1 :#第一下不能为雷，第一下就赢了的事件也在这里写
-                            self.mineLabel[i][j].num=0
+                            self.label.num[i][j]=0
                             while(True):
                                 r = random.randint(0, self.row - 1)
                                 c = random.randint(0, self.column - 1)
-                                if self.mineLabel[r][c].num==-1 or (r==i and c==j):
+                                if self.label.num[r][c]==-1 or (r==i and c==j):
                                     continue
-                                self.mineLabel[r][c].num=-1
+                                self.label.num[r][c]=-1
                                 break
                             for ii in range(i - 1, i + 2):
                                 for jj in range(j - 1, j + 2):
-                                    if not self.outOfBorder(ii, jj) and self.mineLabel[ii][jj].num!=-1:     
+                                    if not self.outOfBorder(ii, jj) and self.label.num[ii][jj]!=-1:     
                                         count=0
                                         for rr in range(ii - 1, ii + 2):
                                             for cc in range(jj - 1, jj + 2):
-                                                if not self.outOfBorder(rr, cc) and self.mineLabel[rr][cc].num==-1:
+                                                if not self.outOfBorder(rr, cc) and self.label.num[rr][cc]==-1:
                                                     count+=1
-                                        self.mineLabel[ii][jj].num=count
+                                        self.label.num[ii][jj]=count
                             for ii in range(r - 1, r + 2):
                                 for jj in range(c - 1, c + 2):
-                                    if not self.outOfBorder(ii, jj) and self.mineLabel[ii][jj].num!=-1:     
+                                    if not self.outOfBorder(ii, jj) and self.label.num[ii][jj]!=-1:     
                                         count=0
                                         for rr in range(ii - 1, ii + 2):
                                             for cc in range(jj - 1, jj + 2):
-                                                if not self.outOfBorder(rr, cc) and self.mineLabel[rr][cc].num==-1:
+                                                if not self.outOfBorder(rr, cc) and self.label.num[rr][cc]==-1:
                                                     count+=1
-                                        self.mineLabel[ii][jj].num=count
+                                        self.label.num[ii][jj]=count
                             self.num0queue=Queue()
-                            self.num0queue.put([i,j,self.mineLabel[i][j].num == 0])
+                            self.num0queue.put([i,j,self.label.num[i][j] == 0])
                             while(self.num0queue.empty()==False):
                                 getqueuehead=self.num0queue.get()
                                 self.BFS(getqueuehead[0], getqueuehead[1],getqueuehead[2])
+                            self.label.update()
                             if self.isGameFinished():
                                 self.gameWin()         
                         else:
@@ -241,66 +229,69 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         if not self.finish:
             self.allclicks[1]+=1
             self.changecounter(1)
-            if self.mineLabel[i][j].status == 0:
+            self.rightfirst=True
+            if self.label.status[i][j] == 0:
                 self.eclicks[1]+=1
                 self.allclicks[3]+=1
+                self.rightfirst=False
                 self.changecounter(1)
-                pixmap = QPixmap(self.pixmapNum[10])
-                self.mineLabel[i][j].setPixmap(pixmap)
-                self.mineLabel[i][j].setScaledContents(True)
-                self.mineLabel[i][j].status = 2
+                self.label.status[i][j] = 2
                 self.showminenum(self.mineNum-self.allclicks[3])
+                self.label.update()
                 #self.label.setText(str(int(self.label.text()) - 1))
-            elif self.mineLabel[i][j].status == 2:
+            elif self.label.status[i][j] == 2:
                 self.eclicks[1]+=1
                 self.allclicks[3]-=1
+                self.rightfirst=False
                 self.changecounter(1)
-                self.mineLabel[i][j].setPixmap(self.pixmapNum[9])
-                self.mineLabel[i][j].status = 0
+                self.label.status[i][j] = 0
                 self.showminenum(self.mineNum-self.allclicks[3])
                 #self.label.setText(str(int(self.label.text()) + 1))
-            elif self.mineLabel[i][j].status == 1 and self.mineLabel[i][j].num != 0:
+                self.label.update()
+            elif self.label.status[i][j] == 1 and self.label.num[i][j] != 0:
                 count=0
                 for r in range(i - 1, i + 2):
                     for c in range(j - 1, j + 2):
                         if not self.outOfBorder(r, c):
-                            if self.mineLabel[r][c].status == 0 or self.mineLabel[r][c].status==2:
+                            if self.label.status[r][c] == 0 or self.label.status[r][c]==2:
                                 count += 1
-                if count== self.mineLabel[i][j].num:
+                if count== self.label.num[i][j]:
                     eright=False
                     for r in range(i - 1, i + 2):
                         for c in range(j - 1, j + 2):
                             if not self.outOfBorder(r, c):
-                                if self.mineLabel[r][c].status == 0:
-                                    self.mineLabel[r][c].status =2
-                                    self.mineLabel[r][c].setPixmap(self.pixmapNum[10])
+                                if self.label.status[r][c] == 0:
+                                    self.label.status[r][c] =2
                                     self.allclicks[3]+=1
+                                    self.rightfirst=False
                                     eright=True
                                     self.showminenum(self.mineNum-self.allclicks[3])
                     if eright==True:
                         self.eclicks[1]+=1
                         self.changecounter(1)
+                    self.label.update()
 
     def mineAreaLeftPressed(self, i, j):
         self.leftHeld = True
         self.oldCell = (i, j)
         if not self.finish:
-            if self.mineLabel[i][j].status == 0:
-                self.mineLabel[i][j].setPixmap(self.pixmapNum[0])
+            if self.label.status[i][j] == 0:
+                self.label.pressed[i][j]=1
+                self.label.update()
 
     def chordingFlag(self, i, j):
         # i, j 周围标雷数是否满足双击的要求
-        if self.mineLabel[i][j].num <= 8 and self.mineLabel[i][j].num >= 0 and self.mineLabel[i][j].status==1:
+        if self.label.num[i][j] <= 8 and self.label.num[i][j] >= 0 and self.label.status[i][j]==1:
             count = 0
             for r in range(i - 1, i + 2):
                 for c in range(j - 1, j + 2):
                     if not self.outOfBorder(r, c):
-                        if self.mineLabel[r][c].status == 2:
+                        if self.label.status[r][c] == 2:
                             count += 1
-            if count == 0 and self.mineLabel[i][j].num !=0:
+            if count == 0 and self.label.num[i][j] !=0:
                 return False
             else:
-                return count == self.mineLabel[i][j].num
+                return count == self.label.num[i][j]
         else:
             return False
 
@@ -309,18 +300,19 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.leftAndRightHeld = True
         self.oldCell = (i, j)
         if not self.finish:
-            if self.mineLabel[i][j].status == 1:
+            if self.label.status[i][j] == 1:
                 count = 0
                 for r in range(i - 1, i + 2):
                     for c in range(j - 1, j + 2):
                         if not self.outOfBorder(r, c):
-                            if self.mineLabel[r][c].status == 0:
-                                self.mineLabel[r][c].setPixmap(self.pixmapNum[0])
+                            if self.label.status[r][c] == 0:
+                                self.label.pressed[r][c]=1
                                 #self.mineLabel[r][c].setFrameShape(QtWidgets.QFrame.Panel)
                                 #self.mineLabel[r][c].setFrameShadow(QtWidgets.QFrame.Sunken)
-                            elif self.mineLabel[r][c].status == 2:
+                            elif self.label.status[r][c] == 2:
                                 count += 1
-                return count == self.mineLabel[i][j].num
+                self.label.update()
+                return count == self.label.num[i][j]
             else:
                 return False
 
@@ -329,6 +321,9 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.leftAndRightHeld = False
         self.leftHeld = False
         if not self.finish and not self.outOfBorder(i, j):
+            if self.rightfirst==True:
+                self.allclicks[1]-=1
+                self.rightfirst=False
             self.allclicks[2]+=1
             self.changecounter(1)
             if self.chordingFlag(i, j):
@@ -337,14 +332,16 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
                 for r in range(i - 1, i + 2):
                     for c in range(j - 1, j + 2):
                         if not self.outOfBorder(r, c):
-                            if self.mineLabel[r][c].status == 0:
+                            self.label.pressed[r][c]=0
+                            if self.label.status[r][c] == 0:
                                 edouble=True
-                                if self.mineLabel[r][c].num >= 0:
+                                if self.label.num[r][c] >= 0:
                                     self.num0queue=Queue()
-                                    self.num0queue.put([r,c,self.mineLabel[r][c].num == 0])
+                                    self.num0queue.put([r,c,self.label.num[r][c] == 0])
                                     while(self.num0queue.empty()==False):
                                         getqueuehead=self.num0queue.get()
                                         self.BFS(getqueuehead[0], getqueuehead[1],getqueuehead[2])
+                                    self.label.update()
                                     if self.isGameFinished():
                                         self.gameWin()
                                 else:
@@ -358,8 +355,9 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
                 for r in range(i - 1, i + 2):
                     for c in range(j - 1, j + 2):
                         if not self.outOfBorder(r, c):
-                            if self.mineLabel[r][c].status == 0:
-                                self.mineLabel[r][c].setPixmap(self.pixmapNum[9])
+                            if self.label.status[r][c] == 0:
+                                self.label.pressed[r][c]=0
+                self.label.update()
                                 #self.mineLabel[r][c].setFrameShape(QtWidgets.QFrame.Panel)
                                 #self.mineLabel[r][c].setFrameShadow(QtWidgets.QFrame.Sunken)
     def mineMouseMove(self, i, j):
@@ -372,54 +370,51 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
                         for r in range(ii - 1, ii + 2):
                             for c in range(jj - 1, jj + 2):
                                 if not self.outOfBorder(r, c):
-                                    if self.mineLabel[r][c].status == 0:
-                                        self.mineLabel[r][c].setPixmap(self.pixmapNum[9])
+                                    if self.label.status[r][c] == 0:
+                                        self.label.pressed[r][c]=0
                         for r in range(i - 1, i + 2):
                             for c in range(j - 1, j + 2):
                                 if not self.outOfBorder(r, c):
-                                    if self.mineLabel[r][c].status == 0:
-                                        self.mineLabel[r][c].setPixmap(self.pixmapNum[0])
-
+                                    if self.label.status[r][c] == 0:
+                                        self.label.pressed[r][c]=1
+                        self.label.update()
                     elif self.leftHeld:
-                        if self.mineLabel[i][j].status == 0:
-                            self.mineLabel[i][j].setPixmap(self.pixmapNum[0])
-                        if self.mineLabel[ii][jj].status == 0:
-                            self.mineLabel[ii][jj].setPixmap(self.pixmapNum[9])
-            elif self.leftAndRightHeld or self.leftHeld:
+                        if self.label.status[i][j] == 0:
+                            self.label.pressed[i][j]=1
+                        if self.label.status[ii][jj] == 0:
+                            self.label.pressed[ii][jj]=0
+                        self.label.update()
+            elif self.leftAndRightHeld or self.leftHeld:#拖到界外
                 ii, jj = self.oldCell
                 if self.leftAndRightHeld:
                     for r in range(ii - 1, ii + 2):
                         for c in range(jj - 1, jj + 2):
                             if not self.outOfBorder(r, c):
-                                if self.mineLabel[r][c].status == 0:
-                                    self.mineLabel[r][c].setPixmap(self.pixmapNum[9])
+                                if self.label.status[r][c] == 0:
+                                    self.label.pressed[r][c]=0
                 elif self.leftHeld:
-                    if self.mineLabel[ii][jj].status == 0:
-                        self.mineLabel[ii][jj].setPixmap(self.pixmapNum[9])
+                    if self.label.status[ii][jj] == 0:
+                        self.label.pressed[ii][jj]=0
+                self.label.update()
  
     def gamereStart(self):
-        pixmap = QPixmap("media/f01.png")
-        self.label_2.setPixmap(pixmap)
-        self.label_2.setScaledContents(True)
         self.gamemode=2
+        self.needtorefresh=False
         self.gameStart()
 
     def newgameStart(self):
-        pixmap = QPixmap("media/f0.png")
-        self.label_2.setPixmap(pixmap)
-        self.label_2.setScaledContents(True)
         self.gamemode=1
         self.gameStart()
 
     def gameStart(self):
-        for i in self.mineLabel:
-            for j in i:
-                self.gridLayout.removeWidget(j)
-                sip.delete(j)
+        if self.needtorefresh==True:
+            for i in range(self.gridLayout.count()):
+                w = self.gridLayout.itemAt(i).widget()
+                w.setParent(None)
         if self.gamemode==1:
-            pixmap = QPixmap("media/smileface.svg")
+            pixmap = QPixmap("media/svg/smileface.svg")
         elif self.gamemode==2:
-            pixmap = QPixmap("media/smileface.svg")
+            pixmap = QPixmap("media/svg/smilefaceblue.svg")
         size=pixmap.size()
         scaled_pixmap=pixmap.scaled(size/8.5)
         self.label_2.setPixmap(scaled_pixmap)
@@ -428,17 +423,22 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.timeStart = False
         self.finish = False
         self.timer.stop()
-        self.mineLabel.clear()
-        self.mineLabel = []
-        self.initMineArea()
+        if self.needtorefresh==True:
+            self.initMineArea()
+        else:
+            self.label.num=[[0 for j in range(self.column)] for i in range(self.row)]
+            self.label.status=[[0 for j in range(self.column)] for i in range(self.row)]
+            self.label.pressed=[[0 for j in range(self.column)] for i in range(self.row)]
+            self.label.update()
         self.createMine(self.gamemode)
         self.bbbv,self.solvedbbbv,self.ops,self.solvedops=0,0,0,0
         self.intervaltime,self.oldinttime =0,0
         self.allclicks,self.eclicks=[0,0,0,0],[0,0,0]
         self.changecounter(1)
         self.showtimenum(self.intervaltime)
-        self.mainWindow.setMinimumSize(0, 0)
-        self.mainWindow.resize(self.mainWindow.minimumSize())
+        if self.needtorefresh==True:
+            self.mainWindow.setMinimumSize(0, 0)
+            self.mainWindow.resize(self.mainWindow.minimumSize())
 
     def changecounter(self,status):
         #self.counterui.valuelabelarray[0].setText('%.2f'%(self.intervaltime))
@@ -499,61 +499,58 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.changecounter(2)
         #self.label_3.setText("%.2f"%(self.intervaltime))
         self.showtimenum(self.intervaltime)
-        for i in self.mineLabel:
-            for j in i:
+        for i in range(self.row):
+            for j in range(self.column):
                 if result==2:#输了
-                    if j.num == -1 or j.status == 2:
-                        j.setFrameShape(QtWidgets.QFrame.Panel)
-                        j.setFrameShadow(QtWidgets.QFrame.Sunken)
-                        if j.num == -1 and j.status == 2:
-                            pixmap = QPixmap("media/03.png")
-                        elif j.num == -1:
-                            pixmap = QPixmap("media/01.png")
+                    if self.label.num[i][j] == -1 or self.label.status[i][j] == 2:
+                        if self.label.num[i][j] == -1 and self.label.status[i][j] == 2:
+                            pass
+                        elif self.label.num[i][j] == -1:
+                            self.label.pressed[i][j]= 2
                         else:
-                            pixmap = QPixmap("media/04.png")
-                        j.setPixmap(pixmap)
-                        j.setScaledContents(True)
+                            self.label.pressed[i][j]= 3
+
                 elif result==1:#赢了
-                    if j.num == -1 or j.status == 2:
-                        j.setFrameShape(QtWidgets.QFrame.Panel)
-                        j.setFrameShadow(QtWidgets.QFrame.Sunken)
-                        if j.num == -1 and j.status == 0:#游戏过程中未标上的雷
-                            pixmap = QPixmap("media/05.png")
-                        elif j.num == -1 and j.status == 2:#游戏过程中标上的雷
-                            pixmap = QPixmap("media/03.png")
+                    if self.label.num[i][j]==-1 or self.label.status[i][j] == 2:
+                        if self.label.num[i][j]==-1  and self.label.status[i][j] == 0:#游戏过程中未标上的雷
+                            self.label.pressed[i][j]=5
+                        elif self.label.num[i][j]==-1  and self.label.status[i][j] == 2:#游戏过程中标上的雷
+                            pass
                         else:
-                            pixmap = QPixmap("media/04.png")
-                        j.setPixmap(pixmap)
-                        j.setScaledContents(True)
+                            self.label.pressed[i][j]=3
                 #j.status = 1
         if result==2 and extra!=None:
-            pixmap= QPixmap("media/02.png")
-            self.mineLabel[extra[0]][extra[1]].setPixmap(pixmap)
+            self.label.pressed[extra[0]][extra[1]]=4
+        self.label.update()
         self.finish = True
         
 
     def isGameFinished(self):
-        for i in self.mineLabel:
-            for j in i:
-                if j.status == 0 and j.num != -1:
+        for i in range(self.row):
+            for j in  range(self.column):
+                if self.label.status[i][j] == 0 and self.label.num[i][j] != -1:
                     return False
         return True
 
     def gameWin(self):
         if self.gamemode==1:
-            pixmap = QPixmap("media/f3.png")
+            pixmap = QPixmap("media/svg/winface.svg")
         elif self.gamemode==2:
-            pixmap = QPixmap("media/f31.png")
-        self.label_2.setPixmap(pixmap)
+            pixmap = QPixmap("media/svg/winfaceblue.svg")
+        size=pixmap.size()
+        scaled_pixmap=pixmap.scaled(size/8.5)
+        self.label_2.setPixmap(scaled_pixmap)
         self.label_2.setScaledContents(True)
         self.gameFinished(1,None)
 
     def gameFailed(self,i,j):
         if self.gamemode==1:
-            pixmap = QPixmap("media/f2.png")
+            pixmap = QPixmap("media/svg/lostface.svg")
         elif self.gamemode==2:
-            pixmap = QPixmap("media/f21.png")
-        self.label_2.setPixmap(pixmap)
+            pixmap = QPixmap("media/svg/lostfaceblue.svg")
+        size=pixmap.size()
+        scaled_pixmap=pixmap.scaled(size/8.5)
+        self.label_2.setPixmap(scaled_pixmap)
         self.label_2.setScaledContents(True)
         if i==None and j==None:
             self.gameFinished(2,None)
@@ -576,23 +573,38 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
 
     def action_BEvent(self):
         self.actionChecked('B')
+        oldrow,oldcolumn=self.row,self.column
         self.row = 8
         self.column = 8
+        if oldrow==8 and oldcolumn==8:
+            self.needtorefresh=False
+        else:
+            self.needtorefresh=True
         self.mineNum = 10
         self.newgameStart()
 
     def action_IEvent(self):
         self.actionChecked('I')
+        oldrow,oldcolumn=self.row,self.column
         self.row = 16
         self.column = 16
+        if oldrow==16 and oldcolumn==16:
+            self.needtorefresh=False
+        else:
+            self.needtorefresh=True
         self.mineNum = 40
         self.newgameStart()
 
 
     def action_Event(self):
         self.actionChecked('E')
+        oldrow,oldcolumn=self.row,self.column
         self.row = 16
         self.column = 30
+        if oldrow==16 and oldcolumn==30:
+            self.needtorefresh=False
+        else:
+            self.needtorefresh=True
         self.mineNum = 99
         self.newgameStart()
 
@@ -607,6 +619,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
             self.row = ui.row
             self.column = ui.column
             self.mineNum = ui.mineNum
+            self.needtorefresh=True
             self.newgameStart()
 
     def action_setevent(self):
@@ -626,15 +639,15 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
                 if jj<0 or jj>=self.column:
                     continue
                 if num==1:
-                    if self.mineLabel[ii][jj].num>=0 and self.mineLabel[ii][jj].status==0:
+                    if self.label.num[ii][jj]>=0 and self.label.status[ii][jj]==0:
                         self.thisopsolved=False
-                    if self.mineLabel[ii][jj].num==0 and self.num0seen[ii][jj]==False:
+                    if self.label.num[ii][jj]==0 and self.num0seen[ii][jj]==False:
                         self.num0seen[ii][jj]=True
                         self.num0get+=1
                         self.num0queue.put([ii,jj])
                 elif num==2:
                     if self.isbv[ii][jj]==True and self.islandseen[ii][jj]==False:
-                        if self.mineLabel[ii][jj].status==0:
+                        if self.label.status[ii][jj]==0:
                             self.thisislandsolved=False
                         self.islandseen[ii][jj]=True
                         self.bvget+=1
@@ -649,13 +662,13 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.isbv = [[False for j in range(self.column)] for i in range(self.row)]
         for i in range(self.row):#对0格计数
             for j in range(self.column):
-                if self.mineLabel[i][j].num==0:
+                if self.label.num[i][j]==0:
                     num0+=1
         for i in range(self.row):
             for j in range(self.column):
                 if self.num0get==num0:#所有0被染色，标志op计算完全，终止
                     break
-                if self.mineLabel[i][j].num==0:
+                if self.label.num[i][j]==0:
                     if self.num0seen[i][j]==True:
                         continue
                     else:
@@ -673,7 +686,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
                         
         for i in range(self.row):
             for j in range(self.column):
-                if self.mineLabel[i][j].num>0:
+                if self.label.num[i][j]>0:
                     nearnum0=False
                     for ii in range(i-1,i+2):
                         if ii<0 or ii>=self.row:
@@ -681,13 +694,13 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
                         for jj in range(j-1,j+2):
                             if jj<0 or jj>=self.column:
                                 continue
-                            if self.mineLabel[ii][jj].num==0:
+                            if self.label.num[ii][jj]==0:
                                 nearnum0=True
                                 break
                     if nearnum0==False:
                         self.isbv[i][j]=True
                         numelse+=1
-                        if self.mineLabel[i][j].status==1:
+                        if self.label.status[i][j]==1:
                             solvedelse+=1
 
         for i in range(self.row):#算islands
@@ -700,7 +713,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
                     else:
                         self.islands+=1
                         self.thisislandsolved=True
-                        if self.mineLabel[i][j].status==0:
+                        if self.label.status[i][j]==0:
                             self.thisislandsolved=False
                         self.islandseen[i][j]=True
                         self.bvget+=1
@@ -714,3 +727,37 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.bbbv=self.ops+numelse
         self.solvedbbbv=self.solvedops+solvedelse
         
+    def gridup(self):
+        if self.gridsize<=46:
+            self.gridsize+=2
+            self.label.pixSize=self.gridsize
+            self.label.resizepixmaps(self.gridsize)
+            num,status,pressed=[*self.label.num],[*self.label.status],[*self.label.pressed]
+            self.initMineArea()
+            self.label.num,self.label.status,self.label.pressed=num,status,pressed
+            self.mainWindow.setMinimumSize(0, 0)
+            self.mainWindow.resize(self.mainWindow.minimumSize())
+            self.action_gridsize.setText('当前尺寸：%d'%(self.gridsize))
+            self.action_griddown.setEnabled(True)
+            if self.gridsize==48:
+                self.action_gridup.setEnabled(False)
+            
+        
+    def griddown(self):
+        if self.gridsize>=14:
+            self.gridsize-=2
+            self.label.pixSize=self.gridsize
+            self.label.resizepixmaps(self.gridsize)
+            num,status,pressed=[*self.label.num],[*self.label.status],[*self.label.pressed]
+            self.initMineArea()
+            self.label.num,self.label.status,self.label.pressed=num,status,pressed
+            self.label.update()
+            self.mainWindow.setMinimumSize(0, 0)
+            self.mainWindow.resize(self.mainWindow.minimumSize())
+            self.action_gridsize.setText('当前尺寸：%d'%(self.gridsize))
+            self.action_gridup.setEnabled(True)
+            if self.gridsize==12:
+                self.action_griddown.setEnabled(False)
+
+
+            

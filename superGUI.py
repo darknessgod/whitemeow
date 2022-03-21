@@ -8,7 +8,6 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 import statusLabel
-import sys
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -138,6 +137,17 @@ class Ui_MainWindow(object):
         self.action_settings.setCheckable(False)
         self.action_settings.setObjectName("action_settings")
         self.action_settings.setShortcut(QtGui.QKeySequence("F5"))
+        self.action_gridup = QtWidgets.QAction(MainWindow)
+        self.action_gridup.setCheckable(False)
+        self.action_gridup.setObjectName("action_gridup")
+        self.action_gridup.setShortcut(QtGui.QKeySequence("+"))
+        self.action_griddown = QtWidgets.QAction(MainWindow)
+        self.action_griddown.setCheckable(False)
+        self.action_griddown.setObjectName("action_griddown")
+        self.action_griddown.setShortcut(QtGui.QKeySequence("-"))
+        self.action_gridsize = QtWidgets.QAction(MainWindow)
+        self.action_gridsize.setEnabled(False)
+        self.action_gridsize.setObjectName("action_gridsize")
         self.action_counter = QtWidgets.QAction(MainWindow)
         self.action_counter.setCheckable(False)
         self.action_counter.setObjectName("action_counter")
@@ -154,6 +164,10 @@ class Ui_MainWindow(object):
         self.menu.addSeparator()
         self.menu.addAction(self.action_X_2)
         self.menu_P.addAction(self.action_settings)
+        self.menu_P.addSeparator()
+        self.menu_P.addAction(self.action_gridsize)
+        self.menu_P.addAction(self.action_gridup)
+        self.menu_P.addAction(self.action_griddown)
         self.menubar.addAction(self.menu.menuAction())
         self.menubar.addAction(self.menu_P.menuAction())
         self.menubar.addAction(self.menu_H.menuAction())
@@ -168,6 +182,9 @@ class Ui_MainWindow(object):
         self.label_2.setText(_translate("MainWindow", "underway"))
         self.menu.setTitle(_translate("MainWindow", "游戏"))
         self.menu_P.setTitle(_translate("MainWindow", "选项"))
+        self.action_gridsize.setText(_translate("MainWindow", "当前尺寸："))
+        self.action_gridup.setText(_translate("MainWindow", "放大"))
+        self.action_griddown.setText(_translate("MainWindow", "缩小"))
         self.menu_H.setTitle(_translate("MainWindow", "这是啥"))
         self.action.setText(_translate("MainWindow", "新游戏"))
         self.action_re.setText(_translate("MainWindow", "重玩"))
@@ -197,6 +214,7 @@ class Ui_MainWindow(object):
             size=pixmap.size()
             scaled_pixmap=pixmap.scaled(size/13)
             self.labelmine[i].setPixmap(scaled_pixmap)
+            
 
     def showtimenum(self,intervaltime):
         ledlist=['-','-','-']
