@@ -21,9 +21,9 @@ class mineLabel (QtWidgets.QLabel):
         self.pixmaps=[0]*15
         self.row=row
         self.column=column
-        self.num = [[0 for j in range(self.column)] for i in range(self.row)]
-        self.status = [[0 for j in range(self.column)] for i in range(self.row)]
-        self.pressed = [[0 for j in range(self.column)] for i in range(self.row)]
+        self.num = [[0 for j in range(self.column)] for i in range(self.row)] # -1雷，0-8数字
+        self.status = [[0 for j in range(self.column)] for i in range(self.row)] # 0未开 1打开 2标雷
+        self.pressed = [[0 for j in range(self.column)] for i in range(self.row)] # 0未打开 1打开 2标雷 3以上是其他
         self.resizepixmaps(self.pixSize)
 
     '''def mousePressEvent(self, e):  ##重载一下鼠标点击事件
