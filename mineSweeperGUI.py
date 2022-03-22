@@ -83,6 +83,16 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         return self.rightHeld
     def chord(self):
         return self.left() and self.right()
+    def recursive(self):
+        return True
+    def isCovered(self,i,j):
+        return self.label.status[i][j]==0
+    def isMine(self,i,j):
+        return self.label.num[i][j]==-1
+    def isFlag(self,i,j):
+        return self.label.status[i][j]==2
+    def isGameStarted(self):
+        return self.timeStart
         
     def showcounter(self):
         self.action_counter.setChecked(True)
@@ -173,9 +183,60 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
                     self.label.update()
 
     def mineAreaLeftRelease(self, i, j):
+        if self.finish or self.outOfBorder(i,j):
+        elif self.chord():
+            self.sendChord(i,j)
+        elif self.left():
+            self.sendLeft(i,j)
+        self.leftHeld=False
+        self.label.update()
+        if self.isGameFinished():
+            self.gameWin()
+    
+    def sendLeft(self,i,j): # 处理左键点击事件
+        self.allclicks[0]+=1 # cl+1
+        self.label.pressed[i][j]=0
+        if self.isCovered(i,j): # 未打开的格子
+            self.eclicks[0]+=1 # lce+1
+            self.changecounter(1)
+            self.doLeft(i,j)
+            
+    
+    def sendChord(self,i,j):
+    
+    # 暂时先用递归调用，队列的事情以后再写
+    
+    def doLeft(self,i,j): # 执行左键点击行为
+        if not self.isGameStarted():
+            
+        if self.isMine(i,j):
+            # 加入踩雷代码
+        else:
+            self.label.status[i][j]=1
+            if self.recursive() or self.label.num[i][j]==0: # 递归双击或开空
+                self.doChord(i,j)
+    
+    def doChord(self,i,j): # 执行双击或开空行为
+        if not self.canChord(i,j):
+            return
+        for ii in range(max(0,i-1),min(self.row,i+2)):
+            for jj in range(max(0,j-1),min(self.column,j+2)):
+                if self.isCovered(ii,jj):
+                    self.doLeft(i,j)
+                    
+    def canChord(self,i,j): # 判断是否可双击
+        if self.isMine(i,j): # 不可双击雷
+            return False
+        flagged=0 # 插旗计数
+        for ii in range(max(0,i-1),min(self.row,i+2)):
+            for jj in range(max(0,j-1),min(self.column,j+2)):
+                if self.isFlag(i,j):
+                    flagged+=1
+        return flagged==self.label.num[i][j]
+    
         if self.leftHeld and not self.finish:
             self.leftHeld = False  # 防止双击中的左键弹起被误认为真正的左键弹起
-            if not self.outOfBorder(i, j) and not self.finish:
+            if not self.outOfBorder(i, j):
                 self.allclicks[0]+=1
                 self.label.pressed[i][j]=0
                 if self.label.status[i][j] == 0:
