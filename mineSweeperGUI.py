@@ -19,6 +19,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.gridsize=32
         self.leftHeld = False
         self.rightHeld = False
+        self.chordHeld = False
         self.rightfirst = False 
         self.leftAndRightHeld = False  # 鼠标是否被按下的标志位
         self.oldCell = (0, 0)  # 鼠标的上个停留位置，用于绘制按下去时的阴影
@@ -82,19 +83,24 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
     def right(self):
         return self.rightHeld
     def chord(self):
-        return self.left() and self.right()
+        return self.chordHeld
     def recursive(self):
         return True
+    
     def isCovered(self,i,j):
         return self.label.status[i][j]==0
+    def isOpened(self,i,j):
+        return self.label.status[i][j]==1
     def isMine(self,i,j):
         return self.label.num[i][j]==-1
     def isFlag(self,i,j):
         return self.label.status[i][j]==2
+    
     def isGameStarted(self):
         return self.timeStart
     def isGameFinished(self):
         return self.finish
+    
     def putFlag(self,i,j):
         self.label.status[i][j]=2
     def rmFlag(self,i,j):
@@ -188,24 +194,53 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
                                 self.num0queue.put([r,c,start0])
                     self.label.update()
 
-    def mineAreaLeftRelease(self, i, j):
+    def mineAreaLeftPressed(self, i, j):
+        if self.isGameFinished():
+            return
+        self.leftHeld=True
+        if self.right():
+            self.chordHeld=True
+    def mineAreaLeftRelease(self, i, j): # 左键弹起
         if self.isGameFinished() or self.outOfBorder(i,j):
-        elif self.chord():
-            self.sendChord(i,j)
-        elif self.left():
-            self.sendLeft(i,j)
+            return
         self.leftHeld=False
+        if self.right():
+            self.sendChord(i,j)
+        elif self.chord():
+            self.chordHeld=False
+        else:
+            self.sendLeft(i,j)
         self.label.update()
         if self.isGameFinished():
             self.gameWin()
+    def mineAreaRightPressed(self, i, j):
+        if self.isGameFinished():
+            return
+        self.rightHeld=True
+        elif self.left():
+            self.chordHeld=True
+        else:
+            self.sendRight(i,j)
+        self.label.update()
+    def mineAreaRightRelease(self, i, j):
+        if self.isGameFinished():
+            return
+        self.rightHeld=False
+        if self.left():
+            self.sendChord(i,j)
+        elif self.chord():
+            self.chordHeld=False
     
     def sendLeft(self,i,j): # 处理左键点击事件
-        self.allclicks[0]+=1 # cl+1
+        self.allclicks[0]+=1 # lcl+1
         self.label.pressed[i][j]=0
         if self.isCovered(i,j): # 未打开的格子
             self.eclicks[0]+=1 # lce+1
             self.changecounter(1)
             self.doLeft(i,j)
+    
+    def sendRight(self,i,j): # 处理右键点击事件
+        if self.isOpened(i,j):
             
     
     def sendChord(self,i,j):
@@ -246,9 +281,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
                     flagged+=1
         return flagged==self.label.num[i][j]
 
-    def mineAreaRightPressed(self, i, j):
-        if self.isGameFinished:
-        else:
+    
             
         
         if not self.finish:
