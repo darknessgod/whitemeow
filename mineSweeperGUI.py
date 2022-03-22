@@ -201,9 +201,9 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         if self.right():
             self.chordHeld=True
     def mineAreaLeftRelease(self, i, j): # 左键弹起
+        self.leftHeld=False
         if self.isGameFinished() or self.outOfBorder(i,j):
             return
-        self.leftHeld=False
         if self.right():
             self.sendChord(i,j)
         elif self.chord():
