@@ -93,6 +93,12 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         return self.label.status[i][j]==2
     def isGameStarted(self):
         return self.timeStart
+    def isGameFinished(self):
+        return self.finish
+    def putFlag(self,i,j):
+        self.label.status[i][j]=2
+    def rmFlag(self,i,j):
+        self.label.status[i][j]=0
         
     def showcounter(self):
         self.action_counter.setChecked(True)
@@ -183,7 +189,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
                     self.label.update()
 
     def mineAreaLeftRelease(self, i, j):
-        if self.finish or self.outOfBorder(i,j):
+        if self.isGameFinished() or self.outOfBorder(i,j):
         elif self.chord():
             self.sendChord(i,j)
         elif self.left():
@@ -208,13 +214,19 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
     
     def doLeft(self,i,j): # 执行左键点击行为
         if not self.isGameStarted():
-            
+            # 加入摆雷功能
         if self.isMine(i,j):
             # 加入踩雷代码
         else:
             self.label.status[i][j]=1
             if self.recursive() or self.label.num[i][j]==0: # 递归双击或开空
                 self.doChord(i,j)
+                
+    def doRight(self,i,j):
+        if self.isCovered(i,j):
+            self.putFlag(i,j)
+        else:
+            self.rmFlag(i,j)
     
     def doChord(self,i,j): # 执行双击或开空行为
         if not self.canChord(i,j):
@@ -233,69 +245,12 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
                 if self.isFlag(i,j):
                     flagged+=1
         return flagged==self.label.num[i][j]
-    
-        if self.leftHeld and not self.finish:
-            self.leftHeld = False  # 防止双击中的左键弹起被误认为真正的左键弹起
-            if not self.outOfBorder(i, j):
-                self.allclicks[0]+=1
-                self.label.pressed[i][j]=0
-                if self.label.status[i][j] == 0:
-                    self.eclicks[0]+=1
-                    self.changecounter(1)
-                    self.label.update()
-                    if self.label.num[i][j] >= 0:
-                        self.num0queue=Queue()
-                        self.num0queue.put([i,j,self.label.num[i][j] == 0])
-                        while(self.num0queue.empty()==False):
-                            getqueuehead=self.num0queue.get()
-                            self.BFS(getqueuehead[0], getqueuehead[1],getqueuehead[2])
-                        self.label.update()
-                        if self.isGameFinished():
-                            self.gameWin()
-                    else:
-                        if not self.timeStart and self.gamemode==1 :#第一下不能为雷，第一下就赢了的事件也在这里写
-                            self.label.num[i][j]=0
-                            while(True):
-                                r = random.randint(0, self.row - 1)
-                                c = random.randint(0, self.column - 1)
-                                if self.label.num[r][c]==-1 or (r==i and c==j):
-                                    continue
-                                self.label.num[r][c]=-1
-                                break
-                            for ii in range(i - 1, i + 2):
-                                for jj in range(j - 1, j + 2):
-                                    if not self.outOfBorder(ii, jj) and self.label.num[ii][jj]!=-1:     
-                                        count=0
-                                        for rr in range(ii - 1, ii + 2):
-                                            for cc in range(jj - 1, jj + 2):
-                                                if not self.outOfBorder(rr, cc) and self.label.num[rr][cc]==-1:
-                                                    count+=1
-                                        self.label.num[ii][jj]=count
-                            for ii in range(r - 1, r + 2):
-                                for jj in range(c - 1, c + 2):
-                                    if not self.outOfBorder(ii, jj) and self.label.num[ii][jj]!=-1:     
-                                        count=0
-                                        for rr in range(ii - 1, ii + 2):
-                                            for cc in range(jj - 1, jj + 2):
-                                                if not self.outOfBorder(rr, cc) and self.label.num[rr][cc]==-1:
-                                                    count+=1
-                                        self.label.num[ii][jj]=count
-                            self.num0queue=Queue()
-                            self.num0queue.put([i,j,self.label.num[i][j] == 0])
-                            while(self.num0queue.empty()==False):
-                                getqueuehead=self.num0queue.get()
-                                self.BFS(getqueuehead[0], getqueuehead[1],getqueuehead[2])
-                            self.label.update()
-                            if self.isGameFinished():
-                                self.gameWin()         
-                        else:
-                            if not self.timeStart:
-                                self.timeStart = True
-                                self.timer.start()
-                                self.starttime=time.time()
-                            self.gameFailed(i,j)
 
     def mineAreaRightPressed(self, i, j):
+        if self.isGameFinished:
+        else:
+            
+        
         if not self.finish:
             self.allclicks[1]+=1
             self.changecounter(1)
