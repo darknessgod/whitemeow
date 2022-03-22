@@ -10,22 +10,94 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import statusLabel
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.setEnabled(True)
-        MainWindow.resize(800, 600)
-        MainWindow.setWindowFlags(QtCore.Qt.WindowMinimizeButtonHint | QtCore.Qt.WindowCloseButtonHint)  
-        self.centralwidget = QtWidgets.QWidget(MainWindow)
-        self.centralwidget.setObjectName("centralwidget")
-        self.verticalLayout = QtWidgets.QVBoxLayout(self.centralwidget)#垂直布局
-        self.verticalLayout.setObjectName("verticalLayout")
-        self.frame = statusLabel.StatusFrame(self.centralwidget)#QFrame是是基本控件的基类
-        self.frame.setFrameShape(QtWidgets.QFrame.Panel)
-        self.frame.setFrameShadow(QtWidgets.QFrame.Sunken)
-        self.frame.setObjectName("frame")
-        self.horizontalLayout = QtWidgets.QHBoxLayout(self.frame)#水平布局
-        self.horizontalLayout.setObjectName("horizontalLayout")
-        self.horizontalLayout.setContentsMargins(1, 5, 1, 5)
-        self.horizontalLayout.setSpacing(0)
+
+        self.initui(MainWindow)
+        self.initmenu(MainWindow)
+        self.retranslateUi(MainWindow)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+       
+       
+    def retranslateUi(self, MainWindow):
+        _translate = QtCore.QCoreApplication.translate
+        MainWindow.setWindowTitle(_translate("MainWindow", "Meowsweeper Arbiter"))
+        self.menu.setTitle(_translate("MainWindow", "游戏"))
+        self.menu_P.setTitle(_translate("MainWindow", "选项"))
+        self.action_gridsize.setText(_translate("MainWindow", "当前尺寸："))
+        self.action_gridup.setText(_translate("MainWindow", "放大"))
+        self.action_griddown.setText(_translate("MainWindow", "缩小"))
+        self.menu_H.setTitle(_translate("MainWindow", "这是啥"))
+        self.action.setText(_translate("MainWindow", "新游戏"))
+        self.action_re.setText(_translate("MainWindow", "重玩"))
+        self.action_B.setText(_translate("MainWindow", "初级"))
+        self.action_I.setText(_translate("MainWindow", "中级"))
+        self.action_E.setText(_translate("MainWindow", "高级"))
+        self.action_C.setText(_translate("MainWindow", "自定义"))
+        self.action_X_2.setText(_translate("MainWindow", "退出"))
+        self.action_counter.setText(_translate("MainWindow", "计数器"))
+        self.action_settings.setText(_translate("MainWindow", "设置"))
+
+    def showminenum(self,minenum):
+        ledlist=['-','-','-']
+        if minenum>=-99 and minenum<0:
+            ledlist[0]='-'
+            ledlist[1]=str((-minenum)//10)
+            ledlist[2]=str((-minenum)%10)
+        else:
+            ledlist[0]=str(minenum//100)
+            ledlist[1]=str((minenum%100)//10)
+            ledlist[2]=str((minenum)%10)
+        for i in range(len(ledlist)):
+            filename='media/LED'
+            filename+=ledlist[i]
+            filename+='.png'
+            pixmap = QtGui.QPixmap(filename)
+            size=pixmap.size()
+            scaled_pixmap=pixmap.scaled(size/13)
+            self.labelmine[i].setPixmap(scaled_pixmap)
+            
+    def showtimenum(self,intervaltime):
+        ledlist=['-','-','-']
+        minenum=int(intervaltime+0.9999)
+        ledlist[0]=str(minenum//100)
+        ledlist[1]=str((minenum%100)//10)
+        ledlist[2]=str((minenum)%10)
+        for i in range(len(ledlist)):
+            filename='media/LED'
+            filename+=ledlist[i]
+            filename+='.png'
+            pixmap = QtGui.QPixmap(filename)
+            size=pixmap.size()
+            scaled_pixmap=pixmap.scaled(size/13)
+            self.labeltime[i].setPixmap(scaled_pixmap)
+
+    def initui(self,MainWindow):
+        self.initmainwindow(MainWindow)
+        #self.label.setFrameShape(QtWidgets.QFrame.WinPanel)
+        #self.label.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.initialupperframe()#初始化顶端状态栏，即self.frame
+        self.verticalLayout.addWidget(self.frame) 
+        self.initialminearea()#初始化雷区，即self.frame_2
+        self.verticalLayout.addWidget(self.frame_2)
+        self.verticalLayout.addStretch(1)
+        self.initialbottomframe()#初始化底端，即self.frame_3
+        #self.scroll = QtWidgets.QScrollArea()
+        #self.scroll.setWidget(self.frame_2)
+        self.verticalLayout.addWidget(self.frame_3)
+        self.verticalLayout.setContentsMargins(10, 10, 10, 10)
+        MainWindow.setCentralWidget(self.centralwidget)
+        
+        
+    def initmenu(self,MainWindow):   
+        self.createmenulabels(MainWindow) 
+        MainWindow.setMenuBar(self.menubar)
+        self.setmenuactions(MainWindow)
+        self.addactionstomenu()
+
+        #self.statusbar = QtWidgets.QStatusBar(MainWindow)
+        #self.statusbar.setObjectName("statusbar")
+        #MainWindow.setStatusBar(self.statusbar)
+
+    def initialminenum(self):
         self.labelmine3 = QtWidgets.QLabel(self.frame)#
         self.labelmine3.setObjectName("label33")
         self.horizontalLayout.addWidget(self.labelmine3)
@@ -36,21 +108,13 @@ class Ui_MainWindow(object):
         self.labelmine1.setObjectName("label31")
         self.horizontalLayout.addWidget(self.labelmine1)
         self.labelmine=[self.labelmine3,self.labelmine2,self.labelmine1]
-        #self.label.setFrameShape(QtWidgets.QFrame.WinPanel)
-        #self.label.setFrameShadow(QtWidgets.QFrame.Sunken)
-        
-        
-        spacerItem = QtWidgets.QSpacerItem(40, 20,
-                                           QtWidgets.QSizePolicy.Expanding, 
-                                           QtWidgets.QSizePolicy.Minimum)#弹簧
-        self.horizontalLayout.addItem(spacerItem)
+
+    def initialface(self):
         self.label_2 = statusLabel.StatusLabel(self.frame)#label2是脸
         self.label_2.setObjectName("label_2")
         self.horizontalLayout.addWidget(self.label_2)
-        spacerItem1 = QtWidgets.QSpacerItem(40, 20, 
-                                            QtWidgets.QSizePolicy.Expanding, 
-                                            QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout.addItem(spacerItem1)
+
+    def initialtimer(self):
         self.labeltime3 = QtWidgets.QLabel(self.frame)#
         self.labeltime3.setObjectName("label33")
         self.horizontalLayout.addWidget(self.labeltime3)
@@ -61,7 +125,35 @@ class Ui_MainWindow(object):
         self.labeltime1.setObjectName("label31")
         self.horizontalLayout.addWidget(self.labeltime1)
         self.labeltime=[self.labeltime3,self.labeltime2,self.labeltime1]
-        self.verticalLayout.addWidget(self.frame)   #把frame添加到垂直布局的上面
+
+    def initmainwindow(self,MainWindow):
+        MainWindow.setObjectName("MainWindow")
+        MainWindow.setEnabled(True)
+        MainWindow.resize(800, 600)
+        MainWindow.setWindowFlags(QtCore.Qt.WindowMinimizeButtonHint | QtCore.Qt.WindowCloseButtonHint)  
+        self.centralwidget = QtWidgets.QWidget(MainWindow)
+        self.centralwidget.setObjectName("centralwidget")
+        self.verticalLayout = QtWidgets.QVBoxLayout(self.centralwidget)#垂直布局
+        self.verticalLayout.setObjectName("verticalLayout")
+
+    def initialupperframe(self):
+        self.frame = statusLabel.StatusFrame(self.centralwidget)#QFrame是是基本控件的基类
+        self.frame.setFrameShape(QtWidgets.QFrame.Panel)
+        self.frame.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.frame.setObjectName("frame")
+        self.horizontalLayout = QtWidgets.QHBoxLayout(self.frame)#水平布局
+        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.horizontalLayout.setContentsMargins(1, 5, 1, 5)
+        self.horizontalLayout.setSpacing(0)
+        self.initialminenum()
+        spacerItem = QtWidgets.QSpacerItem(40,20,QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)#弹簧
+        self.horizontalLayout.addItem(spacerItem)
+        self.initialface()
+        spacerItem1 = QtWidgets.QSpacerItem(40,20,QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout.addItem(spacerItem1)
+        self.initialtimer()
+
+    def initialminearea(self):
         self.frame_2 = QtWidgets.QFrame(self.centralwidget)  #整个局面的框
         self.frame_2.setFrameShape(QtWidgets.QFrame.WinPanel)
         self.frame_2.setFrameShadow(QtWidgets.QFrame.Sunken)
@@ -69,11 +161,9 @@ class Ui_MainWindow(object):
         self.gridLayout = QtWidgets.QGridLayout(self.frame_2)
         self.gridLayout.setContentsMargins(0, 0, 0, 0)
         self.gridLayout.setObjectName("gridLayout")
-        self.verticalLayout.addWidget(self.frame_2)
-        #self.scroll = QtWidgets.QScrollArea()
-        #self.scroll.setWidget(self.frame_2)
-        self.verticalLayout.addStretch(1)
-        self.frame_3 = QtWidgets.QFrame(self.centralwidget)  #整个局面的框
+
+    def initialbottomframe(self):
+        self.frame_3 = QtWidgets.QFrame(self.centralwidget)  
         self.frame_3.setFrameShape(QtWidgets.QFrame.WinPanel)
         self.frame_3.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.frame_3.setObjectName("frame_3")
@@ -86,13 +176,8 @@ class Ui_MainWindow(object):
         self.labeltag.setFixedHeight(22)
         self.labeltag.setStyleSheet("background-color:white;font-size:16px;font-family:YF补 汉仪夏日体;")
         self.horizontalLayout3.addWidget(self.labeltag)
-        self.verticalLayout.addWidget(self.frame_3)
-        self.verticalLayout.setContentsMargins(10, 10, 10, 0)
-        
 
-        MainWindow.setCentralWidget(self.centralwidget)
-        
-        
+    def createmenulabels(self,MainWindow):
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 23))
         self.menubar.setObjectName("menubar")
@@ -102,10 +187,8 @@ class Ui_MainWindow(object):
         self.menu_P.setObjectName("menu_P")
         self.menu_H = QtWidgets.QMenu(self.menubar)
         self.menu_H.setObjectName("menu_H")
-        MainWindow.setMenuBar(self.menubar)
-        #self.statusbar = QtWidgets.QStatusBar(MainWindow)
-        #self.statusbar.setObjectName("statusbar")
-        #MainWindow.setStatusBar(self.statusbar)
+        
+    def setmenuactions(self,MainWindow):
         self.action = QtWidgets.QAction(MainWindow)
         self.action.setCheckable(False)
         self.action.setChecked(False)
@@ -154,6 +237,8 @@ class Ui_MainWindow(object):
         self.action_counter.setCheckable(False)
         self.action_counter.setObjectName("action_counter")
         self.action_counter.setShortcut(QtGui.QKeySequence("C"))
+
+    def addactionstomenu(self):
         self.menu.addAction(self.action)
         self.menu.addAction(self.action_re)
         self.menu.addSeparator()
@@ -173,65 +258,4 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menu.menuAction())
         self.menubar.addAction(self.menu_P.menuAction())
         self.menubar.addAction(self.menu_H.menuAction())
-
-        self.retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
-
-
-    def retranslateUi(self, MainWindow):
-        _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Meowsweeper Arbiter"))
-        self.label_2.setText(_translate("MainWindow", "underway"))
-        self.menu.setTitle(_translate("MainWindow", "游戏"))
-        self.menu_P.setTitle(_translate("MainWindow", "选项"))
-        self.action_gridsize.setText(_translate("MainWindow", "当前尺寸："))
-        self.action_gridup.setText(_translate("MainWindow", "放大"))
-        self.action_griddown.setText(_translate("MainWindow", "缩小"))
-        self.menu_H.setTitle(_translate("MainWindow", "这是啥"))
-        self.action.setText(_translate("MainWindow", "新游戏"))
-        self.action_re.setText(_translate("MainWindow", "重玩"))
-        self.action_B.setText(_translate("MainWindow", "初级"))
-        self.action_I.setText(_translate("MainWindow", "中级"))
-        self.action_E.setText(_translate("MainWindow", "高级"))
-        self.action_C.setText(_translate("MainWindow", "自定义"))
-        self.action_X_2.setText(_translate("MainWindow", "退出"))
-        self.action_counter.setText(_translate("MainWindow", "计数器"))
-        self.action_settings.setText(_translate("MainWindow", "设置"))
-
-    def showminenum(self,minenum):
-        ledlist=['-','-','-']
-        if minenum>=-99 and minenum<0:
-            ledlist[0]='-'
-            ledlist[1]=str((-minenum)//10)
-            ledlist[2]=str((-minenum)%10)
-        else:
-            ledlist[0]=str(minenum//100)
-            ledlist[1]=str((minenum%100)//10)
-            ledlist[2]=str((minenum)%10)
-        for i in range(len(ledlist)):
-            filename='media/LED'
-            filename+=ledlist[i]
-            filename+='.png'
-            pixmap = QtGui.QPixmap(filename)
-            size=pixmap.size()
-            scaled_pixmap=pixmap.scaled(size/13)
-            self.labelmine[i].setPixmap(scaled_pixmap)
-            
-
-    def showtimenum(self,intervaltime):
-        ledlist=['-','-','-']
-        minenum=int(intervaltime+0.9999)
-        ledlist[0]=str(minenum//100)
-        ledlist[1]=str((minenum%100)//10)
-        ledlist[2]=str((minenum)%10)
-        for i in range(len(ledlist)):
-            filename='media/LED'
-            filename+=ledlist[i]
-            filename+='.png'
-            pixmap = QtGui.QPixmap(filename)
-            size=pixmap.size()
-            scaled_pixmap=pixmap.scaled(size/13)
-            self.labeltime[i].setPixmap(scaled_pixmap)
-
-
 
