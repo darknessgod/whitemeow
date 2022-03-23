@@ -171,30 +171,25 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         #print(self.num0queue.qsize())
         if self.isCovered(i,j):
             self.uncover(i,j)
-        if self.label.num[i][j] >= 0:
-            if not self.timeStart:
+        if not self.isMine(i,j):
+            if not self.isGameStarted():
                 self.timeStart = True
                 self.timer.start()
                 self.starttime=time.time()
                 self.label.update()
-            if self.label.num[i][j] == 0: #左键开op递归
+            if self.isOpening(i,j): #左键开op递归
                 for r in range(i - 1, i + 2):
                     for c in range(j - 1, j + 2):
-                        if not self.outOfBorder(r, c) and self.label.status[r][c] == 0 and self.label.num[r][c] != -1:
-                            self.label.status[r][c] = 1
+                        if not self.outOfBorder(r, c) and self.isCovered(r,c) and not self.isMine(r,c):
+                            self.uncover(r,c)
                             self.num0queue.put([r,c,start0])
                 self.label.update()
-            elif self.label.num[i][j] > 0: #双键递归，此处为假条件，将来会替换为递归开关
-                flagged=0
-                for r in range(i - 1, i + 2):
-                    for c in range(j - 1, j + 2):
-                        if not self.outOfBorder(r, c) and self.label.status[r][c] == 2:
-                            flagged+=1
-                if flagged==self.label.num[i][j]:
+            elif self.recursive(): #双键递归，此处为假条件，将来会替换为递归开关
+                if self.canChord(i,j):
                     for r in range(i - 1, i + 2):
                         for c in range(j - 1, j + 2):
-                            if not self.outOfBorder(r, c) and self.label.status[r][c] == 0 and self.label.num[r][c] != -1:
-                                self.label.status[r][c] = 1
+                            if not self.outOfBorder(r, c) and self.isCovered(r,c) and not self.isMine(r,c):
+                                self.uncover(r,c)
                                 self.num0queue.put([r,c,start0])
                     self.label.update()
 
