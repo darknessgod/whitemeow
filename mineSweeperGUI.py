@@ -107,6 +107,8 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.label.status[i][j]=2
     def rmFlag(self,i,j):
         self.label.status[i][j]=0
+    def uncover(self,i,j):
+        self.label.status[i][j]=1
         
     def showcounter(self):
         self.action_counter.setChecked(True)
@@ -167,8 +169,8 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
 
     def BFS(self, i, j ,start0):
         #print(self.num0queue.qsize())
-        if self.label.status[i][j] == 0:
-            self.label.status[i][j] = 1
+        if self.isCovered(i,j):
+            self.uncover(i,j)
         if self.label.num[i][j] >= 0:
             if not self.timeStart:
                 self.timeStart = True
