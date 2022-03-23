@@ -242,10 +242,15 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
             self.doLeft(i,j)
     
     def sendRight(self,i,j): # 处理右键点击事件
+        self.allclicks[1]+=1
         if self.isOpened(i,j):
+        else:
+            self.eclicks[1]+=1
+            self.doRight(i,j)
             
-    
-    def sendChord(self,i,j):
+    def sendChord(self,i,j): # 处理双击点击事件
+        self.allclicks[2]+=1
+        self.doChord(i,j)
     
     # 暂时先用递归调用，队列的事情以后再写
     
@@ -259,7 +264,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
             if self.recursive() or self.label.num[i][j]==0: # 递归双击或开空
                 self.doChord(i,j)
                 
-    def doRight(self,i,j):
+    def doRight(self,i,j): # 执行右键点击行为
         if self.isCovered(i,j):
             self.putFlag(i,j)
         else:
