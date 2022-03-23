@@ -95,6 +95,8 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         return self.label.num[i][j]==-1
     def isFlag(self,i,j):
         return self.label.status[i][j]==2
+    def isOpening(self,i,j):
+        return self.label.num[i][j]==0
     
     def isGameStarted(self):
         return self.timeStart
