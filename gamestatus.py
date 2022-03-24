@@ -24,7 +24,18 @@ class gamestatus(object):
         self.pressed = [[0 for j in range(self.column)] for i in range(self.row)] # 0未打开 1打开 2标雷 3以上是其他
         self.num0queue=Queue()
         self.counter=None
-
+    
+    def isCovered(self,i,j):
+        self.status[i][j]==0
+    def isOpened(self,i,j):
+        self.status[i][j]==1
+    def isFlag(self,i,j):
+        self.status[i][j]==2
+    def isMine(self,i,j):
+        self.num[i][j]==-1
+    def isOpening(self,i,j):
+        self.num[i][j]==0
+        
     def outOfBorder(self, i, j):
         if i < 0 or i >= self.row or j < 0 or j >= self.column:
             return True
