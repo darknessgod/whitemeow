@@ -8,24 +8,27 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 import statusLabel
+import readdata
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
 
+        self.getdata()
         self.initui(MainWindow)
         self.initmenu(MainWindow)
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
        
-       
+
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Meowsweeper Arbiter"))
         self.menu.setTitle(_translate("MainWindow", "游戏"))
         self.menu_P.setTitle(_translate("MainWindow", "选项"))
+        self.menu_H.setTitle(_translate("MainWindow", "这是啥"))
         self.action_gridsize.setText(_translate("MainWindow", "当前尺寸："))
         self.action_gridup.setText(_translate("MainWindow", "放大"))
         self.action_griddown.setText(_translate("MainWindow", "缩小"))
-        self.menu_H.setTitle(_translate("MainWindow", "这是啥"))
         self.action.setText(_translate("MainWindow", "新游戏"))
         self.action_re.setText(_translate("MainWindow", "重玩"))
         self.action_B.setText(_translate("MainWindow", "初级"))
@@ -259,3 +262,7 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menu_P.menuAction())
         self.menubar.addAction(self.menu_H.menuAction())
 
+    def getdata(self):
+        self.datas=readdata.readdata()
+        self.datas.readstats()
+        self.datas.getrecords()
