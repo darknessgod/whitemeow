@@ -25,6 +25,17 @@ class gamestatus(object):
         self.num0queue=Queue()
         self.counter=None
 
+    def isCovered(self,i,j):
+        self.status[i][j]==0
+    def isOpened(self,i,j):
+        self.status[i][j]==1
+    def isFlag(self,i,j):
+        self.status[i][j]==2
+    def isMine(self,i,j):
+        self.num[i][j]==-1
+    def isOpening(self,i,j):
+        self.num[i][j]==0
+
     def outOfBorder(self, i, j):
         if i < 0 or i >= self.row or j < 0 or j >= self.column:
             return True
