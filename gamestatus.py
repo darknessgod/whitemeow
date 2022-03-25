@@ -35,6 +35,13 @@ class gamestatus(object):
         self.num[i][j]==-1
     def isOpening(self,i,j):
         self.num[i][j]==0
+    
+    def forceUncover(self,i,j):
+        self.status[i][j]=1
+    def forceFlag(self,i,j):
+        self.status[i][j]=2
+    def forceUnflag(self,i,j):
+        self.status[i][j]=0
 
     def outOfBorder(self, i, j):
         return i < 0 or i >= self.row or j < 0 or j >= self.column
