@@ -37,9 +37,7 @@ class gamestatus(object):
         self.num[i][j]==0
 
     def outOfBorder(self, i, j):
-        if i < 0 or i >= self.row or j < 0 or j >= self.column:
-            return True
-        return False
+        return i < 0 or i >= self.row or j < 0 or j >= self.column
 
     def createMine(self,mode):    
         num = self.mineNum
