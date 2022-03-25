@@ -58,19 +58,18 @@ class gamestatus(object):
                 self.num[r][c]=-1
                 for i in range(r - 1, r + 2):
                     for j in range(c - 1, c + 2):
-                        if not self.outOfBorder(i, j) and (
-                            self.num[i][j] != -1):
+                        if not self.outOfBorder(i, j) and not self.isMine(i,j):
                             self.num[i][j] += 1
                         
     def BFS(self, i, j ,start0):
         #print(self.num0queue.qsize())
         if self.isCovered(i,j):
             self.status[i][j] = 1
-        if self.num[i][j] >= 0:
+        if not self.isMine(i,j):
             if self.num[i][j] == 0: #左键开op递归
                 for r in range(i - 1, i + 2):
                     for c in range(j - 1, j + 2):
-                        if not self.outOfBorder(r, c) and self.status[r][c] == 0 and self.num[r][c] != -1:
+                        if not self.outOfBorder(r, c) and self.status[r][c] == 0 and not self.isMine(r,c):
                             self.status[r][c] = 1
                             self.num0queue.put([r,c,start0])
             elif self.num[i][j] > 0: #双键递归，此处为假条件，将来会替换为递归开关
@@ -82,10 +81,10 @@ class gamestatus(object):
                 if flagged==self.num[i][j]:
                     for r in range(i - 1, i + 2):
                         for c in range(j - 1, j + 2):
-                            if not self.outOfBorder(r, c) and self.status[r][c] == 0 and self.num[r][c] != -1:
+                            if not self.outOfBorder(r, c) and self.status[r][c] == 0 and not self.isMine(r,c):
                                 self.status[r][c] = 1
                                 self.num0queue.put([r,c,start0])
-                            elif not self.outOfBorder(r, c) and self.num[r][c]==-1 and self.status[r][c] == 0:
+                            elif not self.outOfBorder(r, c) and self.isMine(r,c) and self.status[r][c] == 0:
                                 self.failed=True
                                 self.redmine=[r,c]
 
@@ -198,19 +197,19 @@ class gamestatus(object):
         for i in range(self.row):
             for j in range(self.column):
                 if result==2:#输了
-                    if self.num[i][j] == -1 or self.status[i][j] == 2:
-                        if self.num[i][j] == -1 and self.status[i][j] == 2:
+                    if self.isMine(i,j) or self.status[i][j] == 2:
+                        if self.isMine(i,j) and self.status[i][j] == 2:
                             pass
-                        elif self.num[i][j] == -1:
+                        elif self.isMine(i,j):
                             self.pressed[i][j]= 2
                         else:
                             self.pressed[i][j]= 3
 
                 elif result==1:#赢了
-                    if self.num[i][j]==-1 or self.status[i][j] == 2:
-                        if self.num[i][j]==-1  and self.isCovered(i,j):#游戏过程中未标上的雷
+                    if self.isMine(i,j) or self.status[i][j] == 2:
+                        if self.isMine(i,j)  and self.isCovered(i,j):#游戏过程中未标上的雷
                             self.pressed[i][j]=5
-                        elif self.num[i][j]==-1  and self.status[i][j] == 2:#游戏过程中标上的雷
+                        elif self.isMine(i,j)  and self.status[i][j] == 2:#游戏过程中标上的雷
                             pass
                         else:
                             self.pressed[i][j]=3
@@ -228,22 +227,22 @@ class gamestatus(object):
                     count=0
                     for rr in range(ii - 1, ii + 2):
                         for cc in range(jj - 1, jj + 2):
-                            if not self.outOfBorder(rr, cc) and self.num[rr][cc]==-1:
+                            if not self.outOfBorder(rr, cc) and self.isMine(rr,cc):
                                 count+=1
                     self.num[ii][jj]=count
         for ii in range(self.row-2, self.row):
             for jj in range(self.column-2, self.column):
-                if not self.outOfBorder(ii, jj) and self.num[ii][jj]!=-1:     
+                if not self.outOfBorder(ii, jj) and not self.isMine(ii,jj):     
                     count=0
                     for rr in range(ii - 1, ii + 2):
                         for cc in range(jj - 1, jj + 2):
-                            if not self.outOfBorder(rr, cc) and self.num[rr][cc]==-1:
+                            if not self.outOfBorder(rr, cc) and self.isMine(rr,cc):
                                 count+=1
                     self.num[ii][jj]=count
 
     def chordingFlag(self, i, j):
         # i, j 周围标雷数是否满足双击的要求
-        if self.num[i][j] <= 8 and self.num[i][j] >= 0 and self.status[i][j]==1:
+        if self.num[i][j] <= 8 and not self.isMine(i,j) and self.status[i][j]==1:
             count = 0
             for r in range(i - 1, i + 2):
                 for c in range(j - 1, j + 2):
@@ -297,7 +296,7 @@ class gamestatus(object):
                 if jj<0 or jj>=self.column:
                     continue
                 if num==1:
-                    if self.num[ii][jj]>=0 and self.isCovered(ii,jj):
+                    if not self.isMine(ii,jj) and self.isCovered(ii,jj):
                         self.thisopsolved=False
                     if self.num[ii][jj]==0 and self.num0seen[ii][jj]==False:
                         self.num0seen[ii][jj]=True
