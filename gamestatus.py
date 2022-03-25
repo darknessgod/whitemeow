@@ -57,7 +57,7 @@ class gamestatus(object):
                         
     def BFS(self, i, j ,start0):
         #print(self.num0queue.qsize())
-        if self.status[i][j] == 0:
+        if self.isCovered(i,j):
             self.status[i][j] = 1
         if self.num[i][j] >= 0:
             if self.num[i][j] == 0: #左键开op递归
@@ -85,7 +85,7 @@ class gamestatus(object):
     def doleft(self,i,j):
         self.allclicks[0]+=1
         self.pressed[i][j]=0
-        if self.status[i][j] == 0:
+        if self.isCovered(i,j):
             self.eclicks[0]+=1
             if self.num[i][j] >= 0:
                 self.num0queue=Queue()
@@ -108,7 +108,7 @@ class gamestatus(object):
     def doright(self,i,j):
         self.allclicks[1]+=1
         self.rightfirst=True
-        if self.status[i][j] == 0:
+        if self.isCovered(i,j):
             self.flagonmine(i,j)
         elif self.status[i][j] == 2:
             self.unflagonmine(i,j)
@@ -134,7 +134,7 @@ class gamestatus(object):
                 for c in range(j - 1, j + 2):
                     if not self.outOfBorder(r, c):
                         self.pressed[r][c]=0
-                        if self.status[r][c] == 0:
+                        if self.isCovered(r,c):
                             edouble=True
                             if self.num[r][c] >= 0:
                                 self.num0queue=Queue()
@@ -151,7 +151,7 @@ class gamestatus(object):
             for r in range(i - 1, i + 2):
                 for c in range(j - 1, j + 2):
                     if not self.outOfBorder(r, c):
-                        if self.status[r][c] == 0:
+                        if self.isCovered(r,c):
                             self.pressed[r][c]=0
                         
     def domove(self,i,j):
@@ -163,17 +163,17 @@ class gamestatus(object):
                     for r in range(ii - 1, ii + 2):
                         for c in range(jj - 1, jj + 2):
                             if not self.outOfBorder(r, c):
-                                if self.status[r][c] == 0:
+                                if self.isCovered(r,c):
                                     self.pressed[r][c]=0
                     for r in range(i - 1, i + 2):
                         for c in range(j - 1, j + 2):
                             if not self.outOfBorder(r, c):
-                                if self.status[r][c] == 0:
+                                if self.isCovered(r,c):
                                     self.pressed[r][c]=1
                 elif self.leftHeld:
-                    if self.status[i][j] == 0:
+                    if self.isCovered(i,j):
                         self.pressed[i][j]=1
-                    if self.status[ii][jj] == 0:
+                    if self.isCovered(ii,jj):
                         self.pressed[ii][jj]=0
         elif self.leftAndRightHeld or self.leftHeld:#拖到界外
             ii, jj = self.oldCell
@@ -181,10 +181,10 @@ class gamestatus(object):
                 for r in range(ii - 1, ii + 2):
                     for c in range(jj - 1, jj + 2):
                         if not self.outOfBorder(r, c):
-                            if self.status[r][c] == 0:
+                            if self.isCovered(r,c):
                                 self.pressed[r][c]=0
             elif self.leftHeld:
-                if self.status[ii][jj] == 0:
+                if self.isCovered(ii,jj):
                     self.pressed[ii][jj]=0
 
     def dofinish(self,result):
@@ -201,7 +201,7 @@ class gamestatus(object):
 
                 elif result==1:#赢了
                     if self.num[i][j]==-1 or self.status[i][j] == 2:
-                        if self.num[i][j]==-1  and self.status[i][j] == 0:#游戏过程中未标上的雷
+                        if self.num[i][j]==-1  and self.isCovered(i,j):#游戏过程中未标上的雷
                             self.pressed[i][j]=5
                         elif self.num[i][j]==-1  and self.status[i][j] == 2:#游戏过程中标上的雷
                             pass
@@ -267,14 +267,14 @@ class gamestatus(object):
         for r in range(i - 1, i + 2):
             for c in range(j - 1, j + 2):
                 if not self.outOfBorder(r, c):
-                    if self.status[r][c] == 0 or self.status[r][c]==2:
+                    if self.isCovered(r,c) or self.status[r][c]==2:
                         count += 1
         if count== self.num[i][j]:
             eright=False
             for r in range(i - 1, i + 2):
                 for c in range(j - 1, j + 2):
                     if not self.outOfBorder(r, c):
-                        if self.status[r][c] == 0:
+                        if self.isCovered(r,c):
                             self.status[r][c] =2
                             self.allclicks[3]+=1
                             self.rightfirst=False
@@ -290,7 +290,7 @@ class gamestatus(object):
                 if jj<0 or jj>=self.column:
                     continue
                 if num==1:
-                    if self.num[ii][jj]>=0 and self.status[ii][jj]==0:
+                    if self.num[ii][jj]>=0 and self.isCovered(ii,jj):
                         self.thisopsolved=False
                     if self.num[ii][jj]==0 and self.num0seen[ii][jj]==False:
                         self.num0seen[ii][jj]=True
@@ -298,7 +298,7 @@ class gamestatus(object):
                         self.num0queue.put([ii,jj])
                 elif num==2:
                     if self.isbv[ii][jj]==True and self.islandseen[ii][jj]==False:
-                        if self.status[ii][jj]==0:
+                        if self.isCovered(ii,jj):
                             self.thisislandsolved=False
                         self.islandseen[ii][jj]=True
                         self.bvget+=1
@@ -364,7 +364,7 @@ class gamestatus(object):
                     else:
                         self.islands+=1
                         self.thisislandsolved=True
-                        if self.status[i][j]==0:
+                        if self.isCovered(i,j):
                             self.thisislandsolved=False
                         self.islandseen[i][j]=True
                         self.bvget+=1
