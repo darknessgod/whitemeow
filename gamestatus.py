@@ -74,8 +74,8 @@ class gamestatus(object):
 
     def BFS(self, i, j ,start0):
         #print(self.num0queue.qsize())
-        if self.isCovered(i,j):
-            self.forceUncover(i,j)
+        if self.status[i][j] == 0:
+            self.status[i][j] = 1
         if self.num[i][j] >= 0:
             if self.num[i][j] == 0: #左键开op递归
                 for r in range(i - 1, i + 2):
@@ -102,7 +102,7 @@ class gamestatus(object):
     def doleft(self,i,j):
         self.allclicks[0]+=1
         self.pressed[i][j]=0
-        if self.isCovered(i,j):
+        if self.status[i][j] == 0:
             self.eclicks[0]+=1
             if self.num[i][j] >= 0:
                 self.num0queue=Queue()
@@ -125,11 +125,11 @@ class gamestatus(object):
     def doright(self,i,j):
         self.allclicks[1]+=1
         self.rightfirst=True
-        if self.isCovered(i,j):
+        if self.status[i][j] == 0:
             self.flagonmine(i,j)
-        elif self.isFlag(i,j) :
+        elif self.status[i][j] == 2:
             self.unflagonmine(i,j)
-        elif self.isOpened(i,j) and not self.isOpening(i,j):
+        elif self.status[i][j] == 1 and self.num[i][j] != 0:
             self.flagonnumber(i,j)
 
     def pressdouble(self,i,j):
@@ -180,7 +180,7 @@ class gamestatus(object):
                     for r in range(ii - 1, ii + 2):
                         for c in range(jj - 1, jj + 2):
                             if not self.outOfBorder(r, c):
-                                if self.isCovered(r,c):
+                                if self.status[r][c] == 0:
                                     self.pressed[r][c]=0
                     for r in range(i - 1, i + 2):
                         for c in range(j - 1, j + 2):
@@ -188,9 +188,9 @@ class gamestatus(object):
                                 if self.status[r][c] == 0:
                                     self.pressed[r][c]=1
                 elif self.leftHeld:
-                    if self.isCovered(i,j):
+                    if self.status[i][j] == 0:
                         self.pressed[i][j]=1
-                    if self.isCovered(ii,jj):
+                    if self.status[ii][jj] == 0:
                         self.pressed[ii][jj]=0
         elif self.leftAndRightHeld or self.leftHeld:#拖到界外
             ii, jj = self.oldCell
@@ -198,29 +198,29 @@ class gamestatus(object):
                 for r in range(ii - 1, ii + 2):
                     for c in range(jj - 1, jj + 2):
                         if not self.outOfBorder(r, c):
-                            if self.isCovered(r,c)== 0:
+                            if self.status[r][c] == 0:
                                 self.pressed[r][c]=0
             elif self.leftHeld:
-                if self.isCovered(ii,jj)== 0:
+                if self.status[ii][jj] == 0:
                     self.pressed[ii][jj]=0
 
     def dofinish(self,result):
         for i in range(self.row):
             for j in range(self.column):
                 if result==2:#输了
-                    if self.isMine(i,j) or self.isFlag(i,j):
-                        if self.num[i][j] == -1 and self.isFlag(i,j):
+                    if self.num[i][j] == -1 or self.status[i][j] == 2:
+                        if self.num[i][j] == -1 and self.status[i][j] == 2:
                             pass
-                        elif self.isMine(i,j):
+                        elif self.num[i][j] == -1:
                             self.pressed[i][j]= 2
                         else:
                             self.pressed[i][j]= 3
 
                 elif result==1:#赢了
-                    if self.isMine(i,j) or self.isFlag(i,j):
-                        if self.isMine(i,j)  and self.isCovered(i,j):#游戏过程中未标上的雷
+                    if self.isMine(i,j) or self.status[i][j] == 2:
+                        if self.isMine(i,j)  and self.status[i][j] == 0:#游戏过程中未标上的雷
                             self.pressed[i][j]=5
-                        elif self.isMine(i,j)  and self.isFlag(i,j):#游戏过程中标上的雷
+                        elif self.isMine(i,j)  and self.status[i][j] == 2:#游戏过程中标上的雷
                             pass
                         else:
                             self.pressed[i][j]=3
@@ -234,20 +234,20 @@ class gamestatus(object):
         self.num[self.row-1][self.column-1]=-1
         for ii in range(i - 1, i + 2):
             for jj in range(j - 1, j + 2):
-                if not self.outOfBorder(ii, jj) and not self.isMine(ii,jj):     
+                if not self.outOfBorder(ii, jj) and self.num[ii][jj]!=-1:     
                     count=0
                     for rr in range(ii - 1, ii + 2):
                         for cc in range(jj - 1, jj + 2):
-                            if not self.outOfBorder(rr, cc) and self.isMine(rr,cc):
+                            if not self.outOfBorder(rr, cc) and self.num[rr][cc]==-1:
                                 count+=1
                     self.num[ii][jj]=count
         for ii in range(self.row-2, self.row):
             for jj in range(self.column-2, self.column):
-                if not self.outOfBorder(ii, jj) and not self.isMine(ii,jj):     
+                if not self.outOfBorder(ii, jj) and self.num[ii][jj]!=-1:     
                     count=0
                     for rr in range(ii - 1, ii + 2):
                         for cc in range(jj - 1, jj + 2):
-                            if not self.outOfBorder(rr, cc) and self.isMine(rr,cc):
+                            if not self.outOfBorder(rr, cc) and self.num[rr][cc]==-1:
                                 count+=1
                     self.num[ii][jj]=count
 
@@ -258,9 +258,9 @@ class gamestatus(object):
             for r in range(i - 1, i + 2):
                 for c in range(j - 1, j + 2):
                     if not self.outOfBorder(r, c):
-                        if self.isFlag(r,c):
+                        if self.status[r][c] == 2:
                             count += 1
-            if count == 0 and not self.isOpening(i,j):
+            if count == 0 and self.num[i][j] !=0:
                 return False
             else:
                 return count == self.num[i][j]
