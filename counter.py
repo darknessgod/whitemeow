@@ -6,18 +6,19 @@ class Counter(object):
         counterWindow.setWindowTitle("计数器") 
         counterWindow.setEnabled(True)
         counterWindow.setWindowFlags(QtCore.Qt.WindowCloseButtonHint)
-        columnwidth=[90,90]
+        counterWindow.setWindowFlags(QtCore.Qt.Drawer)
+        self.columnwidth=[90,90]
         self.lineheight=18
         self.rowsnames=['RTime','Est time','3BV','3BV/s','QG','RQP','Ops','Isls','LRD','Flags','Cl','Ce','Path','IOE','Corr','ThrP','Games','Ranks']
         sumheight=self.lineheight*len(self.rowsnames)
-        counterWindow.resize(sum(columnwidth), sumheight)
+        counterWindow.setFixedSize(sum(self.columnwidth), sumheight)
         self.titlelabelarray=[0]*len(self.rowsnames)
         self.valuelabelarray=[0]*len(self.rowsnames)
         #gridlayout= QtWidgets.QGridLayout()
         #counterWindow.setLayout(gridlayout)
         for i in range(len(self.rowsnames)):
             self.titlelabelarray[i]=QtWidgets.QLabel(counterWindow)
-            self.titlelabelarray[i].resize=(columnwidth[0],self.lineheight)
+            self.titlelabelarray[i].resize=(self.columnwidth[0],self.lineheight)
             self.titlelabelarray[i].setText(' %s'%(self.rowsnames[i]))
             self.titlelabelarray[i].setAlignment(QtCore.Qt.AlignLeft)
 #            self.titlelabelarray[i].setStyleSheet("font-size:12px;font-family:YF补 汉仪夏日体;")
@@ -25,13 +26,13 @@ class Counter(object):
             #titlelabelarray[i].setStyleSheet('border-width: 1px;border-color: rgb(255, 255, 255)')
             self.titlelabelarray[i].move(0,self.lineheight*i)
             self.valuelabelarray[i]=QtWidgets.QLabel(counterWindow)
-            self.valuelabelarray[i].resize=(columnwidth[1],self.lineheight)
+            self.valuelabelarray[i].resize=(self.columnwidth[1],self.lineheight)
             self.valuelabelarray[i].setText('0')
             self.valuelabelarray[i].setAlignment(QtCore.Qt.AlignLeft)
             #self.valuelabelarray[i].setStyleSheet("font-size:12px;")
             #valuelabelarray[i].setFrameShadow(QtWidgets.QFrame.Raised)
             #valuelabelarray[i].setStyleSheet('border-width: 1px;border-color: rgb(255, 255, 255)')
-            self.valuelabelarray[i].move(columnwidth[0],self.lineheight*i)
+            self.valuelabelarray[i].move(self.columnwidth[0],self.lineheight*i)
 
     def refreshvalues(self,status):
         allclicks=sum(self.game.allclicks[0:3])

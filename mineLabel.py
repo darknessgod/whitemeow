@@ -2,7 +2,7 @@ from sqlite3 import Row
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtGui import QPainter,QPixmap
 
-from numpy import row_stack
+
 
 
 class mineLabel (QtWidgets.QLabel):
@@ -51,8 +51,7 @@ class mineLabel (QtWidgets.QLabel):
         self.pixmaps[13]=QPixmap("media/svg/blast.svg")
         self.pixmaps[14]=QPixmap("media/svg/cellunflagged.svg")
         for i in range(len(self.pixmaps)):
-            size=self.pixmaps[i].size()
-            self.pixmaps[i]=self.pixmaps[i].scaled(size/(160/targetsize))
+            self.pixmaps[i]=self.pixmaps[i].scaled(targetsize,targetsize)
     
     def mousePressEvent(self, e):  # 重载一下鼠标点击事件
         xx = e.localPos().x()

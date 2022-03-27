@@ -10,7 +10,7 @@ class readdata(object):
         self.titledict={'Day':0,'Month':1,'Year':2,'Hour':3,'Min':4,'Sec':5,'Rtime':6,'3bv':7,'Mode':8,'Level':9,'Style':10,'Lcl':11,'Rcl':12,'Dcl':13,'Leff':14,'Reff':15,'Deff':16,'Ops':17,'Isls':18,'Path':19}
         self.length=len(self.titledict)
         self.records=[]
-        initrecord=[999.99,0,999.99,999.99,0]
+        initrecord=[999.99,0,999.999,999.999,0]
         for i in range(6):
             tmp=[*initrecord]
             self.records.append(tmp)
@@ -70,8 +70,4 @@ class readdata(object):
                 self.records[recordindex][4]=ioe
                 breakrecord[4]=1
         return breakrecord
-
-        
-    
-
 

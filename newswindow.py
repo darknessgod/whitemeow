@@ -10,9 +10,11 @@ class news_Dialog (object):
         self.okbutton.clicked.connect(self.Dialog.close)
 
     def setupui(self):
+        self.Dialog.setWindowTitle(" ")
         self.Dialog.move(self.geo[0]+self.geo[2]//2-150,self.geo[1]+self.geo[3]//2-80)
         self.Dialog.setFixedSize(300,160)
-        self.Dialog.setWindowFlags(QtCore.Qt.CustomizeWindowHint)
+        self.Dialog.setWindowFlags(QtCore.Qt.WindowCloseButtonHint)
+        self.Dialog.setWindowFlags(QtCore.Qt.Drawer)
         self.label = QtWidgets.QLabel (self.Dialog)
         self.label.setObjectName ("label")
         self.label.setFixedSize(260,80)
