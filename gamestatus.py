@@ -62,34 +62,33 @@ class gamestatus(object):
                 self.num[r][c]=-1
                 for i in range(r - 1, r + 2):
                     for j in range(c - 1, c + 2):
-                        if not self.outOfBorder(i, j) and (
-                            self.num[i][j] != -1):
+                        if not self.outOfBorder(i, j) and not self.isMine(i,j):
                             self.num[i][j] += 1
                         
     def BFS(self, i, j ,start0):
         #print(self.num0queue.qsize())
         if self.isCovered(i,j):
-            self.status[i][j] = 1
-        if self.num[i][j] >= 0:
-            if self.num[i][j] == 0: #左键开op递归
+            self.forceUncover(i,j)
+        if not self.isMine(i,j):
+            if self.isOpening(i,j): #左键开op递归
                 for r in range(i - 1, i + 2):
                     for c in range(j - 1, j + 2):
-                        if not self.outOfBorder(r, c) and self.status[r][c] == 0 and self.num[r][c] != -1:
-                            self.status[r][c] = 1
+                        if not self.outOfBorder(r, c) and self.isCovered(r,c) and not self.isMine(r,c):
+                            self.forceUncover(r,c)
                             self.num0queue.put([r,c,start0])
-            elif self.num[i][j] > 0: #双键递归，此处为假条件，将来会替换为递归开关
+            elif not self.isMine(i,j): #双键递归，此处为假条件，将来会替换为递归开关
                 flagged=0
                 for r in range(i - 1, i + 2):
                     for c in range(j - 1, j + 2):
-                        if not self.outOfBorder(r, c) and self.status[r][c] == 2:
+                        if not self.outOfBorder(r, c) and self.isFlag(r,c):
                             flagged+=1
                 if flagged==self.num[i][j]:
                     for r in range(i - 1, i + 2):
                         for c in range(j - 1, j + 2):
-                            if not self.outOfBorder(r, c) and self.status[r][c] == 0 and self.num[r][c] != -1:
-                                self.status[r][c] = 1
+                            if not self.outOfBorder(r, c) and self.isCovered(r,c) and not self.isMine(r,c):
+                                self.forceUncover(r,c)
                                 self.num0queue.put([r,c,start0])
-                            elif not self.outOfBorder(r, c) and self.num[r][c]==-1 and self.status[r][c] == 0:
+                            elif not self.outOfBorder(r, c) and self.isMine(r,c) and self.isCovered(r,c):
                                 self.failed=True
                                 self.redmine=[r,c]
 
@@ -98,9 +97,9 @@ class gamestatus(object):
         self.pressed[i][j]=0
         if self.isCovered(i,j):
             self.eclicks[0]+=1
-            if self.num[i][j] >= 0:
+            if not self.isMine(i,j):
                 self.num0queue=Queue()
-                self.num0queue.put([i,j,self.num[i][j] == 0])
+                self.num0queue.put([i,j,self.isOpening(i,j)])
                 while(self.num0queue.empty()==False):
                     getqueuehead=self.num0queue.get()
                     self.BFS(getqueuehead[0], getqueuehead[1],getqueuehead[2])
@@ -108,7 +107,7 @@ class gamestatus(object):
                 if not self.timeStart and self.gametype==1 :#第一下不能为雷
                     self.exchange1tolast(i,j)
                     self.num0queue=Queue()
-                    self.num0queue.put([i,j,self.num[i][j] == 0])
+                    self.num0queue.put([i,j,self.isOpening(i,j)])
                     while(self.num0queue.empty()==False):
                         getqueuehead=self.num0queue.get()
                         self.BFS(getqueuehead[0], getqueuehead[1],getqueuehead[2])        
@@ -121,17 +120,17 @@ class gamestatus(object):
         self.rightfirst=True
         if self.isCovered(i,j):
             self.flagonmine(i,j)
-        elif self.status[i][j] == 2:
+        elif self.isFlag(i,j):
             self.unflagonmine(i,j)
-        elif self.status[i][j] == 1 and self.num[i][j] != 0:
+        elif self.isOpened(i,j) and not self.isOpening(i,j):
             self.flagonnumber(i,j)
 
     def pressdouble(self,i,j):
-        if self.status[i][j] == 1:
+        if self.isOpened(i,j):
             for r in range(i - 1, i + 2):
                 for c in range(j - 1, j + 2):
                     if not self.outOfBorder(r, c):
-                        if self.status[r][c] == 0:
+                        if self.isCovered(i,j):
                             self.pressed[r][c]=1
 
     def dodouble(self,i,j):
@@ -147,9 +146,9 @@ class gamestatus(object):
                         self.pressed[r][c]=0
                         if self.isCovered(r,c):
                             edouble=True
-                            if self.num[r][c] >= 0:
+                            if not self.isMine(r,c):
                                 self.num0queue=Queue()
-                                self.num0queue.put([r,c,self.num[r][c] == 0])
+                                self.num0queue.put([r,c,self.isOpening(r,c)])
                                 while(self.num0queue.empty()==False):
                                     getqueuehead=self.num0queue.get()
                                     self.BFS(getqueuehead[0], getqueuehead[1],getqueuehead[2])
@@ -202,19 +201,19 @@ class gamestatus(object):
         for i in range(self.row):
             for j in range(self.column):
                 if result==2:#输了
-                    if self.num[i][j] == -1 or self.status[i][j] == 2:
-                        if self.num[i][j] == -1 and self.status[i][j] == 2:
+                    if self.isMine(i,j) or self.isFlag(i,j):
+                        if self.isMine(i,j) and self.isFlag(i,j):
                             pass
-                        elif self.num[i][j] == -1:
+                        elif self.isMine(i,j):
                             self.pressed[i][j]= 2
                         else:
                             self.pressed[i][j]= 3
 
                 elif result==1:#赢了
-                    if self.num[i][j]==-1 or self.status[i][j] == 2:
-                        if self.num[i][j]==-1  and self.isCovered(i,j):#游戏过程中未标上的雷
+                    if self.isMine(i,j) or self.isFlag(i,j):
+                        if self.isMine(i,j)  and self.isCovered(i,j):#游戏过程中未标上的雷
                             self.pressed[i][j]=5
-                        elif self.num[i][j]==-1  and self.status[i][j] == 2:#游戏过程中标上的雷
+                        elif self.isMine(i,j)  and self.isFlag(i,j):#游戏过程中标上的雷
                             pass
                         else:
                             self.pressed[i][j]=3
@@ -228,33 +227,33 @@ class gamestatus(object):
         self.num[self.row-1][self.column-1]=-1
         for ii in range(i - 1, i + 2):
             for jj in range(j - 1, j + 2):
-                if not self.outOfBorder(ii, jj) and self.num[ii][jj]!=-1:     
+                if not self.outOfBorder(ii, jj) and not self.isMine(ii,jj):     
                     count=0
                     for rr in range(ii - 1, ii + 2):
                         for cc in range(jj - 1, jj + 2):
-                            if not self.outOfBorder(rr, cc) and self.num[rr][cc]==-1:
+                            if not self.outOfBorder(rr, cc) and self.isMine(rr,cc):
                                 count+=1
                     self.num[ii][jj]=count
         for ii in range(self.row-2, self.row):
             for jj in range(self.column-2, self.column):
-                if not self.outOfBorder(ii, jj) and self.num[ii][jj]!=-1:     
+                if not self.outOfBorder(ii, jj) and not self.isMine(ii,jj):     
                     count=0
                     for rr in range(ii - 1, ii + 2):
                         for cc in range(jj - 1, jj + 2):
-                            if not self.outOfBorder(rr, cc) and self.num[rr][cc]==-1:
+                            if not self.outOfBorder(rr, cc) and self.isMine(rr,cc):
                                 count+=1
                     self.num[ii][jj]=count
 
     def chordingFlag(self, i, j):
         # i, j 周围标雷数是否满足双击的要求
-        if self.num[i][j] <= 8 and self.num[i][j] >= 0 and self.status[i][j]==1:
+        if self.num[i][j] <= 8 and not self.isMine(i,j) and self.isOpened(i,j):
             count = 0
             for r in range(i - 1, i + 2):
                 for c in range(j - 1, j + 2):
                     if not self.outOfBorder(r, c):
-                        if self.status[r][c] == 2:
+                        if self.isFlag(r,c):
                             count += 1
-            if count == 0 and self.num[i][j] !=0:
+            if count == 0 and not self.isOpening(i,j):
                 return False
             else:
                 return count == self.num[i][j]
@@ -265,20 +264,20 @@ class gamestatus(object):
         self.eclicks[1]+=1
         self.allclicks[3]+=1
         self.rightfirst=False
-        self.status[i][j] = 2
+        self.forceFlag(i,j)
 
     def unflagonmine(self,i,j):
         self.eclicks[1]+=1
         self.allclicks[3]-=1
         self.rightfirst=False
-        self.status[i][j] = 0
+        self.forceUnflag(i,j)
 
     def flagonnumber(self,i,j):
         count=0
         for r in range(i - 1, i + 2):
             for c in range(j - 1, j + 2):
                 if not self.outOfBorder(r, c):
-                    if self.isCovered(r,c) or self.status[r][c]==2:
+                    if self.isCovered(r,c) or self.isFlag(r,c):
                         count += 1
         if count== self.num[i][j]:
             eright=False
@@ -286,7 +285,7 @@ class gamestatus(object):
                 for c in range(j - 1, j + 2):
                     if not self.outOfBorder(r, c):
                         if self.isCovered(r,c):
-                            self.status[r][c] =2
+                            self.forceFlag(r,c)
                             self.allclicks[3]+=1
                             self.rightfirst=False
                             eright=True
@@ -301,9 +300,9 @@ class gamestatus(object):
                 if jj<0 or jj>=self.column:
                     continue
                 if num==1:
-                    if self.num[ii][jj]>=0 and self.isCovered(ii,jj):
+                    if not self.isMine(ii,jj) and self.isCovered(ii,jj):
                         self.thisopsolved=False
-                    if self.num[ii][jj]==0 and self.num0seen[ii][jj]==False:
+                    if self.isOpening(ii,jj) and self.num0seen[ii][jj]==False:
                         self.num0seen[ii][jj]=True
                         self.num0get+=1
                         self.num0queue.put([ii,jj])
@@ -324,13 +323,13 @@ class gamestatus(object):
         self.isbv = [[False for j in range(self.column)] for i in range(self.row)]
         for i in range(self.row):#对0格计数
             for j in range(self.column):
-                if self.num[i][j]==0:
+                if self.isOpening(i,j):
                     num0+=1
         for i in range(self.row):
             for j in range(self.column):
                 if self.num0get==num0:#所有0被染色，标志op计算完全，终止
                     break
-                if self.num[i][j]==0:
+                if self.isOpening(i,j):
                     if self.num0seen[i][j]==True:
                         continue
                     else:
@@ -356,13 +355,13 @@ class gamestatus(object):
                         for jj in range(j-1,j+2):
                             if jj<0 or jj>=self.column:
                                 continue
-                            if self.num[ii][jj]==0:
+                            if self.isOpening(ii,jj):
                                 nearnum0=True
                                 break
                     if nearnum0==False:
                         self.isbv[i][j]=True
                         numelse+=1
-                        if self.status[i][j]==1:
+                        if self.isOpened(i,j):
                             solvedelse+=1
 
         for i in range(self.row):#算islands
