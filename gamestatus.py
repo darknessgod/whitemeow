@@ -37,6 +37,9 @@ class gamestatus(object):
         return self.num[i][j]==0
     def forceUncover(self,i,j):
         self.status[i][j]=1
+    def safeUncover(self,i,j):
+        if self.isCovered(i,j):
+            self.forceUncover(i,j)
     def forceFlag(self,i,j):
         self.status[i][j]=2
     def forceUnflag(self,i,j):
@@ -74,13 +77,12 @@ class gamestatus(object):
 
     def BFS(self, i, j ,start0):
         #print(self.num0queue.qsize())
-        if self.status[i][j] == 0:
-            self.status[i][j] = 1
-        if self.num[i][j] >= 0:
-            if self.num[i][j] == 0: #左键开op递归
+        self.safeUncover(i,j)
+        if not self.isMine(i,j):
+            if self.isOpening(i,j): #左键开op递归
                 for r in range(i - 1, i + 2):
                     for c in range(j - 1, j + 2):
-                        if not self.outOfBorder(r, c) and self.status[r][c] == 0 and self.num[r][c] != -1:
+                        if not self.outOfBorder(r, c) and self.isCovered(r,c) and not self.isMine(r,c):
                             self.status[r][c] = 1
                             self.num0queue.put([r,c,start0])
             elif self.num[i][j] > 0: #双键递归，此处为假条件，将来会替换为递归开关
