@@ -28,6 +28,8 @@ class gamestatus(object):
         self.num0queue=Queue()
         self.counter=None
 
+    def recursive(self):
+        return True
     def isreplaying(self):
         return self.gametype==4
     def isCovered(self,i,j):
@@ -97,7 +99,7 @@ class gamestatus(object):
                         if self.isCovered(r,c) and not self.isMine(r,c):
                             self.forceUncover(r,c)
                             self.num0queue.put([r,c,start0])
-            elif self.num[i][j] > 0: #双键递归，此处为假条件，将来会替换为递归开关
+            elif self.recursive(): #双键递归，此处为假条件，将来会替换为递归开关
                 flagged=0
                 for r in self.rowRange(i - 1, i + 2):
                     for c in self.columnRange(j - 1, j + 2):
