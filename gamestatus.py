@@ -45,6 +45,10 @@ class gamestatus(object):
     def forceUnflag(self,i,j):
         self.status[i][j]=0
 
+    def rowRange(self,top,bottom):
+        return range(max(0,top),min(self.row,bottom))
+    def columnRange(self,left,right):
+        return range(max(0,left),min(self.column,right))
     def outOfBorder(self, i, j):
         return i < 0 or i >= self.row or j < 0 or j >= self.column
 
