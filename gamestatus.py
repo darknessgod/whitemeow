@@ -37,6 +37,9 @@ class gamestatus(object):
         return self.num[i][j]==0
     def forceUncover(self,i,j):
         self.status[i][j]=1
+    def safeUncover(self,i,j):
+        if self.isCovered(i,j):
+            self.forceUncover(i,j)
     def forceFlag(self,i,j):
         self.status[i][j]=2
     def forceUnflag(self,i,j):
