@@ -1,5 +1,6 @@
-from PyQt5 import QtCore, QtGui, QtWidgets
-import sys
+from PyQt5 import QtCore, Qt, QtWidgets
+import time
+
 class Counter(object):
     def __init__(self,counterWindow,game):
         self.game=game
@@ -7,11 +8,12 @@ class Counter(object):
         counterWindow.setEnabled(True)
         counterWindow.setWindowFlags(QtCore.Qt.WindowCloseButtonHint)
         counterWindow.setWindowFlags(QtCore.Qt.Drawer)
+        counterWindow.closeEvent2.connect(self.closecounter)
         self.columnwidth=[90,90]
         self.lineheight=18
         self.rowsnames=['RTime','Est time','3BV','3BV/s','QG','RQP','Ops','Isls','LRD','Flags','Cl','Ce','Path','IOE','Corr','ThrP','Games','Ranks']
         sumheight=self.lineheight*len(self.rowsnames)
-        counterWindow.setFixedSize(sum(self.columnwidth), sumheight)
+        counterWindow.setFixedSize(sum(self.columnwidth), sumheight+10)
         self.titlelabelarray=[0]*len(self.rowsnames)
         self.valuelabelarray=[0]*len(self.rowsnames)
         #gridlayout= QtWidgets.QGridLayout()
@@ -83,6 +85,28 @@ class Counter(object):
             values+=['%d'%(self.game.gamenum),'-/-/-']
             for i in range(len(self.valuelabelarray)):
                 self.valuelabelarray[i].setText(values[i])
+
+    def closecounter(self):
+        pass
+
+class calbbbvThread(Qt.QThread):  # 游戏过程中刷新计数器的线程
+
+    trigger = QtCore.pyqtSignal()
+
+    def __init__(self,game):
+        super(calbbbvThread, self).__init__()
+        self.game=game
+
+    def run(self):
+        k0,k1=0,0
+        while(1):
+            k1=self.game.replaynodes[0]
+            if k1!=k0:
+                self.game.cal_3bv()
+            else:
+                time.sleep(0.03)
+            k0=k1
+
 
 
                     

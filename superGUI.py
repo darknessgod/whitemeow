@@ -32,6 +32,8 @@ class Ui_MainWindow(object):
         self.action.setText(_translate("MainWindow", "新游戏"))
         self.action_re.setText(_translate("MainWindow", "重玩"))
         self.action_saveboard.setText(_translate("MainWindow", "保存局"))
+        self.action_savereplay.setText(_translate("MainWindow", "保存录像"))
+        self.action_loadreplay.setText(_translate("MainWindow", "播放录像"))
         self.action_loadboard.setText(_translate("MainWindow", "载入局"))
         self.action_record.setText(_translate("MainWindow", "纪录"))
         self.action_B.setText(_translate("MainWindow", "初级"))
@@ -117,6 +119,7 @@ class Ui_MainWindow(object):
 
     def initialface(self):
         self.label_2 = statusLabel.StatusLabel(self.frame)#label2是脸
+        self.label_2.setFrameShadow(QtWidgets.QFrame.Raised)
         self.label_2.setObjectName("label_2")
         self.horizontalLayout.addWidget(self.label_2)
 
@@ -145,7 +148,7 @@ class Ui_MainWindow(object):
     def initialupperframe(self):
         self.frame = statusLabel.StatusFrame(self.centralwidget)#QFrame是是基本控件的基类
         self.frame.setFrameShape(QtWidgets.QFrame.Panel)
-        self.frame.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.frame.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame.setObjectName("frame")
         self.horizontalLayout = QtWidgets.QHBoxLayout(self.frame)#水平布局
         self.horizontalLayout.setObjectName("horizontalLayout")
@@ -209,6 +212,17 @@ class Ui_MainWindow(object):
         self.action_loadboard.setCheckable(False)
         self.action_loadboard.setObjectName("action_loadboard")
         self.action_loadboard.setShortcut(QtGui.QKeySequence("L"))
+        self.action_loadboard.setEnabled(True)
+        self.action_savereplay = QtWidgets.QAction(MainWindow)
+        self.action_savereplay.setCheckable(False)
+        self.action_savereplay.setObjectName("action_savereplay")
+        self.action_savereplay.setShortcut(QtGui.QKeySequence("F11"))
+        self.action_savereplay.setEnabled(False)
+        self.action_loadreplay = QtWidgets.QAction(MainWindow)
+        self.action_loadreplay.setCheckable(False)
+        self.action_loadreplay.setObjectName("action_loadreplay")
+        self.action_loadreplay.setShortcut(QtGui.QKeySequence("F4"))
+        self.action_loadreplay.setEnabled(True)
         self.action_re = QtWidgets.QAction(MainWindow)
         self.action_re.setCheckable(False)
         self.action_re.setChecked(False)
@@ -262,6 +276,8 @@ class Ui_MainWindow(object):
         self.menu.addAction(self.action_re)
         self.menu.addAction(self.action_saveboard)
         self.menu.addAction(self.action_loadboard)
+        self.menu.addAction(self.action_savereplay)
+        self.menu.addAction(self.action_loadreplay)
         self.menu.addSeparator()
         self.menu.addAction(self.action_B)
         self.menu.addAction(self.action_I)

@@ -7,6 +7,7 @@ class gamestatus(object):
         self.row,self.column,self.mineNum=row,column,mines
         self.failed,self.timeStart,self.finish=False,False,False
         self.redmine=[0,0]
+        self.replayboardinfo=[]
         self.tmplist=[i for i in range(self.column*self.row-1)]
         self.gamemode=options[0]
         self.gametype=options[1]
@@ -18,6 +19,8 @@ class gamestatus(object):
         self.ops,self.solvedops,self.bbbv,self.solvedbbbv,self.islands,self.solvedislands=0,0,0,0,0,0
         self.allclicks,self.eclicks=[0,0,0,0],[0,0,0]
         self.oldCell=(0,0)
+        self.operationlist,self.tracklist,self.replay,self.pathlist=[],[],[],[]
+        self.replaynodes,self.cursorplace=[0,0],[0,0]
         self.thisislandsolved,self.thisopsolved=False,False
         self.num = [[0 for j in range(self.column)] for i in range(self.row)] # -1雷，0-8数字
         self.status = [[0 for j in range(self.column)] for i in range(self.row)] # 0未开 1打开 2标雷
@@ -25,6 +28,8 @@ class gamestatus(object):
         self.num0queue=Queue()
         self.counter=None
 
+    def isreplaying(self):
+        return self.gametype==4
     def isCovered(self,i,j):
         return self.status[i][j]==0
     def isOpened(self,i,j):
@@ -44,11 +49,11 @@ class gamestatus(object):
         self.status[i][j]=2
     def forceUnflag(self,i,j):
         self.status[i][j]=0
-
     def rowRange(self,top,bottom):
         return range(max(0,top),min(self.row,bottom))
     def columnRange(self,left,right):
         return range(max(0,left),min(self.column,right))
+
     def outOfBorder(self, i, j):
         return i < 0 or i >= self.row or j < 0 or j >= self.column
 
@@ -68,20 +73,23 @@ class gamestatus(object):
     def renewminearea(self):
         self.pressed=[[0 for j in range(self.column)] for i in range(self.row)]
         self.status=[[0 for j in range(self.column)] for i in range(self.row)]
-        if self.gametype!=2:
+        if self.gametype not in [2,4]:
             self.num=[[0 for j in range(self.column)] for i in range(self.row)]
                         
     def renewstatus(self):
         self.timeStart = False
         self.finish=False
-        self.bbbv,self.solvedbbbv,self.ops,self.solvedops,self.path=0,0,0,0,0
+        self.solvedbbbv,self.solvedops,self.path=0,0,0
         self.intervaltime,self.oldinttime =0,0
         self.allclicks,self.eclicks=[0,0,0,0],[0,0,0]
         self.leftAndRightHeld,self.leftHeld,self.rightfirst,self.rightHeld=False,False,False,False
+        if self.gametype!=4:
+            self.operationlist,self.tracklist=[],[],
+            self.bbbv,self.ops=0,0
 
     def BFS(self, i, j ,start0):
-        #print(self.num0queue.qsize())
-        self.safeUncover(i,j)
+        if self.isCovered(i,j):
+            self.forceUncover(i,j)
         if not self.isMine(i,j):
             if self.isOpening(i,j): #左键开op递归
                 for r in self.rowRange(i - 1, i + 2):
@@ -112,7 +120,7 @@ class gamestatus(object):
             self.eclicks[0]+=1
             if not self.isMine(i,j):
                 self.num0queue=Queue()
-                self.num0queue.put([i,j,self.isCovered(i,j)])
+                self.num0queue.put([i,j,self.isOpening(i,j)])
                 while(self.num0queue.empty()==False):
                     getqueuehead=self.num0queue.get()
                     self.BFS(getqueuehead[0], getqueuehead[1],getqueuehead[2])
@@ -120,7 +128,7 @@ class gamestatus(object):
                 if not self.timeStart and self.gametype==1 :#第一下不能为雷
                     self.exchange1tolast(i,j)
                     self.num0queue=Queue()
-                    self.num0queue.put([i,j,self.isCovered(i,j)])
+                    self.num0queue.put([i,j,self.isOpening(i,j)])
                     while(self.num0queue.empty()==False):
                         getqueuehead=self.num0queue.get()
                         self.BFS(getqueuehead[0],getqueuehead[1],getqueuehead[2])        
@@ -159,7 +167,7 @@ class gamestatus(object):
                         edouble=True
                         if not self.isMine(r,c):
                             self.num0queue=Queue()
-                            self.num0queue.put([r,c,self.num[r][c] == 0])
+                            self.num0queue.put([r,c,self.isOpening(r,c)])
                             while(self.num0queue.empty()==False):
                                 getqueuehead=self.num0queue.get()
                                 self.BFS(getqueuehead[0], getqueuehead[1],getqueuehead[2])
@@ -241,8 +249,8 @@ class gamestatus(object):
                             if self.isMine(rr,cc):
                                 count+=1
                     self.num[ii][jj]=count
-        for ii in self.rowRange(self.row-2, self.row):
-            for jj in self.columnRange(self.column-2, self.column):
+        for ii in range(self.row-2, self.row):
+            for jj in range(self.column-2, self.column):
                 if not self.isMine(ii,jj):     
                     count=0
                     for rr in self.rowRange(ii - 1, ii + 2):
@@ -253,7 +261,7 @@ class gamestatus(object):
 
     def chordingFlag(self, i, j):
         # i, j 周围标雷数是否满足双击的要求
-        if self.num[i][j] <= 8 and self.num[i][j] >= 0 and self.isOpened(i,j):
+        if not self.isMine(i,j) and self.isOpened(i,j):
             count = 0
             for r in self.rowRange(i - 1, i + 2):
                 for c in self.columnRange(j - 1, j + 2):
@@ -349,12 +357,11 @@ class gamestatus(object):
             for j in range(self.column):
                 if self.num[i][j]>0:
                     nearnum0=False
-                    for ii in range(i-1,i+2):
-                        for jj in range(j-1,j+2):
-                            if self.outOfBorder(ii,jj)==False:
-                                if self.num[ii][jj]==0:
-                                    nearnum0=True
-                                    break
+                    for ii in self.rowRange(i-1,i+2):
+                        for jj in self.columnRange(j-1,j+2):
+                            if self.isOpening(ii,jj):
+                                nearnum0=True
+                                break
                     if nearnum0==False:
                         self.isbv[i][j]=True
                         numelse+=1
@@ -407,3 +414,127 @@ class gamestatus(object):
             for j in self.columnRange(c - 1, c + 2):
                 if not self.isMine(i,j):
                     self.num[i][j] += 1
+
+    def addoperation(self,num,i,j):
+        if self.timeStart==False:
+            optime=-1
+        else:
+            optime=int(1000*(time.time()-self.starttime))
+        self.operationlist.append((num,i,j,optime))
+
+    def addtrack(self,yy,xx):
+        if self.timeStart==True:
+            optime=int(1000*(time.time()-self.starttime))
+            self.tracklist.append((yy,xx,optime))
+
+    def getboardlist(self):
+        boardlist=[self.column,self.row,self.mineNum//256,self.mineNum%256]
+        for i in range(self.row):
+            for j in range(self.column):
+                if self.num[i][j]==-1:
+                    boardlist+=[j,i]
+        return boardlist
+
+    def getboardinfo(self):
+        playertag,playername='fairy','anonymous'
+        st,et,deltat,bbbv=self.starttime,self.endtime,self.intervaltime,self.bbbv
+        mode,type,level,style=self.gamemode,self.gametype,self.leveljudge(),self.stylejudge()
+        kept1,kept2,kept3,kept4,kept5,kept6,version=0,0,0,0,0,0,'v1.5'
+        if self.failed==True:
+            result=2
+            prefix='#'
+            replayname='%s%s_%.2f_3bv=%d_%s.nvf'%(prefix,level,deltat,bbbv,playername)
+        else:
+            result=1
+            prefix=''
+            replayname='%s%s_%.2f_3bv=%d_3bvs=%.3f_%s.nvf'%(prefix,level,deltat,bbbv,bbbv/deltat,playername)
+        boardinfo=[replayname,playertag,playername,st,et,deltat,bbbv]
+        boardinfo+=[mode,type,level,style,result,kept1,kept2,kept3,kept4,kept5,kept6,version]
+        return boardinfo
+
+    def dealreplay(self):
+        l1,l2,l3,l4=self.replay[0],self.replay[1],self.replay[2],self.replay[3]
+        if len(self.replay)!=4+l1+l2+l3+l4:
+            return 1
+        self.replayboardinfo=[*self.replay[4:4+l1]]
+        if self.replayboardinfo[8] not in[1,2] or self.replayboardinfo[11] not in [1,2]:
+            return 2
+        boardlist=[*self.replay[4+l1:4+l1+l2]]
+        boardlegal=self.dealboard(boardlist)
+        if boardlegal!=0:
+            return boardlegal
+        self.operationlist=[*self.replay[4+l1+l2:4+l1+l2+l3]]
+        try:
+            for i in range(len(self.operationlist)):
+                if self.operationlist[i][0] not in [1,2,3,4,5,6]:
+                    return 3
+                if i!=len(self.operationlist)-1:
+                    if self.operationlist[i][3]>self.operationlist[i+1][3]:
+                        return 4
+                if self.operationlist[i][1]<0 or self.operationlist[i][1]>100*(self.row-1):
+                    return 5
+                if self.operationlist[i][2]<0 or self.operationlist[i][2]>100*(self.column-1):
+                    return 6
+        except:
+            return 7
+        self.tracklist=[*self.replay[4+l1+l2+l3:]]
+        try:
+            for i in range(len(self.tracklist)):
+                if i!=len(self.tracklist)-1:
+                    if self.tracklist[i][2]>self.tracklist[i+1][2]:
+                        return 8
+                if self.tracklist[i][0]<0 or self.tracklist[i][0]>100*self.row:
+                    return 9
+                if self.tracklist[i][1]<0 or self.tracklist[i][1]>100*self.column:
+                    return 10
+        except:
+            return 11
+        self.pathlist=[0]
+        for i in range(len(self.tracklist)-1):
+            self.pathlist.append(self.pathlist[-1]+((self.tracklist[i][0]-self.tracklist[i+1][0])**2+(self.tracklist[i][1]-self.tracklist[i+1][1])**2)**0.5/100)
+        return 0
+
+    def dealboard(self,boardlist):
+        if len(boardlist)<4:
+            return -1
+        boardinfo=boardlist[0:4]
+        boardarea=boardlist[4:]
+        minenum=boardinfo[2]*256+boardinfo[3]
+        column,row=boardinfo[0],boardinfo[1]
+        if len(boardlist)!=4+2*minenum:
+            return -1
+        if min(column,row)<4 or max(column,row)>50 or minenum/(column*row)>0.5:
+            return -2
+        num = [[0 for j in range(column)] for i in range(row)]
+        for i in range(minenum):
+            if boardarea[2*i+1]>=row or boardarea[2*i]>column or num[boardarea[2*i+1]][boardarea[2*i]]==-1:
+                return -3
+            num[boardarea[2*i+1]][boardarea[2*i]]=-1
+        self.row,self.column,self.mineNum=row,column,minenum
+        self.num=[*num]
+        for i in range(minenum):
+            self.calnumbers(boardarea[2*i+1],boardarea[2*i])
+        return 0
+
+    def dopreoperations(self):
+        flags=[]
+        for i in range(0,len(self.operationlist)):
+            if self.operationlist[i][3]!=-1:
+                break
+            if self.operationlist[i][0]==3:
+                self.allclicks[1]+=1
+                self.eclicks[1]+=1
+                tempturple=(self.operationlist[i][1],self.operationlist[i][2])
+                if tempturple in flags:
+                    flags.remove(tempturple)
+                else:
+                    flags.append(tempturple)
+            elif self.operationlist[i][0]==6:
+                self.allclicks[2]+=1
+            elif self.operationlist[i][0]==2: 
+                tempturple=(self.operationlist[i][1],self.operationlist[i][2])
+                for s in flags:
+                    self.forceFlag(s[0],s[1])
+                return tempturple
+            self.replaynodes[0]+=1
+

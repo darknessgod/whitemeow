@@ -1,4 +1,3 @@
-from sqlite3 import Row
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtGui import QPainter,QPixmap
 
@@ -19,9 +18,7 @@ class mineLabel (QtWidgets.QLabel):
         self.game=game
         self.leftAndRightClicked = False
         self.pixSize=pixsize
-        self.pixmaps=[0]*15
-        self.row=self.game.row
-        self.column=self.game.column
+        self.pixmaps=[0]*16
         self.setMouseTracking(True)
         self.resizepixmaps(self.pixSize)
         self.lastcell=None
@@ -50,59 +47,67 @@ class mineLabel (QtWidgets.QLabel):
         self.pixmaps[12]=QPixmap("media/svg/falsemine.svg")
         self.pixmaps[13]=QPixmap("media/svg/blast.svg")
         self.pixmaps[14]=QPixmap("media/svg/cellunflagged.svg")
+        self.pixmaps[15]=QPixmap("media/cursor.png")
         for i in range(len(self.pixmaps)):
             self.pixmaps[i]=self.pixmaps[i].scaled(targetsize,targetsize)
+        self.pixmaps[15]=self.pixmaps[15].scaled(targetsize/2,targetsize/2)
+        
     
     def mousePressEvent(self, e):  # 重载一下鼠标点击事件
-        xx = int(e.localPos().x())
-        yy = int(e.localPos().y())
-        # print('点下位置{}, {}'.format(xx, yy))
-        if e.buttons () == QtCore.Qt.LeftButton | QtCore.Qt.RightButton:
-            self.leftAndRightPressed.emit (yy//self.pixSize, xx//self.pixSize)
-            self.leftAndRightClicked = True
-        else:
-            if e.buttons () == QtCore.Qt.LeftButton:
-                self.leftPressed.emit(yy//self.pixSize, xx//self.pixSize)
-            elif e.buttons () == QtCore.Qt.RightButton:
-                self.rightPressed.emit(yy//self.pixSize, xx//self.pixSize)
-        self.update()
+        if self.game.gametype!=4:
+            xx = int(e.localPos().x())
+            yy = int(e.localPos().y())
+            # print('点下位置{}, {}'.format(xx, yy))
+            if e.buttons () == QtCore.Qt.LeftButton | QtCore.Qt.RightButton:
+                self.leftAndRightPressed.emit (yy//self.pixSize, xx//self.pixSize)
+                self.leftAndRightClicked = True
+            else:
+                if e.buttons () == QtCore.Qt.LeftButton:
+                    self.leftPressed.emit(yy//self.pixSize, xx//self.pixSize)
+                elif e.buttons () == QtCore.Qt.RightButton:
+                    self.rightPressed.emit(yy//self.pixSize, xx//self.pixSize)
+            self.update()
     
     def mouseReleaseEvent(self, e):
         #每个标签的鼠标事件发射给槽的都是自身的坐标
         #所以获取释放点相对本标签的偏移量，矫正发射的信号
-        xx = int(e.localPos().x())
-        yy = int(e.localPos().y())
         # print('抬起位置{}, {}'.format(xx, yy))
-        if self.leftAndRightClicked:
-            self.leftAndRightRelease.emit(yy//self.pixSize, xx//self.pixSize)
-            self.leftAndRightClicked=False
-        else:
-            if e.button () == QtCore.Qt.LeftButton:
-                self.leftRelease.emit(yy//self.pixSize, xx//self.pixSize)
-            elif e.button () == QtCore.Qt.RightButton:
-                self.rightRelease.emit(yy//self.pixSize, xx//self.pixSize)
-        self.update()
+        if self.game.gametype!=4:
+            xx = int(e.localPos().x())
+            yy = int(e.localPos().y())
+            if self.leftAndRightClicked:
+                self.leftAndRightRelease.emit(yy//self.pixSize, xx//self.pixSize)
+                self.leftAndRightClicked=False
+            else:
+                if e.button () == QtCore.Qt.LeftButton:
+                    self.leftRelease.emit(yy//self.pixSize, xx//self.pixSize)
+                elif e.button () == QtCore.Qt.RightButton:
+                    self.rightRelease.emit(yy//self.pixSize, xx//self.pixSize)
+            self.update()
 
     def mouseMoveEvent(self, e):
-
-        xx = int(e.localPos().x())
-        yy = int(e.localPos().y())
         #print('移动位置{}, {}'.format(xx, yy))
-        if self.game.timeStart==True and self.game.finish==False:
-            if self.lastcell!=None:
-                self.game.path+=(((yy-self.lastcell[1])**2+(xx-self.lastcell[0])**2)**0.5)/self.pixSize
-            self.lastcell=(xx,yy)
-        self.mouseMove.emit (yy//self.pixSize, xx//self.pixSize)
-        self.update()
+        if self.game.gametype!=4:
+            xx = int(e.localPos().x())
+            yy = int(e.localPos().y())
+            if self.game.timeStart==True and self.game.finish==False:
+                if self.lastcell!=None:
+                    self.game.path+=(((yy-self.lastcell[1])**2+(xx-self.lastcell[0])**2)**0.5)/self.pixSize
+                    self.game.addtrack(int(100*yy/self.pixSize),int(100*xx/self.pixSize))
+                self.lastcell=(xx,yy)
+            self.mouseMove.emit (yy//self.pixSize, xx//self.pixSize)
+            self.update()
 
     def paintEvent(self, event):
         super().paintEvent(event)
         painter = QPainter()
         painter.begin(self)
         size=self.pixSize
-        for i in range(self.row):
-            for j in range(self.column):
+        for i in range(self.game.row):
+            for j in range(self.game.column):
                 painter.drawPixmap(j*size,i*size,self.pixmaps[self.getPixmapIndex(i,j)])
+        if self.game.gametype==4:
+            painter.drawPixmap(self.game.cursorplace[1]/100*size,self.game.cursorplace[0]/100*size,self.pixmaps[15])
         painter.end()
         
     def getPixmapIndex(self,i, j):

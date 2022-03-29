@@ -17,7 +17,12 @@ class StatusLabel (QtWidgets.QLabel):
     def mouseReleaseEvent(self, e):
         if e.button () == QtCore.Qt.LeftButton:
             self.setFrameShadow (QtWidgets.QFrame.Raised)
-            self.leftRelease.emit ()
+            xx = int(e.localPos().x())
+            yy = int(e.localPos().y())
+            if xx<0 or xx>self.width() or yy<0 or yy>self.height():
+                pass
+            else:   
+                self.leftRelease.emit ()
 
 class StatusFrame (QtWidgets.QFrame):
     leftRelease = QtCore.pyqtSignal ()  # 定义信号
@@ -36,4 +41,9 @@ class StatusFrame (QtWidgets.QFrame):
     def mouseReleaseEvent(self, e):
         if e.button () == QtCore.Qt.LeftButton:
             self.setFrameShadow (QtWidgets.QFrame.Raised)
-            self.leftRelease.emit ()
+            xx = int(e.localPos().x())
+            yy = int(e.localPos().y())
+            if xx<0 or xx>self.width() or yy<0 or yy>self.height():
+                pass
+            else:   
+                self.leftRelease.emit ()

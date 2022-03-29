@@ -71,3 +71,14 @@ class readdata(object):
                 breakrecord[4]=1
         return breakrecord
 
+    def makereplayfile(self,replay):
+        filename=replay[4]
+        file=open('%s'%(filename),'wb')
+        pickle.dump(replay,file)
+        file.close()
+
+    def picklereplay(self,file):
+        replay=pickle.load(file)
+        return replay
+        
+            
