@@ -54,8 +54,8 @@ class mineLabel (QtWidgets.QLabel):
             self.pixmaps[i]=self.pixmaps[i].scaled(targetsize,targetsize)
     
     def mousePressEvent(self, e):  # 重载一下鼠标点击事件
-        xx = e.localPos().x()
-        yy = e.localPos().y()
+        xx = int(e.localPos().x())
+        yy = int(e.localPos().y())
         # print('点下位置{}, {}'.format(xx, yy))
         if e.buttons () == QtCore.Qt.LeftButton | QtCore.Qt.RightButton:
             self.leftAndRightPressed.emit (yy//self.pixSize, xx//self.pixSize)
@@ -70,8 +70,8 @@ class mineLabel (QtWidgets.QLabel):
     def mouseReleaseEvent(self, e):
         #每个标签的鼠标事件发射给槽的都是自身的坐标
         #所以获取释放点相对本标签的偏移量，矫正发射的信号
-        xx = e.localPos().x()
-        yy = e.localPos().y()
+        xx = int(e.localPos().x())
+        yy = int(e.localPos().y())
         # print('抬起位置{}, {}'.format(xx, yy))
         if self.leftAndRightClicked:
             self.leftAndRightRelease.emit(yy//self.pixSize, xx//self.pixSize)
@@ -85,8 +85,8 @@ class mineLabel (QtWidgets.QLabel):
 
     def mouseMoveEvent(self, e):
 
-        xx = e.localPos().x()
-        yy = e.localPos().y()
+        xx = int(e.localPos().x())
+        yy = int(e.localPos().y())
         #print('移动位置{}, {}'.format(xx, yy))
         if self.game.timeStart==True and self.game.finish==False:
             if self.lastcell!=None:
