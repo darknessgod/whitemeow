@@ -19,13 +19,7 @@ class gamestatus(object):
         self.ops,self.solvedops,self.bbbv,self.solvedbbbv,self.islands,self.solvedislands=0,0,0,0,0,0
         self.allclicks,self.eclicks=[0,0,0,0],[0,0,0]
         self.oldCell=(0,0)
-<<<<<<< Updated upstream
         self.operationlist,self.tracklist,self.replay,self.pathlist=[],[],[],[]
-=======
-        self.operationlist=[]
-        self.tracklist=[]
-        self.replay=[]
->>>>>>> Stashed changes
         self.replaynodes,self.cursorplace=[0,0],[0,0]
         self.thisislandsolved,self.thisopsolved=False,False
         self.num = [[0 for j in range(self.column)] for i in range(self.row)] # -1雷，0-8数字
@@ -98,20 +92,13 @@ class gamestatus(object):
             self.forceUncover(i,j)
         if not self.isMine(i,j):
             if self.isOpening(i,j): #左键开op递归
-<<<<<<< Updated upstream
                 for r in self.rowRange(i - 1, i + 2):
                     for c in self.columnRange(j - 1, j + 2):
                         if self.isCovered(r,c) and not self.isMine(r,c):
-=======
-                for r in range(i - 1, i + 2):
-                    for c in range(j - 1, j + 2):
-                        if not self.outOfBorder(r,c) and self.isCovered(r,c) and not self.isMine(r,c):
->>>>>>> Stashed changes
                             self.forceUncover(r,c)
                             self.num0queue.put([r,c,start0])
             elif self.num[i][j] > 0: #双键递归，此处为假条件，将来会替换为递归开关
                 flagged=0
-<<<<<<< Updated upstream
                 for r in self.rowRange(i - 1, i + 2):
                     for c in self.columnRange(j - 1, j + 2):
                         if self.isFlag(r,c):
@@ -123,19 +110,6 @@ class gamestatus(object):
                                 self.forceUncover(r,c)
                                 self.num0queue.put([r,c,start0])
                             elif self.isMine(r,c) and self.isCovered(r,c):
-=======
-                for r in range(i - 1, i + 2):
-                    for c in range(j - 1, j + 2):
-                        if not self.outOfBorder(r, c) and self.isFlag(r,c):
-                            flagged+=1
-                if flagged==self.num[i][j]:
-                    for r in range(i - 1, i + 2):
-                        for c in range(j - 1, j + 2):
-                            if not self.outOfBorder(r, c) and self.isCovered(r,c) and not self.isMine(r,c):
-                                self.forceUncover(r,c)
-                                self.num0queue.put([r,c,start0])
-                            elif not self.outOfBorder(r, c) and self.isMine(r,c) and self.isCovered(r,c):
->>>>>>> Stashed changes
                                 self.failed=True
                                 self.redmine=[r,c]
 
@@ -173,20 +147,11 @@ class gamestatus(object):
             self.flagonnumber(i,j)
 
     def pressdouble(self,i,j):
-<<<<<<< Updated upstream
         if self.isCovered(i,j) or self.isOpened(i,j):
             for r in self.rowRange(i - 1, i + 2):
                 for c in self.columnRange(j - 1, j + 2):
                     if self.isCovered(r,c):
                         self.pressed[r][c]=1
-=======
-        if self.status[i][j] in [0,1]:
-            for r in range(i - 1, i + 2):
-                for c in range(j - 1, j + 2):
-                    if not self.outOfBorder(r, c):
-                        if self.isCovered(r,c):
-                            self.pressed[r][c]=1
->>>>>>> Stashed changes
 
     def dodouble(self,i,j):
         if self.rightfirst==True:
@@ -195,7 +160,6 @@ class gamestatus(object):
         self.allclicks[2]+=1
         if self.chordingFlag(i, j):
             edouble=False
-<<<<<<< Updated upstream
             for r in self.rowRange(i - 1, i + 2):
                 for c in self.columnRange(j - 1, j + 2):
                     self.pressed[r][c]=0
@@ -217,31 +181,6 @@ class gamestatus(object):
                 for c in self.columnRange(j - 1, j + 2):
                     if self.isCovered(r,c):
                         self.pressed[r][c]=0
-=======
-            for r in range(i - 1, i + 2):
-                for c in range(j - 1, j + 2):
-                    if not self.outOfBorder(r,c):
-                        self.pressed[r][c]=0
-                        if self.isCovered(r,c):
-                            edouble=True
-                            if self.num[r][c] >= 0:
-                                self.num0queue=Queue()
-                                self.num0queue.put([r,c,self.isOpening(r,c)])
-                                while(self.num0queue.empty()==False):
-                                    getqueuehead=self.num0queue.get()
-                                    self.BFS(getqueuehead[0], getqueuehead[1],getqueuehead[2])
-                            else:
-                                self.failed=True
-                                self.redmine=[r,c]
-            if edouble==True:
-                self.eclicks[2]+=1
-        else:
-            for r in range(i - 1, i + 2):
-                for c in range(j - 1, j + 2):
-                    if not self.outOfBorder(r, c):
-                        if self.isCovered(r,c):
-                            self.pressed[r][c]=0
->>>>>>> Stashed changes
                         
     def domove(self,i,j):
         if not self.outOfBorder(i, j):
@@ -249,7 +188,6 @@ class gamestatus(object):
                 ii, jj = self.oldCell
                 self.oldCell = (i, j)
                 if self.leftAndRightHeld:
-<<<<<<< Updated upstream
                     for r in self.rowRange(ii - 1, ii + 2):
                         for c in self.columnRange(jj - 1, jj + 2):
                             if self.isCovered(r,c):
@@ -258,18 +196,6 @@ class gamestatus(object):
                         for c in self.columnRange(j - 1, j + 2):
                             if self.isCovered(r,c):
                                 self.pressed[r][c]=1
-=======
-                    for r in range(ii - 1, ii + 2):
-                        for c in range(jj - 1, jj + 2):
-                            if not self.outOfBorder(r, c):
-                                if self.isCovered(r,c):
-                                    self.pressed[r][c]=0
-                    for r in range(i - 1, i + 2):
-                        for c in range(j - 1, j + 2):
-                            if not self.outOfBorder(r, c):
-                                if self.isCovered(r,c):
-                                    self.pressed[r][c]=1
->>>>>>> Stashed changes
                 elif self.leftHeld:
                     if self.isCovered(i,j):
                         self.pressed[i][j]=1
@@ -278,18 +204,10 @@ class gamestatus(object):
         elif self.leftAndRightHeld or self.leftHeld:#拖到界外
             ii, jj = self.oldCell
             if self.leftAndRightHeld:
-<<<<<<< Updated upstream
                 for r in self.rowRange(ii - 1, ii + 2):
                     for c in self.columnRange(jj - 1, jj + 2):
                         if self.isCovered(r,c):
                             self.pressed[r][c]=0
-=======
-                for r in range(ii - 1, ii + 2):
-                    for c in range(jj - 1, jj + 2):
-                        if not self.outOfBorder(r, c):
-                            if self.isCovered(r,c):
-                                self.pressed[r][c]=0
->>>>>>> Stashed changes
             elif self.leftHeld:
                 if self.isCovered(ii,jj):
                     self.pressed[ii][jj]=0
@@ -322,7 +240,6 @@ class gamestatus(object):
     def exchange1tolast(self,i,j):
         self.num[i][j]=0
         self.num[self.row-1][self.column-1]=-1
-<<<<<<< Updated upstream
         for ii in self.rowRange(i - 1, i + 2):
             for jj in self.columnRange(j - 1, j + 2):
                 if not self.isMine(ii,jj):     
@@ -330,32 +247,15 @@ class gamestatus(object):
                     for rr in self.rowRange(ii - 1, ii + 2):
                         for cc in self.columnRange(jj - 1, jj + 2):
                             if self.isMine(rr,cc):
-=======
-        for ii in range(i - 1, i + 2):
-            for jj in range(j - 1, j + 2):
-                if not self.outOfBorder(ii, jj) and not self.isMine(ii,jj):     
-                    count=0
-                    for rr in range(ii - 1, ii + 2):
-                        for cc in range(jj - 1, jj + 2):
-                            if not self.outOfBorder(rr, cc) and self.isMine(rr,cc):
->>>>>>> Stashed changes
                                 count+=1
                     self.num[ii][jj]=count
         for ii in range(self.row-2, self.row):
             for jj in range(self.column-2, self.column):
-<<<<<<< Updated upstream
                 if not self.isMine(ii,jj):     
                     count=0
                     for rr in self.rowRange(ii - 1, ii + 2):
                         for cc in self.columnRange(jj - 1, jj + 2):
                             if self.isMine(rr,cc):
-=======
-                if not self.outOfBorder(ii, jj) and not self.isMine(ii,jj):     
-                    count=0
-                    for rr in range(ii - 1, ii + 2):
-                        for cc in range(jj - 1, jj + 2):
-                            if not self.outOfBorder(rr, cc) and self.isMine(rr,cc):
->>>>>>> Stashed changes
                                 count+=1
                     self.num[ii][jj]=count
 
@@ -363,18 +263,10 @@ class gamestatus(object):
         # i, j 周围标雷数是否满足双击的要求
         if not self.isMine(i,j) and self.isOpened(i,j):
             count = 0
-<<<<<<< Updated upstream
             for r in self.rowRange(i - 1, i + 2):
                 for c in self.columnRange(j - 1, j + 2):
                     if self.isFlag(r,c):
                         count += 1
-=======
-            for r in range(i - 1, i + 2):
-                for c in range(j - 1, j + 2):
-                    if not self.outOfBorder(r, c):
-                        if self.isFlag(r,c):
-                            count += 1
->>>>>>> Stashed changes
             if count == 0 and not self.isOpening(i,j):
                 return False
             else:
@@ -396,7 +288,6 @@ class gamestatus(object):
 
     def flagonnumber(self,i,j):
         count=0
-<<<<<<< Updated upstream
         for r in self.rowRange(i - 1, i + 2):
             for c in self.columnRange(j - 1, j + 2):
                 if self.isCovered(r,c) or self.isFlag(r,c):
@@ -410,36 +301,12 @@ class gamestatus(object):
                         self.allclicks[3]+=1
                         self.rightfirst=False
                         eright=True
-=======
-        for r in range(i - 1, i + 2):
-            for c in range(j - 1, j + 2):
-                if not self.outOfBorder(r, c):
-                    if self.isCovered(r,c) or self.isFlag(r,c):
-                        count += 1
-        if count== self.num[i][j]:
-            eright=False
-            for r in range(i - 1, i + 2):
-                for c in range(j - 1, j + 2):
-                    if not self.outOfBorder(r, c):
-                        if self.isCovered(r,c):
-                            self.forceFlag(r,c)
-                            self.allclicks[3]+=1
-                            self.rightfirst=False
-                            eright=True
->>>>>>> Stashed changes
             if eright==True:
                 self.eclicks[1]+=1
                 
     def findopis_bfs(self,i,j,num):
-<<<<<<< Updated upstream
         for ii in self.rowRange(i-1,i+2):
             for jj in self.columnRange(j-1,j+2):
-=======
-        for ii in range(i-1,i+2):
-            for jj in range(j-1,j+2):
-                if self.outOfBorder(ii,jj):
-                    continue
->>>>>>> Stashed changes
                 if num==1:
                     if not self.isMine(ii,jj) and self.isCovered(ii,jj):
                         self.thisopsolved=False
@@ -490,20 +357,11 @@ class gamestatus(object):
             for j in range(self.column):
                 if self.num[i][j]>0:
                     nearnum0=False
-<<<<<<< Updated upstream
                     for ii in self.rowRange(i-1,i+2):
                         for jj in self.columnRange(j-1,j+2):
                             if self.isOpening(ii,jj):
                                 nearnum0=True
                                 break
-=======
-                    for ii in range(i-1,i+2):
-                        for jj in range(j-1,j+2):
-                            if self.outOfBorder(ii,jj)==False:
-                                if self.isOpening(ii,jj):
-                                    nearnum0=True
-                                    break
->>>>>>> Stashed changes
                     if nearnum0==False:
                         self.isbv[i][j]=True
                         numelse+=1
@@ -552,16 +410,9 @@ class gamestatus(object):
             return 'Flag'
 
     def calnumbers(self,r,c):
-<<<<<<< Updated upstream
         for i in self.rowRange(r - 1, r + 2):
             for j in self.columnRange(c - 1, c + 2):
                 if not self.isMine(i,j):
-=======
-        for i in range(r - 1, r + 2):
-            for j in range(c - 1, c + 2):
-                if not self.outOfBorder(i, j) and (
-                    self.num[i][j] != -1):
->>>>>>> Stashed changes
                     self.num[i][j] += 1
 
     def addoperation(self,num,i,j):
@@ -592,18 +443,11 @@ class gamestatus(object):
         if self.failed==True:
             result=2
             prefix='#'
-<<<<<<< Updated upstream
             replayname='%s%s_%.2f_3bv=%d_%s.nvf'%(prefix,level,deltat,bbbv,playername)
         else:
             result=1
             prefix=''
             replayname='%s%s_%.2f_3bv=%d_3bvs=%.3f_%s.nvf'%(prefix,level,deltat,bbbv,bbbv/deltat,playername)
-=======
-        else:
-            result=1
-            prefix=''
-        replayname='%s%s_%.2f_3bv=%d_3bvs=%.3f_%s.nvf'%(prefix,level,deltat,bbbv,bbbv/deltat,playername)
->>>>>>> Stashed changes
         boardinfo=[replayname,playertag,playername,st,et,deltat,bbbv]
         boardinfo+=[mode,type,level,style,result,kept1,kept2,kept3,kept4,kept5,kept6,version]
         return boardinfo
@@ -612,13 +456,8 @@ class gamestatus(object):
         l1,l2,l3,l4=self.replay[0],self.replay[1],self.replay[2],self.replay[3]
         if len(self.replay)!=4+l1+l2+l3+l4:
             return 1
-<<<<<<< Updated upstream
         self.replayboardinfo=[*self.replay[4:4+l1]]
         if self.replayboardinfo[8] not in[1,2] or self.replayboardinfo[11] not in [1,2]:
-=======
-        boardinfo=[*self.replay[4:4+l1]]
-        if boardinfo[8] not in[1,2] or boardinfo[11] not in [1,2]:
->>>>>>> Stashed changes
             return 2
         boardlist=[*self.replay[4+l1:4+l1+l2]]
         boardlegal=self.dealboard(boardlist)
@@ -650,13 +489,9 @@ class gamestatus(object):
                     return 10
         except:
             return 11
-<<<<<<< Updated upstream
         self.pathlist=[0]
         for i in range(len(self.tracklist)-1):
             self.pathlist.append(self.pathlist[-1]+((self.tracklist[i][0]-self.tracklist[i+1][0])**2+(self.tracklist[i][1]-self.tracklist[i+1][1])**2)**0.5/100)
-=======
-        self.cal_3bv()
->>>>>>> Stashed changes
         return 0
 
     def dealboard(self,boardlist):
@@ -681,7 +516,6 @@ class gamestatus(object):
             self.calnumbers(boardarea[2*i+1],boardarea[2*i])
         return 0
 
-<<<<<<< Updated upstream
     def dopreoperations(self):
         flags=[]
         for i in range(0,len(self.operationlist)):
@@ -704,5 +538,3 @@ class gamestatus(object):
                 return tempturple
             self.replaynodes[0]+=1
 
-=======
->>>>>>> Stashed changes

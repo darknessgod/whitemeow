@@ -4,13 +4,8 @@ from PyQt5.QtGui import QPalette, QPixmap, QFont, QIcon ,QPainter
 from PyQt5.QtWidgets import QLineEdit, QInputDialog
 from gamestatus import gamestatus
 import mainWindowGUI,superGUI, mineLabel,selfDefinedParameter,preference,gamestatus,newswindow,recordwindow
-<<<<<<< Updated upstream
 import time,struct
 from counter import Counter,calbbbvThread
-=======
-import time,struct,math
-from counter import Counter
->>>>>>> Stashed changes
 
 
 class MineSweeperGUI(superGUI.Ui_MainWindow):
@@ -119,19 +114,11 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         if self.game.gametype!=4:
             self.changecounter(1)
         else:
-<<<<<<< Updated upstream
-=======
-            self.changecounter(1)
->>>>>>> Stashed changes
             while(1):
                 k1=self.game.replaynodes[0]
                 if k1==len(self.game.operationlist):
                     break
-<<<<<<< Updated upstream
                 if self.game.operationlist[k1][3]>=1000*(self.game.intervaltime):
-=======
-                if self.game.operationlist[k1][3]>1000*(self.game.intervaltime):
->>>>>>> Stashed changes
                     break
                 else:
                     self.dooperation(self.game.operationlist[k1][0],self.game.operationlist[k1][1],self.game.operationlist[k1][2])
@@ -143,7 +130,6 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
                 if self.game.tracklist[k2][2]>1000*(self.game.intervaltime):
                     break
                 self.game.cursorplace=[self.game.tracklist[k2][0],self.game.tracklist[k2][1]]
-<<<<<<< Updated upstream
                 self.mineMouseMove(self.game.cursorplace[0]//100,self.game.cursorplace[1]//100)
                 self.game.replaynodes[1]+=1
             if k2>0:
@@ -152,10 +138,6 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
                 self.game.path=0
             self.label.update()
             self.changecounter(2)
-=======
-                self.game.replaynodes[1]+=1
-            self.label.update()
->>>>>>> Stashed changes
                     
 
 
@@ -595,14 +577,11 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
                 self.needtorefresh=True
                 self.playnvf()
             else:
-<<<<<<< Updated upstream
                 print(status)
                 self.newgameStart()
                     
 
     def playnvf(self):
-        print(self.game.operationlist[1:20])
-        print(self.game.tracklist[50:100])
         self.replaygameStart()
         self.label.update()
         self.game.cal_3bv()
@@ -612,24 +591,6 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.dooperation(2,start[0],start[1])
 
 
-=======
-                self.newgameStart()
-
-    def playnvf(self):
-        self.replaygameStart()
-        self.label.update()
-        self.game.replaynodes=[0,0]
-        self.dopreoperations()
-
-    def dopreoperations(self):
-        for i in range(0,len(self.game.operationlist)):
-            if self.game.operationlist[i][3]!=-1:
-                break
-            self.dooperation(self.game.operationlist[i][0],self.game.operationlist[i][1],self.game.operationlist[i][2])
-            self.game.replaynodes[0]+=1
-            self.label.update()
-            time.sleep(0.25)
->>>>>>> Stashed changes
 
     def dooperation(self,num,i,j):
         if num==1:

@@ -19,11 +19,6 @@ class mineLabel (QtWidgets.QLabel):
         self.leftAndRightClicked = False
         self.pixSize=pixsize
         self.pixmaps=[0]*16
-<<<<<<< Updated upstream
-=======
-        self.row=self.game.row
-        self.column=self.game.column
->>>>>>> Stashed changes
         self.setMouseTracking(True)
         self.resizepixmaps(self.pixSize)
         self.lastcell=None
@@ -92,7 +87,6 @@ class mineLabel (QtWidgets.QLabel):
 
     def mouseMoveEvent(self, e):
         #print('移动位置{}, {}'.format(xx, yy))
-<<<<<<< Updated upstream
         if self.game.gametype!=4:
             xx = int(e.localPos().x())
             yy = int(e.localPos().y())
@@ -103,16 +97,6 @@ class mineLabel (QtWidgets.QLabel):
                 self.lastcell=(xx,yy)
             self.mouseMove.emit (yy//self.pixSize, xx//self.pixSize)
             self.update()
-=======
-        if self.game.timeStart==True and self.game.finish==False:
-            if self.lastcell!=None:
-                self.game.path+=(((yy-self.lastcell[1])**2+(xx-self.lastcell[0])**2)**0.5)/self.pixSize
-                if self.game.gametype!=4:
-                    self.game.addtrack(int(100*yy/self.pixSize),int(100*xx/self.pixSize))
-            self.lastcell=(xx,yy)
-        self.mouseMove.emit (yy//self.pixSize, xx//self.pixSize)
-        self.update()
->>>>>>> Stashed changes
 
     def paintEvent(self, event):
         super().paintEvent(event)

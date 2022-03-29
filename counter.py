@@ -88,7 +88,6 @@ class Counter(object):
 
     def closecounter(self):
         pass
-<<<<<<< Updated upstream
 
 class calbbbvThread(Qt.QThread):  # 游戏过程中刷新计数器的线程
 
@@ -109,8 +108,6 @@ class calbbbvThread(Qt.QThread):  # 游戏过程中刷新计数器的线程
             k0=k1
 
 
-=======
->>>>>>> Stashed changes
 
                     
                 
