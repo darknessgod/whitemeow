@@ -36,9 +36,9 @@ class mineLabel (QtWidgets.QLabel):
         self.pixmaps[13]=QPixmap(CELL_PATH+"blast.svg")
         self.pixmaps[14]=QPixmap("media/svg/cellunflagged.svg")
         self.pixmaps[15]=QPixmap(ELEMENT_PATH+"arrowcursor.svg")
-        for i in range(len(self.pixmaps)):
+        for i in range(15):
             self.pixmaps[i]=self.pixmaps[i].scaled(targetsize,targetsize)
-        self.pixmaps[15]=self.pixmaps[15].scaled(targetsize//2,targetsize//2)
+        self.pixmaps[15]=self.pixmaps[15].scaled(targetsize,targetsize,transformMode=QtCore.Qt.SmoothTransformation)
         
     
     def mousePressEvent(self, e):  # 重载一下鼠标点击事件
