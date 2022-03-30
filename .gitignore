@@ -1,5 +1,7 @@
 # Other
 stats.dat
+media/1502586-20190508211324336-1412057359.png
+*.nvf
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -130,4 +132,4 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-media/1502586-20190508211324336-1412057359.png
+

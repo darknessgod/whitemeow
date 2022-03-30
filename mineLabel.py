@@ -40,7 +40,7 @@ class mineLabel (QtWidgets.QLabel):
         self.pixmaps[15]=QPixmap("media/cursor.png")
         for i in range(len(self.pixmaps)):
             self.pixmaps[i]=self.pixmaps[i].scaled(targetsize,targetsize)
-        self.pixmaps[15]=self.pixmaps[15].scaled(targetsize/2,targetsize/2)
+        self.pixmaps[15]=self.pixmaps[15].scaled(targetsize//2,targetsize//2)
         
     
     def mousePressEvent(self, e):  # 重载一下鼠标点击事件
@@ -101,7 +101,7 @@ class mineLabel (QtWidgets.QLabel):
             for j in range(self.game.column):
                 painter.drawPixmap(j*size,i*size,self.pixmaps[self.getPixmapIndex(i,j,mouse)])
         if self.game.isreplaying():
-            painter.drawPixmap(self.game.cursorplace[1]/100*size,self.game.cursorplace[0]/100*size,self.pixmaps[15])
+            painter.drawPixmap(self.game.cursorplace[1]*size//100,self.game.cursorplace[0]*size//100,self.pixmaps[15])
         painter.end()
         
     def getPixmapIndex(self,i, j,mouse):
