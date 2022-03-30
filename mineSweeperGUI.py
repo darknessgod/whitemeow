@@ -6,6 +6,7 @@ from gamestatus import gamestatus
 import mainWindowGUI,superGUI, mineLabel,window_custom,window_settings,gamestatus,newswindow,window_record
 import time,struct
 from window_counter import Counter,calbbbvThread
+from constants import *
 
 
 class MineSweeperGUI(superGUI.Ui_MainWindow):
@@ -73,7 +74,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         
     def showface(self,num):
         if self.game.gametype==1:
-            pixmap = QPixmap("media/svg/smileface.svg")
+            pixmap = QPixmap(FACE_PATH + "smileface.svg")
         elif self.game.gametype in [2,4]:
             pixmap = QPixmap("media/svg/smilefaceblue.svg")
         size=pixmap.size()
@@ -312,7 +313,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
 
     def gameWin(self):
         if self.game.gametype==1:
-            pixmap = QPixmap("media/svg/winface.svg")
+            pixmap = QPixmap(FACE_PATH + "winface.svg")
         elif self.game.gametype==2 or 4:
             pixmap = QPixmap("media/svg/winfaceblue.svg")
         size=pixmap.size()
@@ -324,7 +325,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
 
     def gameFailed(self):
         if self.game.gametype==1:
-            pixmap = QPixmap("media/svg/lostface.svg")
+            pixmap = QPixmap(FACE_PATH + "lostface.svg")
         elif self.game.gametype==2 or 4:
             pixmap = QPixmap("media/svg/lostfaceblue.svg")
         size=pixmap.size()

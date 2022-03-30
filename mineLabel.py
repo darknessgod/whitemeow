@@ -1,6 +1,6 @@
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtGui import QPainter,QPixmap
-
+from constants import *
 
 
 
@@ -26,21 +26,19 @@ class mineLabel (QtWidgets.QLabel):
     def resizepixmaps(self,num):
         targetsize=num
         for i in range(1,9):
-            pngname="media/svg/cell"
-            pngname+=str(i)
-            pngname+=".svg"
+            pngname=CELL_PATH+"cell"+str(i)+".svg"
             self.pixmaps[i]=QPixmap(pngname)
-        self.pixmaps[0]=QPixmap("media/svg/celldown.svg")
-        self.pixmaps[9]=QPixmap("media/svg/cellup.svg")
-        self.pixmaps[10]=QPixmap("media/svg/cellflag.svg")
-        self.pixmaps[11]=QPixmap("media/svg/cellmine.svg")
-        self.pixmaps[12]=QPixmap("media/svg/falsemine.svg")
-        self.pixmaps[13]=QPixmap("media/svg/blast.svg")
+        self.pixmaps[0]=QPixmap(CELL_PATH+"celldown.svg")
+        self.pixmaps[9]=QPixmap(CELL_PATH+"cellup.svg")
+        self.pixmaps[10]=QPixmap(CELL_PATH+"cellflag.svg")
+        self.pixmaps[11]=QPixmap(CELL_PATH+"cellmine.svg")
+        self.pixmaps[12]=QPixmap(CELL_PATH+"falsemine.svg")
+        self.pixmaps[13]=QPixmap(CELL_PATH+"blast.svg")
         self.pixmaps[14]=QPixmap("media/svg/cellunflagged.svg")
-        self.pixmaps[15]=QPixmap("media/cursor.png")
-        for i in range(len(self.pixmaps)):
+        self.pixmaps[15]=QPixmap(ELEMENT_PATH+"arrowcursor.svg")
+        for i in range(15):
             self.pixmaps[i]=self.pixmaps[i].scaled(targetsize,targetsize)
-        self.pixmaps[15]=self.pixmaps[15].scaled(targetsize//2,targetsize//2)
+        self.pixmaps[15]=self.pixmaps[15].scaled(targetsize,targetsize,transformMode=QtCore.Qt.SmoothTransformation)
         
     
     def mousePressEvent(self, e):  # 重载一下鼠标点击事件
