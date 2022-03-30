@@ -27,6 +27,10 @@ class gamestatus(object):
         self.num0queue=Queue()
         self.counter=None
 
+    def recursive(self):
+        return bool(self.gamemode%2)
+    def canflagnumber(self):
+        return bool(self.gamemode%2)
     def isreplaying(self):
         return self.gametype==4
     def isCovered(self,i,j):
@@ -96,7 +100,7 @@ class gamestatus(object):
                         if self.isCovered(r,c) and not self.isMine(r,c):
                             self.forceUncover(r,c)
                             self.num0queue.put([r,c,start0])
-            elif self.num[self.getindex(i,j)] > 0: #双键递归，此处为假条件，将来会替换为递归开关
+            elif self.recursive(): 
                 flagged=0
                 for r in self.rowRange(i - 1, i + 2):
                     for c in self.columnRange(j - 1, j + 2):
@@ -141,7 +145,7 @@ class gamestatus(object):
             self.flagonmine(i,j)
         elif self.isFlag(i,j):
             self.unflagonmine(i,j)
-        elif self.isOpened(i,j) and not self.isOpening(i,j):
+        elif self.isOpened(i,j) and not self.isOpening(i,j) and self.canflagnumber():
             self.flagonnumber(i,j)
 
     def pressdouble(self,i,j):
@@ -484,4 +488,10 @@ class gamestatus(object):
     def getindex(self,i,j):
         return i*self.column+j
 
+    def modejudge(self):
+        mode=0
+        if self.recursive() or self.canflagnumber():
+            mode+=1
+        self.gamemode=mode
+        return self.gamemode
 

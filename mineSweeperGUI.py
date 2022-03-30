@@ -451,7 +451,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         thisgamedata+=finishtime[3:6]
         thisgamedata.append(self.game.intervaltime)
         thisgamedata.append(self.game.bbbv)
-        thisgamedata.append(self.game.gamemode)
+        thisgamedata.append(self.game.modejudge())
         thisgamedata.append(self.game.leveljudge())
         thisgamedata.append(self.game.stylejudge())
         thisgamedata+=self.game.allclicks[0:3]
