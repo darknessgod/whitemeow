@@ -33,7 +33,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.closeEvent_.emit()
             else:
                 self.minbackEvent.emit()
-    
 
 class meowcounter(QtWidgets.QMainWindow):
 

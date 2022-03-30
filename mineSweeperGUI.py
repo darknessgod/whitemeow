@@ -3,9 +3,9 @@ from PyQt5.QtCore import Qt, QTimer, QCoreApplication
 from PyQt5.QtGui import QPalette, QPixmap, QFont, QIcon ,QPainter
 from PyQt5.QtWidgets import QLineEdit, QInputDialog
 from gamestatus import gamestatus
-import mainWindowGUI,superGUI, mineLabel,selfDefinedParameter,preference,gamestatus,newswindow,recordwindow
+import mainWindowGUI,superGUI, mineLabel,window_custom,window_settings,gamestatus,newswindow,window_record
 import time,struct
-from counter import Counter,calbbbvThread
+from window_counter import Counter,calbbbvThread
 
 
 class MineSweeperGUI(superGUI.Ui_MainWindow):
@@ -51,6 +51,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         else:
             self.changecounter(1)
         self.counterWindow.move(max(0,(self.mainWindow.x())-sum(self.counterui.columnwidth)),(max(0,self.mainWindow.y())))
+        self.counterWindow.activateWindow()
         self.mainWindow.activateWindow()
    
     def initMineArea(self):
@@ -111,7 +112,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         inttime=int(self.game.intervaltime+0.9999)
         if inttime!=self.game.oldinttime:
             self.showtimenum(self.game.intervaltime)
-        if self.game.gametype!=4:
+        if not self.game.isreplaying():
             self.changecounter(1)
         else:
             while(1):
@@ -153,9 +154,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
                 self.game.addoperation(1,i,j)
             self.game.leftHeld = True
             self.game.oldCell = (i, j)
-            if self.game.status[i][j] == 0:
-                self.game.pressed[i][j]=1
-                self.label.update()
+            self.label.update()
 
     def mineAreaLeftRelease(self, i, j):
         if self.game.leftHeld and not self.finish:
@@ -176,7 +175,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
                     self.game.starttime=time.time()
                 self.label.update()
                 if self.game.failed==True:
-                    self.gameFailed(self.game.redmine[0],self.game.redmine[1])
+                    self.gameFailed()
                 elif self.isGameFinished()==True:
                     self.gameWin()
                
@@ -216,7 +215,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
                 self.changecounter(1)
                 self.label.update()
                 if self.game.failed==True:
-                    self.gameFailed(self.game.redmine[0],self.game.redmine[1])
+                    self.gameFailed()
                 elif self.isGameFinished()==True:
                     self.gameWin()
 
@@ -288,7 +287,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
             if self.game.gametype==1:
                 self.game.gamenum+=1
             score=[self.game.intervaltime,self.game.bbbv/self.game.intervaltime,(self.game.intervaltime**1.7)/self.game.bbbv]
-            if self.game.gametype!=4:
+            if not self.game.isreplaying():
                 self.game.ranks=self.gamerank(score)
         self.changecounter(2)
         self.showtimenum(self.game.intervaltime)
@@ -299,13 +298,15 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         if result==1 and self.game.gametype==1:
             self.savethisgame()
         self.setshortcuts(True)
+        if self.game.isreplaying():
+            self.action_savereplay.setEnabled(False)
         #print(self.game.operationlist)
         #print(self.game.tracklist)
 
     def isGameFinished(self):
         for i in range(self.game.row):
             for j in  range(self.game.column):
-                if self.game.status[i][j] !=1 and self.game.num[i][j] != -1:
+                if not self.game.isOpened(i,j) and not self.game.isMine(i,j):
                     return False
         return True
 
@@ -318,9 +319,10 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         scaled_pixmap=pixmap.scaled(size/8.5)
         self.label_2.setPixmap(scaled_pixmap)
         self.label_2.setScaledContents(True)
-        self.gameFinished(1)
+        self.game.result=1
+        self.gameFinished(self.game.result)
 
-    def gameFailed(self,i,j):
+    def gameFailed(self):
         if self.game.gametype==1:
             pixmap = QPixmap("media/svg/lostface.svg")
         elif self.game.gametype==2 or 4:
@@ -329,7 +331,8 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         scaled_pixmap=pixmap.scaled(size/8.5)
         self.label_2.setPixmap(scaled_pixmap)
         self.label_2.setScaledContents(True)
-        self.gameFinished(2)
+        self.game.result=2
+        self.gameFinished(self.game.result)
 
     def actionChecked(self, k):
         self.action_B.setChecked(False)
@@ -345,46 +348,32 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         elif k == 'C':
             self.action_C.setChecked(True)
 
+    def action_bie(self,r,c,m):
+        oldrow,oldcolumn=self.game.row,self.game.column
+        self.game.row = r
+        self.game.column = c
+        if oldrow==r and oldcolumn==c:
+            self.needtorefresh=False
+        else:
+            self.needtorefresh=True
+        self.game.mineNum = m
+        self.newgameStart()
+
     def action_BEvent(self):
         self.actionChecked('B')
-        oldrow,oldcolumn=self.game.row,self.game.column
-        self.game.row = 8
-        self.game.column = 8
-        if oldrow==8 and oldcolumn==8:
-            self.needtorefresh=False
-        else:
-            self.needtorefresh=True
-        self.game.mineNum = 10
-        self.newgameStart()
-
+        self.action_bie(8,8,10)
+        
     def action_IEvent(self):
         self.actionChecked('I')
-        oldrow,oldcolumn=self.game.row,self.game.column
-        self.game.row = 16
-        self.game.column = 16
-        if oldrow==16 and oldcolumn==16:
-            self.needtorefresh=False
-        else:
-            self.needtorefresh=True
-        self.game.mineNum = 40
-        self.newgameStart()
-
+        self.action_bie(16,16,40)
 
     def action_Event(self):
         self.actionChecked('E')
-        oldrow,oldcolumn=self.game.row,self.game.column
-        self.game.row = 16
-        self.game.column = 30
-        if oldrow==16 and oldcolumn==30:
-            self.needtorefresh=False
-        else:
-            self.needtorefresh=True
-        self.game.mineNum = 99
-        self.newgameStart()
+        self.action_bie(16,30,99)
 
     def action_CEvent(self):
         self.actionChecked('C')
-        ui = selfDefinedParameter.Ui_Dialog(self.game.row, self.game.column,
+        ui = window_custom.Ui_Dialog(self.game.row, self.game.column,
                                             self.game.mineNum)
         ui.Dialog.setModal(True)
         ui.Dialog.show()
@@ -400,14 +389,14 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         if self.finish==False:
             self.gameStart()
         mainpos=[self.mainWindow.x(),self.mainWindow.y(),self.mainWindow.width(),self.mainWindow.height()]
-        recordui=recordwindow.ui_recorddialog(mainpos,self.datas.records)
+        recordui=window_record.ui_recorddialog(mainpos,self.datas.records)
         recordui.Dialog.setModal(True)
         recordui.Dialog.show()
         recordui.Dialog.exec_()        
 
     def action_setevent(self):
         self.gameStart()
-        ui = preference.Ui_SettingDialog()
+        ui = window_settings.Ui_SettingDialog()
         ui.Dialog.setModal(True)
         ui.Dialog.show()
         ui.Dialog.exec_()
@@ -430,9 +419,9 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
             self.gridsize+=2
             self.label.pixSize=self.gridsize
             self.label.resizepixmaps(self.gridsize)
-            num,status,pressed=[*self.game.num],[*self.game.status],[*self.game.pressed]
+            num,status=[*self.game.num],[*self.game.status]
             self.initMineArea()
-            self.game.num,self.game.status,self.game.pressed=num,status,pressed
+            self.game.num,self.game.status=num,status
             windowsize=self.calwindowsize(self.game.row,self.game.column,self.gridsize)
             self.mainWindow.setFixedSize(windowsize[0],windowsize[1])
             self.action_gridsize.setText('当前尺寸：%d'%(self.gridsize))
@@ -440,15 +429,14 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
             if self.gridsize==48:
                 self.action_gridup.setEnabled(False)
             
-        
     def griddown(self):
         if self.gridsize>=14:
             self.gridsize-=2
             self.label.pixSize=self.gridsize
             self.label.resizepixmaps(self.gridsize)
-            num,status,pressed=[*self.game.num],[*self.game.status],[*self.game.pressed]
+            num,status=[*self.game.num],[*self.game.status]
             self.initMineArea()
-            self.game.num,self.game.status,self.game.pressed=num,status,pressed
+            self.game.num,self.game.status=num,status
             windowsize=self.calwindowsize(self.game.row,self.game.column,self.gridsize)
             self.mainWindow.setFixedSize(windowsize[0],windowsize[1])
             self.action_gridsize.setText('当前尺寸：%d'%(self.gridsize))
@@ -579,7 +567,6 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
             else:
                 print(status)
                 self.newgameStart()
-                    
 
     def playnvf(self):
         self.replaygameStart()
@@ -589,8 +576,6 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         start=self.game.dopreoperations()
         self.dooperation(1,start[0],start[1])
         self.dooperation(2,start[0],start[1])
-
-
 
     def dooperation(self,num,i,j):
         if num==1:
@@ -605,7 +590,3 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
             self.mineAreaLeftAndRightPressed(i,j)
         elif num==6:
             self.mineAreaLeftAndRightRelease(i,j)
-
-    
-
-
