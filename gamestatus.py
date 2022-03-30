@@ -441,6 +441,9 @@ class gamestatus(object):
             self.pathlist.append(self.pathlist[-1]+((self.tracklist[i][0]-self.tracklist[i+1][0])**2+(self.tracklist[i][1]-self.tracklist[i+1][1])**2)**0.5/100)
         return 0
 
+    def initreplays(self):
+        self.gamemode=self.replayboardinfo[7]
+
     def dealboard(self,boardlist):
         if len(boardlist)<4:
             return -1
@@ -448,16 +451,17 @@ class gamestatus(object):
         boardarea=boardlist[4:]
         minenum=boardinfo[2]*256+boardinfo[3]
         column,row=boardinfo[0],boardinfo[1]
+        self.row,self.column,self.mineNum=row,column,minenum
         if len(boardlist)!=4+2*minenum:
             return -1
         if min(column,row)<4 or max(column,row)>50 or minenum/(column*row)>0.5:
             return -2
         num = [0]*(self.row*self.column)
+        self.num=[*num]
         for i in range(minenum):
             if boardarea[2*i+1]>=row or boardarea[2*i]>column or num[self.getindex(boardarea[2*i+1],boardarea[2*i])]==-1:
                 return -3
             num[self.getindex(boardarea[2*i+1],boardarea[2*i])]=-1
-        self.row,self.column,self.mineNum=row,column,minenum
         self.num=[*num]
         for i in range(minenum):
             self.calnumbers(boardarea[2*i+1],boardarea[2*i])

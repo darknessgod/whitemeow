@@ -126,5 +126,6 @@ class mineLabel (QtWidgets.QLabel):
                     index=14
         return index
                 
-    def quxinlinyu(self,i,j,r,c):
+    @staticmethod
+    def quxinlinyu(i,j,r,c):
         return abs(i-r)<=1 and abs(j-c)<=1 and not (i==r and j==c)

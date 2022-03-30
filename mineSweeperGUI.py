@@ -468,8 +468,9 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
             #recordindex=self.datas.dict1[thisgameinfo[self.datas.numstyle]]+self.datas.dict2[thisgameinfo[self.datas.numlevel]]
             breakrecord=self.datas.judgerecord(thisgameinfo)
             if sum(breakrecord)>=1:
-                self.shownews(breakrecord,self.game.stylejudge())
                 self.savereplay()
+                self.shownews(breakrecord,self.game.stylejudge())
+                
 
     def gamescount(self):
         level=self.game.leveljudge()
@@ -571,6 +572,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
 
     def playnvf(self):
         self.replaygameStart()
+        self.game.initreplay()
         self.label.update()
         self.game.cal_3bv()
         self.game.replaynodes=[0,0]
