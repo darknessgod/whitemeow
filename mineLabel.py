@@ -23,16 +23,6 @@ class mineLabel (QtWidgets.QLabel):
         self.resizepixmaps(self.pixSize)
         self.lastcell=None
 
-    '''def mousePressEvent(self, e):  ##重载一下鼠标点击事件
-        if e.buttons () == QtCore.Qt.LeftButton | QtCore.Qt.RightButton:
-            self.leftAndRightPressed.emit (self.i, self.j)
-            self.leftAndRightClicked = True
-        else:
-            if e.buttons () == QtCore.Qt.LeftButton:
-                self.leftPressed.emit (self.i, self.j)
-            elif e.buttons () == QtCore.Qt.RightButton:
-                self.rightPressed.emit (self.i, self.j)
-                '''
     def resizepixmaps(self,num):
         targetsize=num
         for i in range(1,9):
@@ -54,7 +44,7 @@ class mineLabel (QtWidgets.QLabel):
         
     
     def mousePressEvent(self, e):  # 重载一下鼠标点击事件
-        if self.game.gametype!=4:
+        if not self.game.isreplaying():
             xx = int(e.localPos().x())
             yy = int(e.localPos().y())
             # print('点下位置{}, {}'.format(xx, yy))
@@ -72,7 +62,7 @@ class mineLabel (QtWidgets.QLabel):
         #每个标签的鼠标事件发射给槽的都是自身的坐标
         #所以获取释放点相对本标签的偏移量，矫正发射的信号
         # print('抬起位置{}, {}'.format(xx, yy))
-        if self.game.gametype!=4:
+        if not self.game.isreplaying():
             xx = int(e.localPos().x())
             yy = int(e.localPos().y())
             if self.leftAndRightClicked:
@@ -87,7 +77,7 @@ class mineLabel (QtWidgets.QLabel):
 
     def mouseMoveEvent(self, e):
         #print('移动位置{}, {}'.format(xx, yy))
-        if self.game.gametype!=4:
+        if not self.game.isreplaying():
             xx = int(e.localPos().x())
             yy = int(e.localPos().y())
             if self.game.timeStart==True and self.game.finish==False:
@@ -103,21 +93,40 @@ class mineLabel (QtWidgets.QLabel):
         painter = QPainter()
         painter.begin(self)
         size=self.pixSize
+        if self.game.isreplaying():
+            mouse=(self.game.cursorplace[0]//100,self.game.cursorplace[1]//100)
+        else:
+            mouse=[*self.game.oldCell]
         for i in range(self.game.row):
             for j in range(self.game.column):
-                painter.drawPixmap(j*size,i*size,self.pixmaps[self.getPixmapIndex(i,j)])
-        if self.game.gametype==4:
+                painter.drawPixmap(j*size,i*size,self.pixmaps[self.getPixmapIndex(i,j,mouse)])
+        if self.game.isreplaying():
             painter.drawPixmap(self.game.cursorplace[1]*size//100,self.game.cursorplace[0]*size//100,self.pixmaps[15])
         painter.end()
         
-    def getPixmapIndex(self,i, j):
-        if self.game.pressed[i][j]>=2:
-            return self.game.pressed[i][j]+9
-        elif self.game.pressed[i][j]==1:
-            return 0
-        elif self.game.status[i][j]==2:
-            return 10
-        elif self.game.status[i][j]==0:
-            return 9
+    def getPixmapIndex(self,i, j,mouse):
+        if self.game.isCovered(i,j) and self.game.leftAndRightHeld and self.quxinlinyu(i,j,mouse[0],mouse[1]) and not self.game.mouseout:
+                index=0
+        elif self.game.isCovered(i,j) and self.game.leftHeld and i==mouse[0] and j==mouse[1] and not self.game.mouseout:
+                index=0
+        elif self.game.isFlag(i,j):
+            index=10
+        elif self.game.isCovered(i,j):
+            index=9
         else:
-            return self.game.num[i][j]
+            index=self.game.num[self.game.getindex(i,j)]
+        if self.game.finish:
+            if self.game.result==2:
+                if i==self.game.redmine[0] and j==self.game.redmine[1]:
+                    index=13
+                elif self.game.isMine(i,j) and not self.game.isFlag(i,j):
+                    index=11
+                elif self.game.isFlag(i,j) and not self.game.isMine(i,j):
+                    index=12
+            elif self.game.result==1:
+                if self.game.isMine(i,j) and not self.game.isFlag(i,j):
+                    index=14
+        return index
+                
+    def quxinlinyu(self,i,j,r,c):
+        return abs(i-r)<=1 and abs(j-c)<=1 and not (i==r and j==c)
