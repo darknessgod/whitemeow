@@ -1,6 +1,4 @@
 import pickle
-import copy
-from constants import *
 
 class readdata(object):
 
@@ -8,6 +6,7 @@ class readdata(object):
         self.dict1={'Flag':0,'NF':3}
         self.dict2={'BEG':0,'INT':1,'EXP':2}
         self.stats=[]
+        self.settings=[]
         self.titledict={'Day':0,'Month':1,'Year':2,'Hour':3,'Min':4,'Sec':5,'Rtime':6,'3bv':7,'Mode':8,'Level':9,'Style':10,'Lcl':11,'Rcl':12,'Dcl':13,'Leff':14,'Reff':15,'Deff':16,'Ops':17,'Isls':18,'Path':19}
         self.length=len(self.titledict)
         self.records=[]
@@ -82,23 +81,4 @@ class readdata(object):
         replay=pickle.load(file)
         return replay
         
-class readsettings(object):
-
-    def __init__(self):
-        self.settings={}
-
-    def readsettings(self):
-        try:
-            file=open('settings.dat','rb')
-            self.settings=pickle.load(file)
-        except FileNotFoundError:
-            self.settings=copy.deepcopy(defaultsettings)
             
-
-    def writesettings(self):
-        file=open('settings.dat','wb')
-        if self.settings!={}:
-            pickle.dump(self.settings,file)
-        else:
-            pickle.dump(defaultsettings,file)
-        file.close()
