@@ -14,7 +14,7 @@ def adjacent(i,j,index,row,column):
             return (index-row,index-row+1,index+1)
         else:
             return (index-row,index-row+1,index+1,index+row,index+row+1)
-    elif j==column: # right edge
+    elif j==column-1: # right edge
         if i==0: # top-right corner
             return (index-1,index+row-1,index+row)
         elif i==row-1: # bottom-right corner
