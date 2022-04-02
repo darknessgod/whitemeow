@@ -94,7 +94,10 @@ class mineLabel (QtWidgets.QLabel):
         if self.game.isreplaying():
             mouse=(self.game.cursorplace[0]//100,self.game.cursorplace[1]//100)
         else:
-            mouse=[*self.game.oldCell]
+            index=self.game.oldCell
+            r=self.game.getrow(index)
+            c=self.game.getcolumn(index)
+            mouse=(r,c)
         for i in range(self.game.row):
             for j in range(self.game.column):
                 index=self.game.pixmapindex[i*self.game.column+j]
@@ -108,10 +111,11 @@ class mineLabel (QtWidgets.QLabel):
             painter.drawPixmap(self.game.cursorplace[1]*size//100,self.game.cursorplace[0]*size//100,self.pixmaps[15])
         painter.end()
         
-    def getPixmapIndex(self,i, j,mouse):
-        if self.game.isCovered(i,j) and self.game.leftAndRightHeld and smallfuc.linyu(i,j,mouse[0],mouse[1]) and not self.game.mouseout:
+    def getPixmapIndex(self,i,j,mouse):
+        index=self.game.getindex(i,j)
+        if self.game.isCovered(index) and self.game.leftAndRightHeld and smallfuc.linyu(i,j,mouse[0],mouse[1]) and not self.game.mouseout:
                 return 0
-        elif self.game.isCovered(i,j) and self.game.leftHeld and i==mouse[0] and j==mouse[1] and not self.game.mouseout:
+        elif self.game.isCovered(index) and self.game.leftHeld and i==mouse[0] and j==mouse[1] and not self.game.mouseout:
                 return 0
 
     

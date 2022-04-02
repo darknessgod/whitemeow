@@ -9,7 +9,8 @@ class gamestatus(object):
         self.settings=settings
         self.row,self.column,self.mineNum=row,column,mines
         self.failed,self.timeStart,self.finish,self.mouseout,self.result=False,False,False,False,0
-        self.redmine,self.oldCell=(0,0),(0,0)
+        self.redmine=0
+        self.oldCell=0
         self.replayboardinfo=[]
         self.tmplist=[i for i in range(self.column*self.row-1)]
         self.gamemode,self.gametype=self.modejudge(),1
@@ -43,33 +44,14 @@ class gamestatus(object):
         return index//self.column
     def getcolumn(self,index):
         return index % self.column
-
-    def isCovered(self,i,j):
-        return self.status[self.getindex(i,j)]==0
-    def isOpened(self,i,j):
-        return self.status[self.getindex(i,j)]==1
-    def isFlag(self,i,j):
-        return self.status[self.getindex(i,j)]==2
-    def isMine(self,i,j):
-        return self.num[self.getindex(i,j)]==-1
-    def isOpening(self,i,j):
-        return self.num[self.getindex(i,j)]==0
-    def forceUncover(self,i,j):
-        self.status[self.getindex(i,j)]=1
-    def safeUncover(self,i,j):
-        if self.isCovered(i,j):
-            self.forceUncover(i,j)
-    def forceFlag(self,i,j):
-        self.status[self.getindex(i,j)]=2
-    def forceUnflag(self,i,j):
-        self.status[self.getindex(i,j)]=0
-
+    
     def isCovered(self,index):
         return self.status[index]==0
     def isOpened(self,index):
         return self.status[index]==1
     def isFlag(self,index):
         return self.status[index]==2
+    
     def isMine(self,index):
         return self.num[index]==-1
     def isOpening(self,index):
@@ -89,12 +71,12 @@ class gamestatus(object):
     def columnRange(self,left,right):
         return range(max(0,left),min(self.column,right))
 
-    def adjacent(self,i,j,index):
+    def adjacent3(self,i,j,index):
         return adjacent(i,j,index,self.row,self.column)
-    def adjacent(self,i,j):
-        return self.adjacent(i,j,self.getindex(i,j))
-    def adjacent(self,index):
-        return self.adjacent(self.getrow(index),self.getcolumn(index),index)
+    def adjacent2(self,i,j):
+        return self.adjacent3(i,j,self.getindex(i,j))
+    def adjacent1(self,index):
+        return self.adjacent3(self.getrow(index),self.getcolumn(index),index)
         
     def outOfBorder(self, i, j):
         return i < 0 or i >= self.row or j < 0 or j >= self.column
@@ -109,7 +91,7 @@ class gamestatus(object):
                 r= int(self.tmplist[i]/self.column)
                 c= self.tmplist[i]-r*self.column
                 self.num[self.getindex(r,c)]=-1
-                self.calnumbers(r,c)
+                self.calnumbers(self.getindex(r,c))
 
 
     def renewminearea(self):
@@ -130,8 +112,7 @@ class gamestatus(object):
             self.operationlist,self.tracklist=[],[],
             self.bbbv,self.ops=0,0
 
-    def BFS(self, i, j ,start0):
-        index=self.getindex(i,j)
+    def BFS(self,index,start0):
         if self.isCovered(index):
             self.forceUncover(index)
             self.pixmapindex[index]=self.num[index]
@@ -142,63 +123,58 @@ class gamestatus(object):
                     self.tocheck.append(self.gridquality[index])
         if not self.isMine(index):
             if self.isOpening(index): #左键开op递归
-                for r in self.rowRange(i - 1, i + 2):
-                    for c in self.columnRange(j - 1, j + 2):
-                        if self.isCovered(r,c) and not self.isMine(r,c):
-                            self.forceUncover(r,c)
-                            index=self.getindex(r,c)
-                            self.pixmapindex[index]=self.num[index]
-                            if self.isreplaying():
-                                if self.gridquality[index]<0:
-                                    self.solvedelse+=1
-                                if self.gridquality[index] not in self.tocheck:
-                                    self.tocheck.append(self.gridquality[index])
-                            self.num0queue.put([r,c,start0])
+                for r in self.adjacent1(index):
+                    if self.isCovered(r) and not self.isMine(r):
+                        self.forceUncover(r)
+                        self.pixmapindex[r]=self.num[r]
+                        if self.isreplaying():
+                            if self.gridquality[r]<0:
+                                self.solvedelse+=1
+                            if self.gridquality[r] not in self.tocheck:
+                                self.tocheck.append(self.gridquality[r])
+                        self.num0queue.put([r,start0])
             elif self.recursive(): 
                 flagged=0
-                for r in self.rowRange(i - 1, i + 2):
-                    for c in self.columnRange(j - 1, j + 2):
-                        if self.isFlag(r,c):
-                            flagged+=1
-                if flagged==self.num[self.getindex(i,j)]:
-                    for r in self.rowRange(i - 1, i + 2):
-                        for c in self.columnRange(j - 1, j + 2):
-                            if self.isCovered(r,c) and not self.isMine(r,c):
-                                self.forceUncover(r,c)
-                                index=self.getindex(r,c)
-                                self.pixmapindex[index]=self.num[index]
-                                if self.isreplaying():
-                                    if self.gridquality[index]<0:
-                                        self.solvedelse+=1
-                                    if self.gridquality[index] not in self.tocheck:
-                                        self.tocheck.append(self.gridquality[index])
-                                self.num0queue.put([r,c,start0])
-                            elif self.isMine(r,c) and self.isCovered(r,c):
-                                self.failed=True
-                                self.redmine=[r,c]
+                for r in self.adjacent1(index):
+                    if self.isFlag(index):
+                        flagged+=1
+                if flagged==self.num[index]:
+                    for r in self.adjacent1(index):
+                        if self.isCovered(r) and not self.isMine(r):
+                            self.forceUncover(r)
+                            self.pixmapindex[r]=self.num[r]
+                            if self.isreplaying():
+                                if self.gridquality[r]<0:
+                                    self.solvedelse+=1
+                                if self.gridquality[r] not in self.tocheck:
+                                    self.tocheck.append(self.gridquality[r])
+                            self.num0queue.put([r,start0])
+                        elif self.isMine(r) and self.isCovered(r):
+                            self.failed=True
+                            self.redmine=r
 
-    def doleft(self,i,j):
+    def doleft(self,index):
         self.allclicks[0]+=1
-        if self.isCovered(i,j):
+        if self.isCovered(index):
             self.eclicks[0]+=1
             self.tocheck=[]
-            if not self.isMine(i,j):
+            if not self.isMine(index):
                 self.num0queue=Queue()
-                self.num0queue.put([i,j,self.isOpening(i,j)])
+                self.num0queue.put([index,self.isOpening(index)])
                 while(self.num0queue.empty()==False):
                     getqueuehead=self.num0queue.get()
-                    self.BFS(getqueuehead[0], getqueuehead[1],getqueuehead[2])
+                    self.BFS(getqueuehead[0], getqueuehead[1])
             else:
                 if not self.timeStart and self.gametype==1 :#第一下不能为雷
-                    self.exchange1tolast(i,j)
+                    self.exchange1tolast(index)
                     self.num0queue=Queue()
-                    self.num0queue.put([i,j,self.isOpening(i,j)])
+                    self.num0queue.put([index,self.isOpening(index)])
                     while(self.num0queue.empty()==False):
                         getqueuehead=self.num0queue.get()
-                        self.BFS(getqueuehead[0],getqueuehead[1],getqueuehead[2])        
+                        self.BFS(getqueuehead[0],getqueuehead[1])        
                 else:
                     self.failed=True
-                    self.redmine=[i,j]
+                    self.redmine=index
             if self.isreplaying():
                 if len(self.tocheck)!=0:
                     for s in self.tocheck:
@@ -209,40 +185,39 @@ class gamestatus(object):
                     self.solvedops=self.calsolved(1)
                     self.solvedislands=self.calsolved(2)
 
-    def doright(self,i,j):
+    def doright(self,index):
         self.allclicks[1]+=1
         self.rightfirst=True
-        if self.isCovered(i,j):
-            self.flagonmine(i,j)
-        elif self.isFlag(i,j):
-            self.unflagonmine(i,j)
-        elif self.isOpened(i,j) and not self.isOpening(i,j) and self.canflagnumber():
-            self.flagonnumber(i,j)
+        if self.isCovered(index):
+            self.flagonmine(index)
+        elif self.isFlag(index):
+            self.unflagonmine(index)
+        elif self.isOpened(index) and not self.isOpening(index) and self.canflagnumber():
+            self.flagonnumber(index)
 
-    def pressdouble(self,i,j):
+    def pressdouble(self,index):
         pass
 
-    def dodouble(self,i,j):
+    def dodouble(self,index):
         if self.rightfirst==True:
             self.allclicks[1]-=1
             self.rightfirst=False
         self.allclicks[2]+=1
-        if self.chordingFlag(i, j):
+        if self.chordingFlag(index):
             self.tocheck=[]
             edouble=False
-            for r in self.rowRange(i - 1, i + 2):
-                for c in self.columnRange(j - 1, j + 2):
-                    if self.isCovered(r,c):
-                        edouble=True
-                        if not self.isMine(r,c):
-                            self.num0queue=Queue()
-                            self.num0queue.put([r,c,self.isOpening(r,c)])
-                            while(self.num0queue.empty()==False):
-                                getqueuehead=self.num0queue.get()
-                                self.BFS(getqueuehead[0], getqueuehead[1],getqueuehead[2])
-                        else:
-                            self.failed=True
-                            self.redmine=[r,c]
+            for r in self.adjacent1(index):
+                if self.isCovered(r):
+                    edouble=True
+                    if not self.isMine(r):
+                        self.num0queue=Queue()
+                        self.num0queue.put([r,self.isOpening(r)])
+                        while(self.num0queue.empty()==False):
+                            getqueuehead=self.num0queue.get()
+                            self.BFS(getqueuehead[0], getqueuehead[1])
+                    else:
+                        self.failed=True
+                        self.redmine=r
             if edouble==True:
                 self.eclicks[2]+=1
                 if self.isreplaying():
@@ -256,112 +231,100 @@ class gamestatus(object):
                         self.solvedislands=self.calsolved(2)
 
                         
-    def domove(self,i,j):
-        if not self.outOfBorder(i, j):
+    def domove(self,index):
+        if not self.outOfBorder(self.getrow(index),self.getcolumn(index)):
             self.mouseout=False
-            if (i, j) != self.oldCell and (self.leftAndRightHeld or self.leftHeld):
-                self.oldCell = (i, j)
+            if index != self.oldCell and (self.leftAndRightHeld or self.leftHeld):
+                self.oldCell = index
         elif self.leftAndRightHeld or self.leftHeld:#拖到界外
             self.mouseout=True
 
     def dofinish(self):
-        for i in range(self.row):
-            for j in range(self.column):
-                self.finishpaint(i,j)
+        for i in range(self.row*self.column):
+            self.finishpaint(i)
             
 
-    def exchange1tolast(self,i,j):
-        self.num[self.getindex(i,j)]=0
-        self.num[self.getindex(self.row-1,self.column-1)]=-1
-        for ii in self.rowRange(i - 1, i + 2):
-            for jj in self.columnRange(j - 1, j + 2):
-                if not self.isMine(ii,jj):     
-                    count=0
-                    for rr in self.rowRange(ii - 1, ii + 2):
-                        for cc in self.columnRange(jj - 1, jj + 2):
-                            if self.isMine(rr,cc):
-                                count+=1
-                    self.num[self.getindex(ii,jj)]=count
+    def exchange1tolast(self,index):
+        self.num[index]=0
+        self.num[-1]=-1
+        for ii in self.adjacent1(index):
+            if not self.isMine(ii):     
+                count=0
+                for rr in self.adjacent1(ii):
+                    if self.isMine(rr):
+                        count+=1
+                self.num[ii]=count
         for ii in range(self.row-2, self.row):
             for jj in range(self.column-2, self.column):
-                if not self.isMine(ii,jj):     
+                if not self.isMine(self.getindex(ii,jj)):     
                     count=0
-                    for rr in self.rowRange(ii - 1, ii + 2):
-                        for cc in self.columnRange(jj - 1, jj + 2):
-                            if self.isMine(rr,cc):
-                                count+=1
+                    for rr in self.adjacent2(ii,jj):
+                        if self.isMine(rr):
+                            count+=1
                     self.num[self.getindex(ii,jj)]=count
 
-    def chordingFlag(self, i, j):
+    def chordingFlag(self, index):
         # i, j 周围标雷数是否满足双击的要求
-        if not self.isMine(i,j) and self.isOpened(i,j):
+        if not self.isMine(index) and self.isOpened(index):
             count = 0
-            for r in self.rowRange(i - 1, i + 2):
-                for c in self.columnRange(j - 1, j + 2):
-                    if self.isFlag(r,c):
-                        count += 1
-            if count == 0 and not self.isOpening(i,j):
+            for r in self.adjacent1(index):
+                if self.isFlag(r):
+                    count += 1
+            if count == 0 and not self.isOpening(index):
                 return False
             else:
-                return count == self.num[self.getindex(i,j)]
+                return count == self.num[index]
         else:
             return False
 
-    def flagonmine(self,i,j):
+    def flagonmine(self,index):
         self.eclicks[1]+=1
         self.allclicks[3]+=1
         self.rightfirst=False
-        self.forceFlag(i,j)
-        self.pixmapindex[self.getindex(i,j)]=10
+        self.forceFlag(index)
+        self.pixmapindex[index]=10
 
-    def unflagonmine(self,i,j):
+    def unflagonmine(self,index):
         self.eclicks[1]+=1
         self.allclicks[3]-=1
         self.rightfirst=False
-        self.forceUnflag(i,j)
-        self.pixmapindex[self.getindex(i,j)]=9
+        self.forceUnflag(index)
+        self.pixmapindex[index]=9
 
-    def flagonnumber(self,i,j):
+    def flagonnumber(self,index):
         count=0
-        for r in self.rowRange(i - 1, i + 2):
-            for c in self.columnRange(j - 1, j + 2):
-                if self.isCovered(r,c) or self.isFlag(r,c):
-                    count += 1
-        if count== self.num[self.getindex(i,j)]:
+        for r in self.adjacent1(index):
+            if self.isCovered(r) or self.isFlag(r):
+                count += 1
+        if count== self.num[index]:
             eright=False
-            for r in self.rowRange(i - 1, i + 2):
-                for c in self.columnRange(j - 1, j + 2):
-                    if self.isCovered(r,c):
-                        self.forceFlag(r,c)
-                        self.pixmapindex[self.getindex(r,c)]=10
-                        self.allclicks[3]+=1
-                        self.rightfirst=False
-                        eright=True
+            for r in self.adjacent1(index):
+                if self.isCovered(r):
+                    self.forceFlag(r)
+                    self.pixmapindex[r]=10
+                    self.allclicks[3]+=1
+                    self.rightfirst=False
+                    eright=True
             if eright==True:
                 self.eclicks[1]+=1
                 
-    def findopis_bfs(self,i,j,num):
-        index=self.getindex(i,j)
+    def findopis_bfs(self,index,num):
         if num==1:#op模式    
-            if self.isOpening(i,j):
+            if self.isOpening(index):
                 self.num0get+=1
-                for ii in self.rowRange(i-1,i+2):
-                    for jj in self.columnRange(j-1,j+2):
-                        index=self.getindex(ii,jj)
-                        if self.gridquality[index]!=self.ops and not self.isMine(ii,jj):
-                            self.gridquality[index]=self.ops
-                            self.thisop.append(index)
-                            self.num0queue.put([ii,jj])
+                for ii in self.adjacent1(index):
+                    if self.gridquality[ii]!=self.ops and not self.isMine(ii):
+                        self.gridquality[ii]=self.ops
+                        self.thisop.append(ii)
+                        self.num0queue.put([ii])
         elif num==2:
-            if not self.isMine(i,j):
-                for ii in self.rowRange(i-1,i+2):
-                    for jj in self.columnRange(j-1,j+2):
-                        index=self.getindex(ii,jj)
-                        if self.gridquality[index]==0 and not self.isMine(ii,jj):
-                            self.bvget+=1
-                            self.gridquality[index]=-self.islands
-                            self.thisis.append(index)
-                            self.num0queue.put([ii,jj])
+            if not self.isMine(index):
+                for ii in self.adjacent1(index):
+                    if self.gridquality[ii]==0 and not self.isMine(ii):
+                        self.bvget+=1
+                        self.gridquality[ii]=-self.islands
+                        self.thisis.append(ii)
+                        self.num0queue.put([ii])
                     
 
     def cal_3bv(self):
@@ -369,38 +332,33 @@ class gamestatus(object):
         self.bvget,self.num0get,num0=0,0,0
         self.replayoplist,self.replayislist=[],[]
         self.gridquality = [0]*(self.row*self.column)#格子性质，0为雷或未标记，正数A为第A个op,负数-B为第B个is
-        for i in range(self.row):#对0格计数
-            for j in range(self.column):
-                if self.isOpening(i,j):
-                    num0+=1
-        for i in range(self.row):
-            for j in range(self.column):
-                index=self.getindex(i,j)
-                if self.num0get==num0:#所有0被标记，标志op计算完全，终止
-                    break
-                if self.isOpening(i,j):
-                    if self.gridquality[index]==0:
-                        self.ops+=1#找到新的op
-                        self.thisop=[0]
-                        self.num0queue=Queue()
-                        self.num0queue.put([i,j])
-                        while(self.num0queue.empty()==False):
-                            getqueuehead=self.num0queue.get()
-                            self.findopis_bfs(getqueuehead[0], getqueuehead[1],1)
-                        self.replayoplist.append(self.thisop)
-        #此时所有的op及op边缘都被标记，剩下的数字一定是bv
-        for i in range(self.row):
-            for j in range(self.column):
-                index=self.getindex(i,j)
-                if not self.isMine(i,j) and  self.gridquality[index]==0:
-                    self.islands+=1
-                    self.thisis=[0]
+        for i in range(self.row*self.column):#对0格计数
+            if self.isOpening(i):
+                num0+=1
+        for i in range(self.row*self.column):
+            if self.num0get==num0:#所有0被标记，标志op计算完全，终止
+                break
+            if self.isOpening(i):
+                if self.gridquality[i]==0:
+                    self.ops+=1#找到新的op
+                    self.thisop=[0]
                     self.num0queue=Queue()
-                    self.num0queue.put([i,j])
+                    self.num0queue.put([i])
                     while(self.num0queue.empty()==False):
                         getqueuehead=self.num0queue.get()
-                        self.findopis_bfs(getqueuehead[0], getqueuehead[1],2)
-                    self.replayislist.append(self.thisis)
+                        self.findopis_bfs(getqueuehead[0], 1)
+                    self.replayoplist.append(self.thisop)
+        #此时所有的op及op边缘都被标记，剩下的数字一定是bv
+        for i in range(self.row*self.column):
+            if not self.isMine(i) and  self.gridquality[i]==0:
+                self.islands+=1
+                self.thisis=[0]
+                self.num0queue=Queue()
+                self.num0queue.put([i])
+                while(self.num0queue.empty()==False):
+                    getqueuehead=self.num0queue.get()
+                    self.findopis_bfs(getqueuehead[0], 2)
+                self.replayislist.append(self.thisis)
         self.bbbv=self.bvget+self.ops
 
     def issolved(self,num,index):
@@ -457,11 +415,10 @@ class gamestatus(object):
         else:
             return 'Flag'
 
-    def calnumbers(self,r,c):
-        for i in self.rowRange(r - 1, r + 2):
-            for j in self.columnRange(c - 1, c + 2):
-                if not self.isMine(i,j):
-                    self.num[self.getindex(i,j)] += 1
+    def calnumbers(self,index):
+        for i in self.adjacent1(index):
+            if not self.isMine(i):
+                self.num[i] += 1
 
     def addoperation(self,num,i,j):
         if self.timeStart==False:
@@ -479,7 +436,7 @@ class gamestatus(object):
         boardlist=[self.column,self.row,self.mineNum//256,self.mineNum%256]
         for i in range(self.row):
             for j in range(self.column):
-                if self.isMine(i,j):
+                if self.isMine(self.getindex(i,j)):
                     boardlist+=[j,i]
         return boardlist
 
@@ -598,15 +555,14 @@ class gamestatus(object):
         self.gamemode=mode
         return self.gamemode
 
-    def finishpaint(self,i,j):
-        index=self.getindex(i,j)
+    def finishpaint(self,index):
         if self.result==2:
-            if i==self.redmine[0] and j==self.redmine[1]:
+            if index==self.redmine:
                 self.pixmapindex[index]=13
-            elif self.isMine(i,j) and not self.isFlag(i,j):
+            elif self.isMine(index) and not self.isFlag(index):
                 self.pixmapindex[index]=11
-            elif self.isFlag(i,j) and not self.isMine(i,j):
+            elif self.isFlag(index) and not self.isMine(index):
                 self.pixmapindex[index]=12
         elif self.result==1:
-            if self.isMine(i,j) and not self.isFlag(i,j):
+            if self.isMine(index) and not self.isFlag(index):
                 self.pixmapindex[index]=14
