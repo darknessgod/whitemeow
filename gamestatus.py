@@ -54,6 +54,27 @@ class gamestatus(object):
         self.status[self.getindex(i,j)]=2
     def forceUnflag(self,i,j):
         self.status[self.getindex(i,j)]=0
+
+    def isCovered(self,index):
+        return self.status[index]==0
+    def isOpened(self,index):
+        return self.status[index]==1
+    def isFlag(self,index):
+        return self.status[index]==2
+    def isMine(self,index):
+        return self.num[index]==-1
+    def isOpening(self,index):
+        return self.num[index]==0
+    def forceUncover(self,index):
+        self.status[index]=1
+    def safeUncover(self,index):
+        if self.isCovered(index):
+            self.forceUncover(index)
+    def forceFlag(self,index):
+        self.status[index]=2
+    def forceUnflag(self,index):
+        self.status[index]=0
+
     def rowRange(self,top,bottom):
         return range(max(0,top),min(self.row,bottom))
     def columnRange(self,left,right):
