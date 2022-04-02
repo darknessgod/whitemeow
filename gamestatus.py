@@ -54,6 +54,27 @@ class gamestatus(object):
         self.status[self.getindex(i,j)]=2
     def forceUnflag(self,i,j):
         self.status[self.getindex(i,j)]=0
+
+    def isCovered(self,index):
+        return self.status[index]==0
+    def isOpened(self,index):
+        return self.status[index]==1
+    def isFlag(self,index):
+        return self.status[index]==2
+    def isMine(self,index):
+        return self.num[index]==-1
+    def isOpening(self,index):
+        return self.num[index]==0
+    def forceUncover(self,index):
+        self.status[index]=1
+    def safeUncover(self,index):
+        if self.isCovered(index):
+            self.forceUncover(index)
+    def forceFlag(self,index):
+        self.status[index]=2
+    def forceUnflag(self,index):
+        self.status[index]=0
+
     def rowRange(self,top,bottom):
         return range(max(0,top),min(self.row,bottom))
     def columnRange(self,left,right):
@@ -94,17 +115,17 @@ class gamestatus(object):
             self.bbbv,self.ops=0,0
 
     def BFS(self, i, j ,start0):
-        if self.isCovered(i,j):
-            self.forceUncover(i,j)
-            index=self.getindex(i,j)
+        index=self.getindex(i,j)
+        if self.isCovered(index):
+            self.forceUncover(index)
             self.pixmapindex[index]=self.num[index]
             if self.isreplaying():
                 if self.gridquality[index]<0:
                     self.solvedelse+=1
                 if self.gridquality[index] not in self.tocheck:
                     self.tocheck.append(self.gridquality[index])
-        if not self.isMine(i,j):
-            if self.isOpening(i,j): #左键开op递归
+        if not self.isMine(index):
+            if self.isOpening(index): #左键开op递归
                 for r in self.rowRange(i - 1, i + 2):
                     for c in self.columnRange(j - 1, j + 2):
                         if self.isCovered(r,c) and not self.isMine(r,c):
