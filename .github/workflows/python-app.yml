@@ -33,7 +33,7 @@ jobs:
       run: |
         pyinstaller --hidden-import pywintypes -F main.py
         cp media/* dist/media
-        cp MS-Texture/svg/* dist/MS-Texture/svg
+        cp MS-Texture/* dist/MS-Texture/
     
     # upload the result package as an artifact
     - name: Upload artifacts
