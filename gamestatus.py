@@ -115,17 +115,17 @@ class gamestatus(object):
             self.bbbv,self.ops=0,0
 
     def BFS(self, i, j ,start0):
-        if self.isCovered(i,j):
-            self.forceUncover(i,j)
-            index=self.getindex(i,j)
+        index=self.getindex(i,j)
+        if self.isCovered(index):
+            self.forceUncover(index)
             self.pixmapindex[index]=self.num[index]
             if self.isreplaying():
                 if self.gridquality[index]<0:
                     self.solvedelse+=1
                 if self.gridquality[index] not in self.tocheck:
                     self.tocheck.append(self.gridquality[index])
-        if not self.isMine(i,j):
-            if self.isOpening(i,j): #左键开op递归
+        if not self.isMine(index):
+            if self.isOpening(index): #左键开op递归
                 for r in self.rowRange(i - 1, i + 2):
                     for c in self.columnRange(j - 1, j + 2):
                         if self.isCovered(r,c) and not self.isMine(r,c):
