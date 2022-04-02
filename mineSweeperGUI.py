@@ -19,7 +19,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.setupUi(self.mainWindow)
         self.game=gamestatus.gamestatus(16,16,40,self.options.settings)
         self.gridsize=32
-        self.game.oldCell = (0, 0)  # 鼠标的上个停留位置，用于绘制按下去时的阴影
+        self.game.oldCell = 0  # 鼠标的上个停留位置，用于绘制按下去时的阴影
 
         self.counterWindow =None
         self.counterui=None
@@ -171,7 +171,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
             if not self.game.isreplaying():
                 self.game.addoperation(1,i,j)
             self.game.leftHeld = True
-            self.game.oldCell = (i, j)
+            self.game.oldCell = self.game.getindex(i, j)
             self.label.update()
 
     def mineAreaLeftRelease(self, i, j):
@@ -181,7 +181,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
             self.game.leftHeld = False  # 防止双击中的左键弹起被误认为真正的左键弹起
             if not self.game.outOfBorder(i, j) and not self.finish:
                 self.game.failed=False
-                self.game.doleft(i,j)
+                self.game.doleft(self.game.getindex(i, j))
                 self.changecounter(1)
                 if not self.game.timeStart:
                     self.game.timeStart = True
@@ -199,7 +199,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         if not self.finish:
             if not self.game.isreplaying():
                 self.game.addoperation(3,i,j)
-            self.game.doright(i,j)
+            self.game.doright(self.game.getindex(i, j))
             self.label.update()
             self.showminenum(self.game.mineNum-self.game.allclicks[3])
             self.changecounter(1)
@@ -214,8 +214,8 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
             if not self.game.isreplaying():
                 self.game.addoperation(5,i,j)
             self.game.leftAndRightHeld = True
-            self.game.oldCell = (i, j)
-            self.game.pressdouble(i,j)
+            self.game.oldCell = self.game.getindex(i, j)
+            self.game.pressdouble(self.game.getindex(i, j))
             self.label.update()
 
     def mineAreaLeftAndRightRelease(self, i, j):
@@ -226,7 +226,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
                 self.game.addoperation(6,i,j)
             if not self.game.outOfBorder(i, j):
                 self.game.failed=False
-                self.game.dodouble(i,j)
+                self.game.dodouble(self.game.getindex(i, j))
                 self.changecounter(1)
                 self.label.update()
                 if self.game.failed==True:
@@ -236,7 +236,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
 
     def mineMouseMove(self, i, j):
         if not self.finish:
-            self.game.domove(i,j)
+            self.game.domove(self.game.getindex(i,j))
             self.label.update()
  
     def gamereStart(self):
@@ -325,10 +325,9 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         #print(self.game.tracklist)
 
     def isGameFinished(self):
-        for i in range(self.game.row):
-            for j in  range(self.game.column):
-                if not self.game.isOpened(i,j) and not self.game.isMine(i,j):
-                    return False
+        for i in range(self.game.row*self.game.column):
+            if not self.game.isOpened(i) and not self.game.isMine(i):
+                return False
         return True
 
     def gameWin(self):
