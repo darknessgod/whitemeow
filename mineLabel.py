@@ -1,7 +1,7 @@
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtGui import QPainter,QPixmap
 from constants import *
-
+import time
 
 
 class mineLabel (QtWidgets.QLabel):
@@ -94,38 +94,32 @@ class mineLabel (QtWidgets.QLabel):
         if self.game.isreplaying():
             mouse=(self.game.cursorplace[0]//100,self.game.cursorplace[1]//100)
         else:
-            mouse=[*self.game.oldCell]
+            index=self.game.oldCell
+            r=self.game.getrow(index)
+            c=self.game.getcolumn(index)
+            mouse=(r,c)
         for i in range(self.game.row):
             for j in range(self.game.column):
-                painter.drawPixmap(j*size,i*size,self.pixmaps[self.getPixmapIndex(i,j,mouse)])
+                index=self.game.pixmapindex[i*self.game.column+j]
+                painter.drawPixmap(j*size,i*size,self.pixmaps[index])
+        for i in self.game.rowRange(mouse[0] - 1, mouse[0]+ 2):
+            for j in self.game.columnRange(mouse[1] - 1, mouse[1]+ 2):
+                index=self.getPixmapIndex(i,j,mouse)
+                if index!=None:
+                    painter.drawPixmap(j*size,i*size,self.pixmaps[index])
         if self.game.isreplaying():
             painter.drawPixmap(self.game.cursorplace[1]*size//100,self.game.cursorplace[0]*size//100,self.pixmaps[15])
         painter.end()
         
-    def getPixmapIndex(self,i, j,mouse):
-        if self.game.isCovered(i,j) and self.game.leftAndRightHeld and self.quxinlinyu(i,j,mouse[0],mouse[1]) and not self.game.mouseout:
-                index=0
-        elif self.game.isCovered(i,j) and self.game.leftHeld and i==mouse[0] and j==mouse[1] and not self.game.mouseout:
-                index=0
-        elif self.game.isFlag(i,j):
-            index=10
-        elif self.game.isCovered(i,j):
-            index=9
-        else:
-            index=self.game.num[self.game.getindex(i,j)]
-        if self.game.finish:
-            if self.game.result==2:
-                if i==self.game.redmine[0] and j==self.game.redmine[1]:
-                    index=13
-                elif self.game.isMine(i,j) and not self.game.isFlag(i,j):
-                    index=11
-                elif self.game.isFlag(i,j) and not self.game.isMine(i,j):
-                    index=12
-            elif self.game.result==1:
-                if self.game.isMine(i,j) and not self.game.isFlag(i,j):
-                    index=14
-        return index
+    def getPixmapIndex(self,i,j,mouse):
+        index=self.game.getindex(i,j)
+        if self.game.isCovered(index) and self.game.leftAndRightHeld and smallfuc.linyu(i,j,mouse[0],mouse[1]) and not self.game.mouseout:
+                return 0
+        elif self.game.isCovered(index) and self.game.leftHeld and i==mouse[0] and j==mouse[1] and not self.game.mouseout:
+                return 0
+
+    
+
+
                 
-    @staticmethod
-    def quxinlinyu(i,j,r,c):
-        return abs(i-r)<=1 and abs(j-c)<=1 and not (i==r and j==c)
+
