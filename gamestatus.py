@@ -2,6 +2,7 @@ import random
 import time
 from queue import Queue
 from readdata import *
+from constants import adjacent
 
 class gamestatus(object):
     def __init__(self,row,column,mines,settings):
@@ -35,6 +36,14 @@ class gamestatus(object):
         return bool(self.gamemode&1)
     def isreplaying(self):
         return self.gametype==4
+
+    def getindex(self,i,j):
+        return i*self.column+j
+    def getrow(self,index):
+        return index//self.column
+    def getcolumn(self,index):
+        return index % self.column
+
     def isCovered(self,i,j):
         return self.status[self.getindex(i,j)]==0
     def isOpened(self,i,j):
@@ -80,6 +89,13 @@ class gamestatus(object):
     def columnRange(self,left,right):
         return range(max(0,left),min(self.column,right))
 
+    def adjacent(self,i,j,index):
+        return adjacent(i,j,index,self.row,self.column)
+    def adjacent(self,i,j):
+        return self.adjacent(i,j,self.getindex(i,j))
+    def adjacent(self,index):
+        return self.adjacent(self.getrow(index),self.getcolumn(index),index)
+        
     def outOfBorder(self, i, j):
         return i < 0 or i >= self.row or j < 0 or j >= self.column
 
@@ -573,8 +589,7 @@ class gamestatus(object):
                 return tempturple
             self.replaynodes[0]+=1
 
-    def getindex(self,i,j):
-        return i*self.column+j
+    
 
     def modejudge(self):
         mode=0
