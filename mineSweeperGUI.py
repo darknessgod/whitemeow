@@ -297,13 +297,13 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.timer.stop()
         if not self.game.isreplaying():
             self.game.cal_3bv()
-            for i in range(self.game.ops):
-                self.game.issolved(1,i)
-            for i in range(self.game.islands):
-                self.game.issolved(2,i)
-        self.game.solvedops=self.game.calsolved(1)
-        self.game.solvedislands=self.game.calsolved(2)
-        self.game.solvedelse=self.game.calsolved(3)
+            #for i in range(self.game.ops):
+                #self.game.issolved(1,i)
+            #for i in range(self.game.islands):
+                #self.game.issolved(2,i)
+        self.game.solvedops=self.game.ops
+        self.game.solvedislands=self.game.islands
+        self.game.solvedelse=self.game.bbbv-self.game.ops
         if result==1:
             if self.game.gametype==1:
                 self.game.gamenum+=1
