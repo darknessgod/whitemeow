@@ -19,6 +19,7 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
        
+
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Meowsweeper Arbiter"))
@@ -179,7 +180,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout3.setContentsMargins(0, 0, 0, 0)
         self.labeltag = QtWidgets.QLabel(self.frame_3)#
         self.labeltag.setObjectName("labeltag")
-        self.resetplayertag()
+        self.labeltag.setText('fairy')
         self.labeltag.setAlignment(QtCore.Qt.AlignCenter)
         self.labeltag.setFixedHeight(22)
         self.labeltag.setStyleSheet("background-color:white;font-size:16px;font-family:YF补 汉仪夏日体;")
@@ -301,12 +302,3 @@ class Ui_MainWindow(object):
         self.datas=readdata.readdata()
         self.datas.readstats()
         self.datas.getrecords()
-        self.options=readdata.readsettings()
-        self.options.readsettings()
-        
-
-    def resetplayertag(self):
-        if self.options.settings['showplayertag']==True:
-            self.labeltag.setText(self.options.settings['defaultplayertag'])
-        else:
-            self.labeltag.setText(' ')
