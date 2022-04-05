@@ -10,7 +10,6 @@ class MainWindow(QtWidgets.QMainWindow):
   
     def closeEvent(self, event):
   
-  
         self.closeEvent_.emit()
 
     def wheelEvent(self, event):
@@ -37,6 +36,12 @@ class MainWindow(QtWidgets.QMainWindow):
 class meowcounter(QtWidgets.QMainWindow):
 
     closeEvent2 = QtCore.pyqtSignal()
-
     def closeEvent(self, event):
         self.closeEvent2.emit()
+
+class meowsettings(QtWidgets.QDialog):
+    
+    closeEvent3 = QtCore.pyqtSignal()
+    def closeEvent(self, event):
+        self.closeEvent3.emit()
+    
