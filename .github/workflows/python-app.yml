@@ -32,7 +32,7 @@ jobs:
     - name: Package meowsweeper
       run: |
         pyinstaller --hidden-import pywintypes -F main.py
-        cp media/* dist/media -Recurse
+        cp media/* dist/media/ -Recurse
         cp MS-Texture/* dist/MS-Texture/ -Recurse
     
     # upload the result package as an artifact
