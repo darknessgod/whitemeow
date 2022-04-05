@@ -34,7 +34,7 @@ class mineLabel (QtWidgets.QLabel):
         self.pixmaps[11]=QPixmap(CELL_PATH+"cellmine.svg")
         self.pixmaps[12]=QPixmap(CELL_PATH+"falsemine.svg")
         self.pixmaps[13]=QPixmap(CELL_PATH+"blast.svg")
-        self.pixmaps[14]=QPixmap("./media/svg/cellunflagged.svg")
+        self.pixmaps[14]=QPixmap("media/svg/cellunflagged.svg")
         self.pixmaps[15]=QPixmap(ELEMENT_PATH+"arrowcursor.svg")
         for i in range(15):
             self.pixmaps[i]=self.pixmaps[i].scaled(targetsize,targetsize)
