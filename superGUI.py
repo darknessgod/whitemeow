@@ -54,7 +54,7 @@ class Ui_MainWindow(object):
             ledlist[1]=str((minenum%100)//10)
             ledlist[2]=str((minenum)%10)
         for i in range(len(ledlist)):
-            filename='media/LED'
+            filename='./media/LED'
             filename+=ledlist[i]
             filename+='.png'
             pixmap = QtGui.QPixmap(filename)
@@ -69,7 +69,7 @@ class Ui_MainWindow(object):
         ledlist[1]=str((minenum%100)//10)
         ledlist[2]=str((minenum)%10)
         for i in range(len(ledlist)):
-            filename='media/LED'
+            filename='./media/LED'
             filename+=ledlist[i]
             filename+='.png'
             pixmap = QtGui.QPixmap(filename)
