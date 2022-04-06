@@ -8,38 +8,38 @@ from constants import adjacent
 class gamestatus(object):
     def __init__(self,row,column,mines,settings):
         self.settings=settings
-        self.row,self.column,self.mineNum=row,column,mines
-        self.failed,self.timeStart,self.finish,self.mouseout,self.result=False,False,False,False,0
-        self.redmine=0
+        self.row,self.column,self.mineNum=row,column,mines # height=row, width=column, mines=mineNum
+        self.failed,self.timeStart,self.finish,self.mouseout,self.result=False,False,False,False,0 # some flags for events
+        self.redmine=0 # blast
         self.oldCell=0
         self.replayboardinfo=[]
         self.tmplist=[i for i in range(self.column*self.row-1)]
         self.gamemode,self.gametype=self.modejudge(),1
-        self.leftHeld,self.rightHeld,self.leftAndRightHeld,self.rightfirst=False,False,False,False
+        self.leftHeld,self.rightHeld,self.leftAndRightHeld,self.rightfirst=False,False,False,False # mouse status
         self.path,self.gamenum,self.ranks=0,0,[0,0,0]
         self.starttime,self.intervaltime,self.endtime,self.oldinttime=0,0,0,0
         self.num0seen,self.islandseen,self.isbv=[],[],[]
         self.num0get,self.bvget=0,0
-        self.ops,self.solvedops,self.bbbv,self.solvedbbbv,self.solvedelse,self.islands,self.solvedislands=0,0,0,0,0,0,0
-        self.allclicks,self.eclicks=[0,0,0,0],[0,0,0]
+        self.ops,self.solvedops,self.bbbv,self.solvedbbbv,self.solvedelse,self.islands,self.solvedislands=0,0,0,0,0,0,0 # (solved) openings, (solved) bbbv, (solved) islands. solvedelse = solvedbbbv-solvedops
+        self.allclicks,self.eclicks=[0,0,0,0],[0,0,0] # clicks and efficient clicks
         self.operationlist,self.tracklist,self.replay,self.pathlist=[],[],[],[]
-        self.replayoplist,self.replayislist=[],[]
+        self.replayoplist,self.replayislist=[],[] # contain indices of cells in each opening/island
         self.replaynodes,self.cursorplace=[0,0],[0,0]
         self.thisop,self.thisis=[],[]
-        self.num = [0]*(self.row*self.column) # -1雷，0-8数字
-        self.status = [0]*(self.row*self.column) # 0未开 1打开 2标雷
+        self.num = [0]*(self.row*self.column) # mine=-1, numbers=0,1,2,3,4,5,6,7,8
+        self.status = [0]*(self.row*self.column) # covered=0, opened=1, flagged=2
         self.pixmapindex = [9]*(self.row*self.column)
-        # self.num0queue=Queue()
         self.counter=None
-        self.tocheck=set()
+        self.tocheck=set() # openings and islands to update
 
-    def recursive(self):
+    def recursive(self): # recursive chord
         return bool(self.gamemode&1)
-    def canflagnumber(self):
+    def canflagnumber(self): # fast flag
         return bool(self.gamemode&1)
     def isreplaying(self):
         return self.gametype==4
 
+    # index conversion
     def getindex(self,i,j):
         return i*self.column+j
     def getrow(self,index):
@@ -47,6 +47,7 @@ class gamestatus(object):
     def getcolumn(self,index):
         return index % self.column
     
+    # check cell status
     def isCovered(self,index):
         return self.status[index]==0
     def isOpened(self,index):
@@ -58,6 +59,7 @@ class gamestatus(object):
     def isOpening(self,index):
         return self.num[index]==0
         
+    # cell operations
     def forceUncover(self,index):
         #print("uncovering ", index)
         self.status[index]=1
@@ -84,11 +86,13 @@ class gamestatus(object):
     def forceUnflag(self,index):
         self.status[index]=0
 
+    # in-border ranges
     def rowRange(self,top,bottom):
         return range(max(0,top),min(self.row,bottom))
     def columnRange(self,left,right):
         return range(max(0,left),min(self.column,right))
 
+    # adjacent cells
     def adjacent3(self,i,j,index):
         return adjacent(i,j,index,self.row,self.column)
     def adjacent2(self,i,j):
@@ -96,8 +100,11 @@ class gamestatus(object):
     def adjacent1(self,index):
         return self.adjacent3(self.getrow(index),self.getcolumn(index),index)
         
+    # border check
     def outOfBorder(self, i, j):
         return i < 0 or i >= self.row or j < 0 or j >= self.column
+    def outOfBorder1(self,index):
+        return self.outOfBorder(self.getrow(index), self.getcolumn(index))
 
     def createMine(self,mode):    
         num = self.mineNum
@@ -214,7 +221,6 @@ class gamestatus(object):
                         self.getOpening(i)
             if self.isreplaying():
                 self.checkSolved()
-
                         
     def domove(self,index):
         if not self.outOfBorder(self.getrow(index),self.getcolumn(index)):
