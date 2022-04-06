@@ -227,7 +227,6 @@ class gamestatus(object):
     def dofinish(self):
         for i in range(self.row*self.column):
             self.finishpaint(i)
-            
 
     def exchange1tolast(self,index):
         if self.isMine(index):
@@ -337,6 +336,14 @@ class gamestatus(object):
                 self.replayislist.append(thisis)
                 #print("index = ",-self.islands, "content = ", thisis)
         return
+
+    def cal_3bv_solved(self):
+        self.cal_3bv()
+        self.tocheck=set()
+        for index in range(self.row*self.column):
+            if self.isOpened(index):
+                self.tocheck.add(self.gridquality[index])
+        self.checkSolved()
 
     def checkSolved(self):
         for index in self.tocheck:
