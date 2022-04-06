@@ -41,8 +41,8 @@ class Counter(object):
         eclicks=sum(self.game.eclicks)
         if status==2:
             rt=self.game.intervaltime
-            allbv=int(self.game.bbbv)
-            solvedbv=int(self.game.solvedbbbv)
+            allbv=self.game.bbbv
+            solvedbv=self.game.solvedelse+self.game.solvedops
             if eclicks==0:
                 ioe,corr,thrp=0,0,0
             else:
@@ -89,7 +89,7 @@ class Counter(object):
     def closecounter(self):
         pass
 
-class calbbbvThread(Qt.QThread):  # 游戏过程中刷新计数器的线程
+'''class calbbbvThread(Qt.QThread):  # 游戏过程中刷新计数器的线程
 
     trigger = QtCore.pyqtSignal()
 
@@ -105,7 +105,7 @@ class calbbbvThread(Qt.QThread):  # 游戏过程中刷新计数器的线程
                 self.game.cal_3bv()
             else:
                 time.sleep(0.03)
-            k0=k1
+            k0=k1'''
 
 
 
