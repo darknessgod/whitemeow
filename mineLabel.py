@@ -60,7 +60,7 @@ class mineLabel (QtWidgets.QLabel):
         #每个标签的鼠标事件发射给槽的都是自身的坐标
         #所以获取释放点相对本标签的偏移量，矫正发射的信号
         # print('抬起位置{}, {}'.format(xx, yy))
-        if not self.game.isreplaying():
+        if not self.game.isreplaying() and not self.game.settings['instantclick']:
             xx = int(e.localPos().x())
             yy = int(e.localPos().y())
             if self.leftAndRightClicked:

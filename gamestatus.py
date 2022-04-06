@@ -126,6 +126,7 @@ class gamestatus(object):
         self.intervaltime,self.oldinttime =0,0
         self.allclicks,self.eclicks=[0,0,0,0],[0,0,0]
         self.leftAndRightHeld,self.leftHeld,self.rightfirst,self.rightHeld=False,False,False,False
+        self.gamemode=self.modejudge()
         if not self.isreplaying():
             self.operationlist,self.tracklist=[],[],
             self.bbbv,self.ops=0,0
@@ -153,7 +154,12 @@ class gamestatus(object):
             next=q.get()
             if self.isOpening(next):
                 for i in self.adjacent1(next):
-                    if self.unCovered(i):
+                    if not self.isCovered(i):
+                        continue
+                    elif self.isMine(i):
+                        self.failed=True
+                        self.redmine=i
+                    else:
                         self.forceUncover(i)
                         q.put(i)
 
@@ -204,6 +210,8 @@ class gamestatus(object):
             else:
                 for i in self.adjacent1(index):
                     self.safeUncover(i)
+                    if self.isOpening(i):
+                        self.getOpening(i)
             if self.isreplaying():
                 self.checkSolved()
 
@@ -523,7 +531,7 @@ class gamestatus(object):
 
     def modejudge(self):
         mode=0
-        if self.settings['enablerec']==True:
+        if self.settings['enablerec']:
             mode+=1
         self.gamemode=mode
         return self.gamemode
@@ -537,5 +545,6 @@ class gamestatus(object):
             elif self.isFlag(index) and not self.isMine(index):
                 self.pixmapindex[index]=12
         elif self.result==1:
-            if self.isMine(index) and not self.isFlag(index):
-                self.pixmapindex[index]=14
+            if self.settings['endflagall']:
+                if self.isMine(index) and not self.isFlag(index):
+                    self.pixmapindex[index]=14

@@ -15,6 +15,8 @@ class Ui_SettingDialog (object):
     def __init__(self,window,options):
         self.Dialog = window
         self.options=options
+        self.currentpage=0
+        self.initialized=False
         self.tmpsettings=copy.deepcopy(self.options.settings)
         self.setupUi ()
         self.Dialog.setWindowIcon (QtGui.QIcon ("media/mine.ico"))
@@ -51,12 +53,15 @@ class Ui_SettingDialog (object):
         self.verticalLayout2.addWidget(iconlabel)
         self.verticalLayout2.setSpacing(2)
         for i in range(len(menunames)):
-            self.menulabels[i]=statusLabel.StatusLabel(self.setmenuwidget)
+            self.menulabels[i]=statusLabel.menuLabel(self.setmenuwidget)
             self.menulabels[i].resize=(100,25)
             self.menulabels[i].setText(' %s'%(menunames[i]))
             self.menulabels[i].setAlignment(QtCore.Qt.AlignLeft)
             self.menulabels[i].setStyleSheet("font-size:18px;")
+            self.menulabels[i].leftRelease.connect(self.showsettings)
+            self.menulabels[i].menunum=i
             self.verticalLayout2.addWidget(self.menulabels[i])
+        self.menulabels[2].setEnabled(False)
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout2.addWidget (self.setmenuwidget)
         self.horizontalLayout2.addStretch(1)
@@ -91,8 +96,6 @@ class Ui_SettingDialog (object):
         self.verticalLayout.addWidget (self.widget_2)
         self.verticalLayout.setContentsMargins(10, 10, 10, 10)
         self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
-        
-        
         self.retranslateUi ()
         #-QtCore.QMetaObject.connectSlotsByName (self.Dialog)
         #self.setParameter ()
@@ -106,9 +109,12 @@ class Ui_SettingDialog (object):
         self.pushButton4.setText (_translate ("Dialog", "确定"))
 
     def showsettings(self,menunum):
+        if self.initialized==True:
+            self.tmpsavesettings(self.currentpage)
         for i in range(self.verticalLayout3.count()): 
             self.verticalLayout3.itemAt(i).widget().deleteLater()
         self.menulabels[menunum].setStyleSheet("background-color:blue;color:white;font-size:18px;")
+        self.menulabels[self.currentpage].setStyleSheet("color:black;font-size:18px;")
         self.titlelabel=QtWidgets.QLabel(self.coreframe)
         self.titlelabel.setFixedSize(400,35)
         self.titlelabel.setAlignment(QtCore.Qt.AlignCenter)
@@ -120,10 +126,8 @@ class Ui_SettingDialog (object):
             self.titlelabel.setText(' %s'%('玩家设置'))
             self.freshcheckBox=self.createcheckbox(self.coreframe,'显示玩家标识',self.tmpsettings['showplayertag'])
             self.verticalLayout3.addWidget(self.freshcheckBox)
-            self.playertag = QtWidgets.QLineEdit(self.coreframe)
+            self.playertag = self.createlineedit(self.coreframe,self.tmpsettings['defaultplayertag'],30)
             self.playertag.setEnabled(self.freshcheckBox.isChecked())
-            self.playertag.setText(self.tmpsettings['defaultplayertag'])
-            self.playertag.setMaxLength(30)
             self.verticalLayout3.addWidget(self.playertag)
             self.playernametext = QtWidgets.QLabel(self.coreframe)
             self.playernametext.setText('录像玩家姓名')
@@ -143,12 +147,45 @@ class Ui_SettingDialog (object):
             for i in range(4):
                 self.modenamelabels[i] = QtWidgets.QLineEdit(self.coreframe2)
                 self.modenamelabels[i].setText(levelnames[i])
+                self.modenamelabels[i].setMaxLength(5)
                 self.horizontalLayout3.addWidget(self.modenamelabels[i])
             self.horizontalLayout3.setSpacing(1)
             self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
             self.verticalLayout3.addWidget(self.coreframe2)
             self.reccheckBox = self.createcheckbox(self.coreframe,'启用递归双击和快速标雷(推荐)',self.tmpsettings['enablerec'])
             self.verticalLayout3.addWidget(self.reccheckBox)
+        elif menunum==1:
+            self.titlelabel.setText(' %s'%('游戏设置'))
+            self.widgetbranch1 = QtWidgets.QWidget (self.coreframe)
+            self.horizontalLayout3 = QtWidgets.QHBoxLayout (self.widgetbranch1)
+            self.playernametext = QtWidgets.QLabel(self.coreframe)
+            self.playernametext.setText('默认级别')
+            self.horizontalLayout3.addWidget(self.playernametext)
+            self.levelsetbuttons=[0,0,0,0]
+            self.levelsetbuttontext=['初级','中级','高级']
+            for i in range(3):
+                self.levelsetbuttons[i]=QtWidgets.QRadioButton(self.widgetbranch1)
+                self.levelsetbuttons[i].setText(self.levelsetbuttontext[i])
+                self.horizontalLayout3.addWidget(self.levelsetbuttons[i])
+            if self.tmpsettings['defaultlevel']=='beg':
+                self.levelsetbuttons[0].setChecked(True)
+            elif self.tmpsettings['defaultlevel']=='exp':
+                self.levelsetbuttons[2].setChecked(True)
+            else:
+                self.levelsetbuttons[1].setChecked(True)
+            self.verticalLayout3.addWidget(self.widgetbranch1)
+            self.timerenableBox = self.createcheckbox(self.coreframe,'游戏过程中显示计时器',self.tmpsettings['timeringame'])
+            self.verticalLayout3.addWidget(self.timerenableBox)
+            self.safenumenableBox = self.createcheckbox(self.coreframe,'计雷器显示剩余安全格数',self.tmpsettings['showsafesquares'])
+            self.verticalLayout3.addWidget(self.safenumenableBox)
+            self.oneshotBox = self.createcheckbox(self.coreframe,'一触即发(与1.5c冲突)',self.tmpsettings['instantclick'])
+            self.verticalLayout3.addWidget(self.oneshotBox)
+            self.disablerbox = self.createcheckbox(self.coreframe,'禁用右键',self.tmpsettings['disableright'])
+            self.verticalLayout3.addWidget(self.disablerbox)
+            self.flagallbox = self.createcheckbox(self.coreframe,'胜利后标上所有雷',self.tmpsettings['endflagall'])
+            self.verticalLayout3.addWidget(self.flagallbox)
+        self.currentpage=menunum
+        self.initialized=True
             
     def createcheckbox(self,widget,text,defaultstate):
         checkbox=QtWidgets.QCheckBox(widget)
@@ -158,24 +195,44 @@ class Ui_SettingDialog (object):
         checkbox.stateChanged.connect(self.changesettings)
         return checkbox
         
-    def changesettings(self):
-        self.tmpsettings['showplayertag']=self.freshcheckBox.isChecked()
-        self.playertag.setEnabled(self.freshcheckBox.isChecked())
-        self.tmpsettings['enablerec']=self.reccheckBox.isChecked()
+    def createlineedit(self,widget,text,maxlength):
+        lineedit=QtWidgets.QLineEdit(widget)
+        lineedit.setText(text)
+        lineedit.setMaxLength(maxlength)
+        return lineedit
 
-    def tmpsavesettings(self):
-        self.tmpsettings['showplayertag']=self.freshcheckBox.isChecked()
-        self.tmpsettings['enablerec']=self.reccheckBox.isChecked()
-        self.tmpsettings['defaultplayertag']=self.playertag.text()
-        self.tmpsettings['playername']=self.playername.text()
-        self.tmpsettings['level1name']=(self.modenamelabels[0].text())
-        self.tmpsettings['level2name']=(self.modenamelabels[1].text())
-        self.tmpsettings['level3name']=(self.modenamelabels[2].text())
-        self.tmpsettings['level4name']=(self.modenamelabels[3].text())
+    def changesettings(self):
+        if self.currentpage==0:
+            self.tmpsettings['showplayertag']=self.freshcheckBox.isChecked()
+            self.playertag.setEnabled(self.freshcheckBox.isChecked())
+            self.tmpsettings['enablerec']=self.reccheckBox.isChecked()
+
+    def tmpsavesettings(self,page):
+        if page==0:
+            self.tmpsettings['showplayertag']=self.freshcheckBox.isChecked()
+            self.tmpsettings['enablerec']=self.reccheckBox.isChecked()
+            self.tmpsettings['defaultplayertag']=self.playertag.text()
+            self.tmpsettings['playername']=self.playername.text()
+            self.tmpsettings['level1name']=(self.modenamelabels[0].text())
+            self.tmpsettings['level2name']=(self.modenamelabels[1].text())
+            self.tmpsettings['level3name']=(self.modenamelabels[2].text())
+            self.tmpsettings['level4name']=(self.modenamelabels[3].text())
+        elif page==1:
+            if self.levelsetbuttons[0].isChecked():
+                self.tmpsettings['defaultlevel']='beg'
+            elif self.levelsetbuttons[2].isChecked():
+                self.tmpsettings['defaultlevel']='exp'
+            else:
+                self.tmpsettings['defaultlevel']='int'
+            self.tmpsettings['timeringame']=self.timerenableBox.isChecked()
+            self.tmpsettings['showsafesquares']=self.safenumenableBox.isChecked()
+            self.tmpsettings['instantclick']=self.oneshotBox.isChecked()
+            self.tmpsettings['disableright']=self.disablerbox.isChecked()
+            self.tmpsettings['endflagall']=self.flagallbox.isChecked()
 
     def savesettings(self):
 
-        self.tmpsavesettings()
+        self.tmpsavesettings(self.currentpage)
         self.options.settings=copy.deepcopy(self.tmpsettings)
         self.options.writesettings()
         self.Dialog.close()
@@ -183,20 +240,5 @@ class Ui_SettingDialog (object):
     def closesettings(self):
         pass
 
-
-
-                
-                
-
-'''    def processParameter(self):
-        r = self.spinBox.value ()
-        c = self.spinBox_2.value ()
-        n = self.spinBox_3.value ()
-        if r != self.row or c != self.column or n != self.mineNum:
-            self.alter = True
-            self.row = r
-            self.column = c
-            self.mineNum = min (max (n, 4), r*c//2)
-        self.Dialog.close ()'''
 
     

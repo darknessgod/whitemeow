@@ -17,7 +17,13 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.mainWindow.move(694,200)
 
         self.setupUi(self.mainWindow)
-        self.game=gamestatus.gamestatus(16,16,40,self.options.settings)
+        if self.options.settings['defaultlevel']=='beg':
+            self.game=gamestatus.gamestatus(8,8,10,self.options.settings)
+        elif self.options.settings['defaultlevel']=='exp':
+            self.game=gamestatus.gamestatus(16,30,99,self.options.settings)
+        else:
+            self.game=gamestatus.gamestatus(16,16,40,self.options.settings)
+        
         self.gridsize=32
         self.game.oldCell = 0  # 鼠标的上个停留位置，用于绘制按下去时的阴影
 
@@ -35,7 +41,10 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.label_2.leftRelease.connect(self.newgameStart)
         self.frame.leftRelease.connect(self.newgameStart)
         self.showface(8.5)
-        self.showminenum(self.game.mineNum)
+        if not self.options.settings['showsafesquares']:
+            self.showminenum(self.game.mineNum)
+        else:
+            self.showminenum(min(999,self.game.row*self.game.column-self.game.mineNum-self.game.status.count(1)))
         self.showtimenum(self.game.intervaltime)
         self.connectactions()
 
@@ -122,13 +131,13 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.mainWindow.ctrlreleaseEvent.connect(self.ctrlrelease)
         self.mainWindow.minbackEvent.connect(self.counterback)
         self.action_gridsize.setText('当前尺寸：%d'%(self.gridsize))
-        self.actionChecked('I')  # 默认选择中级
+        self.actionChecked(self.options.settings['defaultlevel'])  # 默认选择中级
 
     def timeCount(self):
         self.oldinttime=int(self.game.intervaltime+0.9999)
         self.game.intervaltime=time.time()-self.game.starttime
         inttime=int(self.game.intervaltime+0.9999)
-        if inttime!=self.game.oldinttime:
+        if inttime!=self.game.oldinttime and self.options.settings['timeringame']:
             self.showtimenum(self.game.intervaltime)
         if not self.game.isreplaying():
             self.changecounter(1)
@@ -173,6 +182,8 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
             self.game.leftHeld = True
             self.game.oldCell = self.game.getindex(i, j)
             self.label.update()
+            if self.options.settings['instantclick']:
+                self.mineAreaLeftRelease(i,j)
 
     def mineAreaLeftRelease(self, i, j):
         if self.game.leftHeld and not self.finish:
@@ -191,21 +202,27 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
                 self.label.update()
                 if self.game.failed==True:
                     self.gameFailed()
-                elif self.isGameFinished()==True:
-                    self.gameWin()
+                else:
+                    if self.options.settings['showsafesquares']:
+                        self.showminenum(min(999,self.game.row*self.game.column-self.game.mineNum-self.game.status.count(1)))
+                    if self.isGameFinished()==True:
+                        self.gameWin()
                
 
     def mineAreaRightPressed(self, i, j):
-        if not self.finish:
+        if not self.finish and not self.game.settings['disableright']:
             if not self.game.isreplaying():
                 self.game.addoperation(3,i,j)
             self.game.doright(self.game.getindex(i, j))
             self.label.update()
-            self.showminenum(self.game.mineNum-self.game.allclicks[3])
+            if not self.options.settings['showsafesquares']:
+                self.showminenum(self.game.mineNum-self.game.allclicks[3])
             self.changecounter(1)
+            if self.options.settings['instantclick']:
+                self.mineAreaRightRelease(i,j)
             
     def mineAreaRightRelease(self, i, j):
-        if not self.finish:
+        if not self.finish and not self.game.settings['disableright']:
             if not self.game.isreplaying():
                 self.game.addoperation(4,i,j)
 
@@ -217,6 +234,8 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
             self.game.oldCell = self.game.getindex(i, j)
             self.game.pressdouble(self.game.getindex(i, j))
             self.label.update()
+            if self.options.settings['instantclick']:
+                self.mineAreaLeftAndRightRelease(i,j)
 
     def mineAreaLeftAndRightRelease(self, i, j):
         if not self.finish:
@@ -231,9 +250,13 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
                 self.label.update()
                 if self.game.failed==True:
                     self.gameFailed()
-                elif self.isGameFinished()==True:
-                    self.gameWin()
-
+                else:
+                    if self.options.settings['showsafesquares']:
+                        self.showminenum(min(999,self.game.row*self.game.column-self.game.mineNum-self.game.status.count(1)))
+                    if self.isGameFinished()==True:
+                        self.gameWin()
+                
+                    
     def mineMouseMove(self, i, j):
         if not self.finish:
             self.game.domove(self.game.getindex(i,j))
@@ -256,7 +279,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
             for i in range(self.gridLayout.count()):
                 w = self.gridLayout.itemAt(i).widget()
                 w.setParent(None)
-        self.showminenum(self.game.mineNum)
+        self.game.settings=self.options.settings
         self.finish = False
         self.timer.stop()
         if self.needtorefresh==True:
@@ -266,6 +289,10 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.label.lastcell=None
         self.game.createMine(self.game.gametype)
         self.game.renewstatus()
+        if not self.options.settings['showsafesquares']:
+            self.showminenum(self.game.mineNum)
+        else:
+            self.showminenum(min(999,self.game.row*self.game.column-self.game.mineNum-self.game.status.count(1)))
         self.setshortcuts(True)
         self.action_saveboard.setEnabled(False)
         self.action_savereplay.setEnabled(False)
@@ -297,10 +324,6 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.timer.stop()
         if not self.game.isreplaying():
             self.game.cal_3bv()
-            #for i in range(self.game.ops):
-                #self.game.issolved(1,i)
-            #for i in range(self.game.islands):
-                #self.game.issolved(2,i)
         self.game.solvedops=self.game.ops
         self.game.solvedislands=self.game.islands
         self.game.solvedelse=self.game.bbbv-self.game.ops
@@ -345,13 +368,13 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.action_I.setChecked(False)
         self.action_E.setChecked(False)
         self.action_C.setChecked(False)
-        if k == 'B':
+        if k == 'beg':
             self.action_B.setChecked(True)
-        elif k == 'I':
+        elif k == 'int':
             self.action_I.setChecked(True)
-        elif k == 'E':
+        elif k == 'exp':
             self.action_E.setChecked(True)
-        elif k == 'C':
+        elif k == 'cus':
             self.action_C.setChecked(True)
 
     def action_bie(self,r,c,m):
@@ -366,19 +389,19 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.newgameStart()
 
     def action_BEvent(self):
-        self.actionChecked('B')
+        self.actionChecked('beg')
         self.action_bie(8,8,10)
         
     def action_IEvent(self):
-        self.actionChecked('I')
+        self.actionChecked('int')
         self.action_bie(16,16,40)
 
     def action_Event(self):
-        self.actionChecked('E')
+        self.actionChecked('exp')
         self.action_bie(16,30,99)
 
     def action_CEvent(self):
-        self.actionChecked('C')
+        self.actionChecked('cus')
         ui = window_custom.Ui_Dialog(self.game.row, self.game.column,
                                             self.game.mineNum)
         ui.Dialog.setModal(True)
@@ -409,6 +432,8 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         ui.Dialog.setModal(True)
         ui.Dialog.show()
         ui.Dialog.exec_()
+        if not self.game.finish:
+            self.gameStart()
         self.resetplayertag()
 
     def ctrlpress(self):
