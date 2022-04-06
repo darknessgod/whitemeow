@@ -287,25 +287,6 @@ class gamestatus(object):
                     eright=True
             if eright==True:
                 self.eclicks[1]+=1
-                
-    def findopis_bfs(self,index,num):
-        if num==1:#op模式    
-            if self.isOpening(index):
-                self.num0get+=1
-                for ii in self.adjacent1(index):
-                    if self.gridquality[ii]!=self.ops and not self.isMine(ii):
-                        self.gridquality[ii]=self.ops
-                        self.thisop.append(ii)
-                        self.num0queue.put([ii])
-        elif num==2:
-            if not self.isMine(index):
-                for ii in self.adjacent1(index):
-                    if self.gridquality[ii]==0 and not self.isMine(ii):
-                        self.bvget+=1
-                        self.gridquality[ii]=-self.islands
-                        self.thisis.append(ii)
-                        self.num0queue.put([ii])
-                    
 
     def cal_3bv(self):
         self.islands,self.solvedislands,self.ops,self.solvedops,self.solvedbbbv,self.solvedelse=0,0,0,0,0,0
