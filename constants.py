@@ -31,6 +31,12 @@ def adjacent(i,j,index,row,column):
         else:
             return (index-column-1,index-column,index-column+1,index-1,index+1,index+column-1,index+column,index+column+1)
 
+# column 1. left down
+# column 2. left up
+# column 3. right down
+# column 4. right up
+changeMouseStatus=[[]]
+
 class smallfuc(object):#放一些静态方法
     @staticmethod
     def linyu(i,j,r,c):
