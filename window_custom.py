@@ -77,13 +77,12 @@ class Ui_Dialog (object):
         self.setParameter ()
 
     def retranslateUi(self):
-        _translate = QtCore.QCoreApplication.translate
-        self.Dialog.setWindowTitle (_translate ("Dialog", "参数设置"))
-        self.label.setText (_translate ("Dialog", "行数(row)："))
-        self.label_2.setText (_translate ("Dialog", "列数(column)："))
-        self.label_3.setText (_translate ("Dialog", "雷数(number)："))
-        self.pushButton.setText (_translate ("Dialog", "确定"))
-        self.pushButton_2.setText (_translate ("Dialog", "取消"))
+        self.Dialog.setWindowTitle (_("参数设置"))
+        self.label.setText (_("行数"))
+        self.label_2.setText (_("列数"))
+        self.label_3.setText (_("雷数"))
+        self.pushButton.setText (_("确定"))
+        self.pushButton_2.setText (_("取消"))
 
     def setParameter(self):
         self.spinBox.setValue (self.row)

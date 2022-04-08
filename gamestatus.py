@@ -216,9 +216,19 @@ class gamestatus(object):
                 self.recursiveChord(index)
             else:
                 for i in self.adjacent1(index):
-                    self.safeUncover(i)
-                    if self.isOpening(i):
-                        self.getOpening(i)
+                    if self.isCovered(i):
+                        if self.isMine(i):
+                            self.failed=True
+                            self.redmine=i
+                        elif self.isOpening(i):
+                            self.forceUncover(i)
+                            self.getOpening(i)
+                        else:
+                            self.forceUncover(i)
+                            
+
+                    
+
             if self.isreplaying():
                 self.checkSolved()
                         
@@ -299,7 +309,7 @@ class gamestatus(object):
         self.bbbv=self.row*self.column-self.mineNum
         #print("bbbv="+str(self.bbbv))
         self.replayoplist,self.replayislist=[],[]
-        m=sys.maxsize
+        m=32767
         self.gridquality = [m]*(self.row*self.column)#格子性质，m为雷，0为op边缘，正数A为第A个op内部,负数-B为第B个is
         for i in range(self.row*self.column): # 找op
             if self.isOpening(i) and self.gridquality[i]==m:
@@ -346,22 +356,46 @@ class gamestatus(object):
     def cal_3bv_solved(self):
         self.cal_3bv()
         self.tocheck=set()
-        for index in range(self.row*self.column):
-            if self.isOpened(index):
-                self.tocheck.add(self.gridquality[index])
+        if self.isreplaying():
+            for index in range(self.row*self.column):
+                if self.isOpened(index):
+                    self.tocheck.add(self.gridquality[index])
+        else:
+            for index in range(self.row*self.column):
+                if self.isOpened(index):
+                    self.tocheck.add(self.gridquality[index])
+                    if self.gridquality[index]<0:
+                        self.solvedelse+=1
         self.checkSolved()
 
     def checkSolved(self):
-        for index in self.tocheck:
-            if index>0:
-                #print("index = ",index, ", cells left = ", len(self.replayoplist[index-1]))
-                if len(self.replayoplist[index-1])==0:
-                    self.solvedops+=1 
-            elif index<0:
-                #print("index = ",index, ", cells left = ", len(self.replayislist[-index-1]))
-                if len(self.replayislist[-index-1])==0:
-                    self.solvedislands+=1
-        self.tocheck.clear()
+        if self.isreplaying():
+            for index in self.tocheck:
+                if index>0:
+                    #print("index = ",index, ", cells left = ", len(self.replayoplist[index-1]))
+                    if len(self.replayoplist[index-1])==0:
+                        self.solvedops+=1 
+                elif index<0:
+                    #print("index = ",index, ", cells left = ", len(self.replayislist[-index-1]))
+                    if len(self.replayislist[-index-1])==0:
+                        self.solvedislands+=1
+            self.tocheck.clear()
+        else:
+            for index in self.tocheck:
+                solved=True
+                if index>0:
+                    for s in self.replayoplist[index-1]:
+                        if not self.isOpened(s):
+                            solved=False
+                    if solved==True:
+                        self.solvedops+=1
+                elif index<0:
+                    for s in self.replayislist[-index-1]:
+                        if not self.isOpened(s):
+                            solved=False
+                    if solved==True:
+                        self.solvedislands+=1
+        
 
     def issolved(self,index):
         if index>0:
@@ -485,7 +519,7 @@ class gamestatus(object):
         self.row,self.column,self.mineNum=row,column,minenum
         if len(boardlist)!=4+2*minenum:
             return -1
-        if min(column,row)<4 or max(column,row)>50 or minenum/(column*row)>0.5:
+        if min(column,row)<4 or max(column,row)>80 or minenum/(column*row)>0.5:
             return -2
         num = [0]*(self.row*self.column)
         self.num=[*num]

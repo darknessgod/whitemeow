@@ -4,7 +4,7 @@ import time
 class Counter(object):
     def __init__(self,counterWindow,game):
         self.game=game
-        counterWindow.setWindowTitle("计数器") 
+        counterWindow.setWindowTitle(_("计数器")) 
         counterWindow.setEnabled(True)
         counterWindow.setWindowFlags(QtCore.Qt.WindowCloseButtonHint)
         counterWindow.setWindowFlags(QtCore.Qt.Drawer)

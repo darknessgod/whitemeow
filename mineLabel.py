@@ -39,8 +39,8 @@ class mineLabel (QtWidgets.QLabel):
         for i in range(15):
             self.pixmaps[i]=self.pixmaps[i].scaled(targetsize,targetsize)
         self.pixmaps[15]=self.pixmaps[15].scaled(targetsize,targetsize,transformMode=QtCore.Qt.SmoothTransformation)
-        
-    
+
+
     def mousePressEvent(self, e):  # 重载一下鼠标点击事件
         if not self.game.isreplaying():
             xx = int(e.localPos().x())

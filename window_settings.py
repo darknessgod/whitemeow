@@ -41,7 +41,7 @@ class Ui_SettingDialog (object):
         self.setmenuwidget = QtWidgets.QWidget (self.widget)
         self.setmenuwidget.setObjectName ("setmenuwidget")#主体部分，构成除去几个按钮以外的整个上半部分
         self.setmenuwidget.resize(135,500)
-        menunames=['玩家设置','游戏设置','计数器设置']
+        menunames=[_('玩家设置'),_('游戏设置'),_('计数器设置')]
         self.menulabels=[0]*len(menunames)
         self.verticalLayout2 = QtWidgets.QVBoxLayout (self.setmenuwidget)
         self.verticalLayout2.setObjectName ("verticalLayout2")
@@ -101,12 +101,11 @@ class Ui_SettingDialog (object):
         #self.setParameter ()
 
     def retranslateUi(self):
-        _translate = QtCore.QCoreApplication.translate
-        self.Dialog.setWindowTitle (_translate ("Dialog", "设置"))
-        self.pushButton1.setText (_translate ("Dialog", "全部重置"))
-        self.pushButton2.setText (_translate ("Dialog", "重置本页"))
-        self.pushButton3.setText (_translate ("Dialog", "取消"))
-        self.pushButton4.setText (_translate ("Dialog", "确定"))
+        self.Dialog.setWindowTitle (_("设置"))
+        self.pushButton1.setText (_("全部重置"))
+        self.pushButton2.setText (_("重置本页"))
+        self.pushButton3.setText (_( "取消"))
+        self.pushButton4.setText (_("确定"))
 
     def showsettings(self,menunum):
         if self.initialized==True:
@@ -123,20 +122,20 @@ class Ui_SettingDialog (object):
         self.titlelabel.setFrameShadow(QtWidgets.QFrame.Raised)
         self.verticalLayout3.addWidget(self.titlelabel)
         if menunum==0:#0：玩家设置 1：游戏设置 2：计数器设置
-            self.titlelabel.setText(' %s'%('玩家设置'))
-            self.freshcheckBox=self.createcheckbox(self.coreframe,'显示玩家标识',self.tmpsettings['showplayertag'])
+            self.titlelabel.setText(' %s'%(_('玩家设置')))
+            self.freshcheckBox=self.createcheckbox(self.coreframe,_('显示玩家标识'),self.tmpsettings['showplayertag'])
             self.verticalLayout3.addWidget(self.freshcheckBox)
             self.playertag = self.createlineedit(self.coreframe,self.tmpsettings['defaultplayertag'],30)
             self.playertag.setEnabled(self.freshcheckBox.isChecked())
             self.verticalLayout3.addWidget(self.playertag)
             self.playernametext = QtWidgets.QLabel(self.coreframe)
-            self.playernametext.setText('录像玩家姓名')
+            self.playernametext.setText(_('录像玩家姓名'))
             self.verticalLayout3.addWidget(self.playernametext)
             self.playername = QtWidgets.QLineEdit(self.coreframe)
             self.playername.setText(self.tmpsettings['playername'])
             self.verticalLayout3.addWidget(self.playername)
             self.modenametext = QtWidgets.QLabel(self.coreframe)
-            self.modenametext.setText('模式名称')
+            self.modenametext.setText(_('模式名称'))
             self.verticalLayout3.addWidget(self.modenametext)
             self.coreframe2=QtWidgets.QFrame(self.widget)
             self.coreframe2.setObjectName ("coreframe2")
@@ -152,17 +151,17 @@ class Ui_SettingDialog (object):
             self.horizontalLayout3.setSpacing(1)
             self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
             self.verticalLayout3.addWidget(self.coreframe2)
-            self.reccheckBox = self.createcheckbox(self.coreframe,'启用递归双击和快速标雷(推荐)',self.tmpsettings['enablerec'])
+            self.reccheckBox = self.createcheckbox(self.coreframe,_('启用递归双击和快速标雷(推荐)'),self.tmpsettings['enablerec'])
             self.verticalLayout3.addWidget(self.reccheckBox)
         elif menunum==1:
-            self.titlelabel.setText(' %s'%('游戏设置'))
+            self.titlelabel.setText(' %s'%(_('游戏设置')))
             self.widgetbranch1 = QtWidgets.QWidget (self.coreframe)
             self.horizontalLayout3 = QtWidgets.QHBoxLayout (self.widgetbranch1)
             self.playernametext = QtWidgets.QLabel(self.coreframe)
-            self.playernametext.setText('默认级别')
+            self.playernametext.setText(_('默认级别'))
             self.horizontalLayout3.addWidget(self.playernametext)
             self.levelsetbuttons=[0,0,0,0]
-            self.levelsetbuttontext=['初级','中级','高级']
+            self.levelsetbuttontext=[_('初级'),_('中级'),_('高级')]
             for i in range(3):
                 self.levelsetbuttons[i]=QtWidgets.QRadioButton(self.widgetbranch1)
                 self.levelsetbuttons[i].setText(self.levelsetbuttontext[i])
@@ -174,16 +173,28 @@ class Ui_SettingDialog (object):
             else:
                 self.levelsetbuttons[1].setChecked(True)
             self.verticalLayout3.addWidget(self.widgetbranch1)
-            self.timerenableBox = self.createcheckbox(self.coreframe,'游戏过程中显示计时器',self.tmpsettings['timeringame'])
+            self.timerenableBox = self.createcheckbox(self.coreframe,_('游戏过程中显示计时器'),self.tmpsettings['timeringame'])
             self.verticalLayout3.addWidget(self.timerenableBox)
-            self.safenumenableBox = self.createcheckbox(self.coreframe,'计雷器显示剩余安全格数',self.tmpsettings['showsafesquares'])
+            self.safenumenableBox = self.createcheckbox(self.coreframe,_('计雷器显示剩余安全格数'),self.tmpsettings['showsafesquares'])
             self.verticalLayout3.addWidget(self.safenumenableBox)
-            self.oneshotBox = self.createcheckbox(self.coreframe,'一触即发(与1.5c冲突)',self.tmpsettings['instantclick'])
+            self.oneshotBox = self.createcheckbox(self.coreframe,_('一触即发(与1.5c冲突)'),self.tmpsettings['instantclick'])
             self.verticalLayout3.addWidget(self.oneshotBox)
-            self.disablerbox = self.createcheckbox(self.coreframe,'禁用右键',self.tmpsettings['disableright'])
+            self.disablerbox=self.createcheckbox(self.coreframe,_('禁用右键'),self.tmpsettings['disableright'])
             self.verticalLayout3.addWidget(self.disablerbox)
-            self.flagallbox = self.createcheckbox(self.coreframe,'胜利后标上所有雷',self.tmpsettings['endflagall'])
+            self.flagallbox=self.createcheckbox(self.coreframe,_('胜利后标上所有雷'),self.tmpsettings['endflagall'])
             self.verticalLayout3.addWidget(self.flagallbox)
+            self.widgetbranch2=QtWidgets.QWidget (self.coreframe)
+            self.horizontalLayout4=QtWidgets.QHBoxLayout (self.widgetbranch2)
+            self.failrestartbox=self.createcheckbox(self.widgetbranch2,_('触雷自动重开'),self.tmpsettings['failrestart'])
+            self.horizontalLayout4.addWidget(self.failrestartbox)
+            self.failrestartpercentage=self.createspinbox(self.widgetbranch2,100,0,100,1)
+            self.failrestartpercentage.setEnabled(self.tmpsettings['failrestart'])
+            self.horizontalLayout4.addWidget(self.failrestartpercentage)
+            self.frpercentagetext=QtWidgets.QLabel(self.widgetbranch2)
+            self.frpercentagetext.setText(_('%以内完成度重开'))
+            self.horizontalLayout4.addWidget(self.frpercentagetext)
+            self.horizontalLayout4.setAlignment(QtCore.Qt.AlignLeft)
+            self.verticalLayout3.addWidget(self.widgetbranch2)
         self.currentpage=menunum
         self.initialized=True
             
@@ -201,11 +212,23 @@ class Ui_SettingDialog (object):
         lineedit.setMaxLength(maxlength)
         return lineedit
 
+    def createspinbox(self,widget,max,min,default,step):
+        spinBox = QtWidgets.QSpinBox (widget)
+        spinBox.setAlignment (QtCore.Qt.AlignCenter)
+        spinBox.setMinimum (min)
+        spinBox.setMaximum (max)
+        spinBox.setProperty ("value", default)
+        spinBox.setSingleStep(step)
+        return spinBox
+
     def changesettings(self):
         if self.currentpage==0:
             self.tmpsettings['showplayertag']=self.freshcheckBox.isChecked()
             self.playertag.setEnabled(self.freshcheckBox.isChecked())
             self.tmpsettings['enablerec']=self.reccheckBox.isChecked()
+        elif self.currentpage==1:
+            self.tmpsettings['failrestart']=self.failrestartbox.isChecked()
+            self.failrestartpercentage.setEnabled(self.failrestartbox.isChecked())
 
     def tmpsavesettings(self,page):
         if page==0:
@@ -229,6 +252,8 @@ class Ui_SettingDialog (object):
             self.tmpsettings['instantclick']=self.oneshotBox.isChecked()
             self.tmpsettings['disableright']=self.disablerbox.isChecked()
             self.tmpsettings['endflagall']=self.flagallbox.isChecked()
+            self.tmpsettings['failrestart']=self.failrestartbox.isChecked()
+            self.tmpsettings['failrestart_percentage']=self.failrestartpercentage.value()
 
     def savesettings(self):
 

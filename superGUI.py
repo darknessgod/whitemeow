@@ -20,28 +20,27 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
        
     def retranslateUi(self, MainWindow):
-        _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Meowsweeper Arbiter"))
-        self.menu.setTitle(_translate("MainWindow", "游戏"))
-        self.menu_P.setTitle(_translate("MainWindow", "选项"))
-        self.menu_H.setTitle(_translate("MainWindow", "这是啥"))
-        self.action_gridsize.setText(_translate("MainWindow", "当前尺寸："))
-        self.action_gridup.setText(_translate("MainWindow", "放大"))
-        self.action_griddown.setText(_translate("MainWindow", "缩小"))
-        self.action.setText(_translate("MainWindow", "新游戏"))
-        self.action_re.setText(_translate("MainWindow", "重玩"))
-        self.action_saveboard.setText(_translate("MainWindow", "保存局"))
-        self.action_savereplay.setText(_translate("MainWindow", "保存录像"))
-        self.action_loadreplay.setText(_translate("MainWindow", "播放录像"))
-        self.action_loadboard.setText(_translate("MainWindow", "载入局"))
-        self.action_record.setText(_translate("MainWindow", "纪录"))
-        self.action_B.setText(_translate("MainWindow", "初级"))
-        self.action_I.setText(_translate("MainWindow", "中级"))
-        self.action_E.setText(_translate("MainWindow", "高级"))
-        self.action_C.setText(_translate("MainWindow", "自定义"))
-        self.action_X_2.setText(_translate("MainWindow", "退出"))
-        self.action_counter.setText(_translate("MainWindow", "计数器"))
-        self.action_settings.setText(_translate("MainWindow", "设置"))
+        MainWindow.setWindowTitle(_("Meowsweeper Arbiter"))
+        self.menu.setTitle(_("游戏"))
+        self.menu_P.setTitle(_("选项"))
+        self.menu_H.setTitle(_("这是啥"))
+        self.action_gridsize.setText(_("当前尺寸："))
+        self.action_gridup.setText(_("放大"))
+        self.action_griddown.setText(_("缩小"))
+        self.action.setText(_("新游戏"))
+        self.action_re.setText(_("重玩"))
+        self.action_saveboard.setText(_("保存局"))
+        self.action_savereplay.setText(_("保存录像"))
+        self.action_loadreplay.setText(_("播放录像"))
+        self.action_loadboard.setText(_("载入局"))
+        self.action_record.setText(_("纪录"))
+        self.action_B.setText(_("初级"))
+        self.action_I.setText(_("中级"))
+        self.action_E.setText(_("高级"))
+        self.action_C.setText(_("自定义"))
+        self.action_X_2.setText(_("退出"))
+        self.action_counter.setText(_("计数器"))
+        self.action_settings.setText(_("设置"))
 
     def showminenum(self,minenum):
         ledlist=['-','-','-']
@@ -162,14 +161,13 @@ class Ui_MainWindow(object):
         self.initialtimer()
 
     def initialminearea(self):
-        self.frame_2 = QtWidgets.QFrame(self.centralwidget)  #整个局面的框
+        self.frame_2 = QtWidgets.QFrame(self.centralwidget)  
         self.frame_2.setFrameShape(QtWidgets.QFrame.WinPanel)
         self.frame_2.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.frame_2.setObjectName("frame_2")
         self.gridLayout = QtWidgets.QGridLayout(self.frame_2)
         self.gridLayout.setContentsMargins(0, 0, 0, 0)
         self.gridLayout.setObjectName("gridLayout")
-
     def initialbottomframe(self):
         self.frame_3 = QtWidgets.QFrame(self.centralwidget)  
         self.frame_3.setFrameShape(QtWidgets.QFrame.WinPanel)
@@ -304,7 +302,6 @@ class Ui_MainWindow(object):
         self.options=readdata.readsettings()
         self.options.readsettings()
         
-
     def resetplayertag(self):
         if self.options.settings['showplayertag']==True:
             self.labeltag.setText(self.options.settings['defaultplayertag'])

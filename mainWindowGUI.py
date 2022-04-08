@@ -4,8 +4,8 @@ class MainWindow(QtWidgets.QMainWindow):
   
     closeEvent_ = QtCore.pyqtSignal()
     gridupdownEvent = QtCore.pyqtSignal(int)
-    ctrlpressEvent= QtCore.pyqtSignal()
-    ctrlreleaseEvent= QtCore.pyqtSignal()
+    keypressEvent= QtCore.pyqtSignal(int)
+    keyreleaseEvent= QtCore.pyqtSignal(int)
     minbackEvent= QtCore.pyqtSignal()
   
     def closeEvent(self, event):
@@ -19,12 +19,16 @@ class MainWindow(QtWidgets.QMainWindow):
             self.gridupdownEvent.emit(angleY)
 
     def keyPressEvent(self, event):
-        if(event.key() == QtCore.Qt.Key_Control):
-            self.ctrlpressEvent.emit()
+        if (event.key() == QtCore.Qt.Key_Control):
+            self.keypressEvent.emit(1)
+        elif (event.key() == QtCore.Qt.Key_Z):
+            self.keypressEvent.emit(2)
 
     def keyReleaseEvent(self, event):
-        if(event.key() == QtCore.Qt.Key_Control):
-            self.ctrlreleaseEvent.emit()
+        if (event.key() == QtCore.Qt.Key_Control):
+            self.keyreleaseEvent.emit(1)
+        elif (event.key() == QtCore.Qt.Key_Z):
+            self.keyreleaseEvent.emit(2)
 
     def changeEvent(self, event):
         if event.type() == QtCore.QEvent.WindowStateChange:

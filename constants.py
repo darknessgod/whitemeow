@@ -6,7 +6,7 @@ ELEMENT_PATH = TEXTURE_PATH + "elements/"
 defaultsettings={'showplayertag':True,'defaultplayertag':'请按F5设置标识','playername':'anonymous',
 'level1name':'beg','level2name':'int','level3name':'exp','level4name':'cus','enablerec':True,
 'defaultlevel':'int','timeringame':True,'showsafesquares':False,'instantclick':False,'disableright':False,
-'endflagall':True}
+'endflagall':True,'failrestart':False,'failrestart_percentage':100}
 
 def adjacent(i,j,index,row,column):
     if j==0: # left edge

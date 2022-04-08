@@ -13,7 +13,7 @@ class ui_recorddialog (object):
         self.nfbutton.clicked.connect(self.shownf)
 
     def setupui(self):
-        self.Dialog.setWindowTitle("纪录")
+        self.Dialog.setWindowTitle(_("纪录"))
         self.Dialog.move(self.geo[0]+self.geo[2]//2-145,self.geo[1]+self.geo[3]//2-82)
         self.Dialog.setFixedSize(410,165)
         self.Dialog.setWindowFlags(QtCore.Qt.WindowCloseButtonHint)
@@ -23,7 +23,7 @@ class ui_recorddialog (object):
         self.flbutton = QtWidgets.QPushButton (self.Dialog)
         self.nfbutton = QtWidgets.QPushButton (self.Dialog)
         buttons=[self.allbutton,self.flbutton,self.nfbutton]
-        buttonstext=['总纪录','插旗纪录','盲扫纪录']
+        buttonstext=[_('总纪录'),_('插旗纪录'),_('盲扫纪录')]
         for i in range(self.levelnum):
             buttons[i].setFixedSize(60,25)
             buttons[i].setText('%s'%(buttonstext[i]))
@@ -37,7 +37,7 @@ class ui_recorddialog (object):
             label.setAlignment (QtCore.Qt.AlignCenter)
             label.setStyleSheet("font-size:14px;font-family:YF补 汉仪夏日体;")
             self.gridLayout.addWidget(label,1,i+1)
-        leveltext=['初级','中级','高级']
+        leveltext=[_('初级'),_('中级'),_('高级')]
         for j in range(self.levelnum):
             label =QtWidgets.QLabel (self.Dialog)
             label.setFixedSize(60,25)
