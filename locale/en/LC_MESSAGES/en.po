@@ -191,7 +191,7 @@ msgstr "Cancel"
 
 #: window_settings.py:128
 msgid "Show player tag"
-msgstr "Show player tag"
+msgstr "Show player identification text"
 
 #: window_settings.py:134
 msgid "Player name"
@@ -247,4 +247,4 @@ msgstr "if completion less than"
 
 #: constants.py:1
 msgid "press F5 to set playertag"
-msgstr "press F5 to set playertag"
+msgstr "press F5 to set player identification text"
