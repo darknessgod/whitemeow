@@ -10,10 +10,12 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import statusLabel
 import readdata
 
+
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
 
-        self.getdata()
+        
         self.initui(MainWindow)
         self.initmenu(MainWindow)
         self.retranslateUi(MainWindow)
@@ -21,26 +23,26 @@ class Ui_MainWindow(object):
        
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(_("Meowsweeper Arbiter"))
-        self.menu.setTitle(_("游戏"))
-        self.menu_P.setTitle(_("选项"))
-        self.menu_H.setTitle(_("这是啥"))
-        self.action_gridsize.setText(_("当前尺寸："))
-        self.action_gridup.setText(_("放大"))
-        self.action_griddown.setText(_("缩小"))
-        self.action.setText(_("新游戏"))
-        self.action_re.setText(_("重玩"))
-        self.action_saveboard.setText(_("保存局"))
-        self.action_savereplay.setText(_("保存录像"))
-        self.action_loadreplay.setText(_("播放录像"))
-        self.action_loadboard.setText(_("载入局"))
-        self.action_record.setText(_("纪录"))
-        self.action_B.setText(_("初级"))
-        self.action_I.setText(_("中级"))
-        self.action_E.setText(_("高级"))
-        self.action_C.setText(_("自定义"))
-        self.action_X_2.setText(_("退出"))
-        self.action_counter.setText(_("计数器"))
-        self.action_settings.setText(_("设置"))
+        self.menu.setTitle(_("Game"))
+        self.menu_P.setTitle(_("Options"))
+        self.menu_H.setTitle(_("Help"))
+        self.action_gridsize.setText(_("Current size:"))
+        self.action_gridup.setText(_("Zoom in"))
+        self.action_griddown.setText(_("Zoom out"))
+        self.action.setText(_("New game"))
+        self.action_re.setText(_("Restart game"))
+        self.action_saveboard.setText(_("Save board"))
+        self.action_savereplay.setText(_("Save replay"))
+        self.action_loadreplay.setText(_("Load replay"))
+        self.action_loadboard.setText(_("Load board"))
+        self.action_record.setText(_("Best scores"))
+        self.action_B.setText(_("Beginner"))
+        self.action_I.setText(_("Intermediate"))
+        self.action_E.setText(_("Expert"))
+        self.action_C.setText(_("Custom"))
+        self.action_X_2.setText(_("Exit"))
+        self.action_counter.setText(_("Counter"))
+        self.action_settings.setText(_("Settings"))
 
     def showminenum(self,minenum):
         ledlist=['-','-','-']

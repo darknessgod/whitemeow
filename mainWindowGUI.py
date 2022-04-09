@@ -29,6 +29,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.keyreleaseEvent.emit(1)
         elif (event.key() == QtCore.Qt.Key_Z):
             self.keyreleaseEvent.emit(2)
+        elif (event.key() == QtCore.Qt.Key_T):
+            self.keyreleaseEvent.emit(3)
 
     def changeEvent(self, event):
         if event.type() == QtCore.QEvent.WindowStateChange:

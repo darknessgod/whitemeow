@@ -9,6 +9,9 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
+
+
+
 class Ui_Dialog (object):
     def __init__(self, row, column, num):
         self.row = row
@@ -77,12 +80,12 @@ class Ui_Dialog (object):
         self.setParameter ()
 
     def retranslateUi(self):
-        self.Dialog.setWindowTitle (_("参数设置"))
-        self.label.setText (_("行数"))
-        self.label_2.setText (_("列数"))
-        self.label_3.setText (_("雷数"))
-        self.pushButton.setText (_("确定"))
-        self.pushButton_2.setText (_("取消"))
+        self.Dialog.setWindowTitle (_("Set parameter"))
+        self.label.setText (_("Row"))
+        self.label_2.setText (_("Column"))
+        self.label_3.setText (_("Mines"))
+        self.pushButton.setText (_("Apply"))
+        self.pushButton_2.setText (_("Cancel"))
 
     def setParameter(self):
         self.spinBox.setValue (self.row)

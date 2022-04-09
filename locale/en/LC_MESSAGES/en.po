@@ -1,0 +1,250 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2022-04-09 22:57+0800\n"
+"PO-Revision-Date: 2022-04-10 00:15+0800\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Generated-By: pygettext.py 1.5\n"
+"X-Generator: Poedit 3.0.1\n"
+
+#: mineSweeperGUI.py:162 mineSweeperGUI.py:512
+msgid "current size:%d"
+msgstr "current size:%d"
+
+#: mineSweeperGUI.py:612
+msgid "load board"
+msgstr "load board"
+
+#: mineSweeperGUI.py:642
+msgid "play video"
+msgstr "load board"
+
+#: superGUI.py:23
+msgid "Meowsweeper Arbiter"
+msgstr "Meowsweeper Arbiter"
+
+#: superGUI.py:24
+msgid "Game"
+msgstr "Game"
+
+#: superGUI.py:25
+msgid "Options"
+msgstr "Options"
+
+#: superGUI.py:26
+msgid "Help"
+msgstr "Help"
+
+#: superGUI.py:27
+msgid "Current size:"
+msgstr "Current size:"
+
+#: superGUI.py:28
+msgid "Zoom in"
+msgstr "Zoom in"
+
+#: superGUI.py:29
+msgid "Zoom out"
+msgstr "Zoom out"
+
+#: superGUI.py:30
+msgid "New game"
+msgstr "New game"
+
+#: superGUI.py:31
+msgid "Restart game"
+msgstr "Restart game"
+
+#: superGUI.py:32
+msgid "Save board"
+msgstr "Save board"
+
+#: superGUI.py:33
+msgid "Save replay"
+msgstr "Save replay"
+
+#: superGUI.py:34
+msgid "Load replay"
+msgstr "Load replay"
+
+#: superGUI.py:35
+msgid "Load board"
+msgstr "Load board"
+
+#: superGUI.py:36
+msgid "Best scores"
+msgstr "Best scores"
+
+#: superGUI.py:37
+msgid "Beginner"
+msgstr "Best scores"
+
+#: superGUI.py:38
+msgid "Intermediate"
+msgstr "Intermediate"
+
+#: superGUI.py:39
+msgid "Expert"
+msgstr "Expert"
+
+#: superGUI.py:37
+msgid "Beg"
+msgstr "Beg"
+
+#: superGUI.py:38
+msgid "Int"
+msgstr "Int"
+
+#: superGUI.py:39
+msgid "Exp"
+msgstr "Exp"
+
+#: superGUI.py:40
+msgid "Custom"
+msgstr "Custom"
+
+#: superGUI.py:41
+msgid "Exit"
+msgstr "Exit"
+
+#: superGUI.py:42
+msgid "Counter"
+msgstr "Counter"
+
+#: superGUI.py:43
+msgid "Settings"
+msgstr "Settings"
+
+#: window_custom.py:80
+msgid "Set parameter"
+msgstr "Set parameter"
+
+#: window_custom.py:81
+msgid "Row"
+msgstr "Row"
+
+#: window_custom.py:82
+msgid "Column"
+msgstr "Column"
+
+#: window_custom.py:83
+msgid "Mines"
+msgstr "Mines"
+
+#: window_news.py:22
+msgid ""
+"Congratulations with:\n"
+"%s "
+msgstr ""
+"Congratulations with:\n"
+"%s "
+
+#: window_news.py:32
+msgid "score"
+msgstr "score"
+
+#: window_news.py:41
+msgid "OK"
+msgstr "OK"
+
+#: window_record.py:26
+msgid "Flagging"
+msgstr "Flagging"
+
+#: window_record.py:26
+msgid "No-flagging"
+msgstr "No-flagging"
+
+#: window_record.py:26
+msgid "Overall"
+msgstr "Overall"
+
+#: window_settings.py:46
+msgid "Player"
+msgstr "Player"
+
+#: window_settings.py:107
+msgid "Reset all"
+msgstr "Reset all"
+
+#: window_settings.py:108
+msgid "Reset page"
+msgstr "Reset page"
+
+#: window_settings.py:110
+msgid "Apply"
+msgstr "Apply"
+
+#: window_settings.py:109
+msgid "Cancel"
+msgstr "Cancel"
+
+#: window_settings.py:128
+msgid "Show player tag"
+msgstr "Show player tag"
+
+#: window_settings.py:134
+msgid "Player name"
+msgstr "Player name"
+
+#: window_settings.py:140
+msgid "Mode names"
+msgstr "Mode names"
+
+#: window_settings.py:156
+msgid "enable recursive chord and quick flagging(recommended)"
+msgstr "enable recursive chord and quick flagging"
+
+#: window_settings.py:159
+msgid "Game settings"
+msgstr "Game settings"
+
+#: window_settings.py:160
+msgid "Player settings"
+msgstr "Player settings"
+
+#: window_settings.py:163
+msgid "Default level"
+msgstr "Default level"
+
+#: window_settings.py:178
+msgid "Show timer in game"
+msgstr "Show timer in game"
+
+#: window_settings.py:180
+msgid "Show num of safe tiles"
+msgstr "Show num of safe tiles"
+
+#: window_settings.py:182
+msgid "Click when press(confict with 1.5cl)"
+msgstr "Click when press(confict with 1.5cl)"
+
+#: window_settings.py:184
+msgid "Disable right"
+msgstr "Disable right"
+
+#: window_settings.py:186
+msgid "Flag all mines after winning"
+msgstr "Flag all mines after winning"
+
+#: window_settings.py:190
+msgid "Start new game after fail"
+msgstr "Start new game after fail"
+
+#: window_settings.py:194
+msgid "if completion less than"
+msgstr "if completion less than"
+
+#: constants.py:1
+msgid "press F5 to set playertag"
+msgstr "press F5 to set playertag"

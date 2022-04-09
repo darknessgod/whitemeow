@@ -12,15 +12,19 @@ from constants import *
 
 
 
+
+
 class MineSweeperGUI(superGUI.Ui_MainWindow):
     def __init__(self, MainWindow):
+        
+        self.getdata()
         self.mainWindow = MainWindow        
         self.mainWindow.setWindowIcon(QIcon("media/mine.ico"))
         self.mainWindow.setFixedSize(self.mainWindow.minimumSize())
         self.mainWindow.move(694,200)
         self.maxsize=[1000,800]
         self.widthmargin,self.heightmargin=24,135
-
+        self.initlanguage()
         self.setupUi(self.mainWindow)
         if self.options.settings['defaultlevel']=='beg':
             self.game=gamestatus.gamestatus(8,8,10,self.options.settings)
@@ -158,7 +162,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.mainWindow.keypressEvent.connect(self.keypress)
         self.mainWindow.keyreleaseEvent.connect(self.keyrelease)
         self.mainWindow.minbackEvent.connect(self.counterback)
-        self.action_gridsize.setText(_('当前尺寸:%d')%(self.gridsize))
+        self.action_gridsize.setText(_('current size:%d')%(self.gridsize))
         self.actionChecked(self.options.settings['defaultlevel'])  # 默认选择中级
 
     def timeCount(self):
@@ -473,7 +477,24 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         if keynum==1:
             self.ctrlpressed=False
         elif keynum==2:
-            self.zpressed=False     
+            self.zpressed=False
+        elif keynum==3:
+            constant=3
+            self.options.settings['language']=constant-self.options.settings['language']
+            self.resetlanguage()
+
+    def initlanguage(self):
+        if self.options.settings['language']==1:
+            Chinese.install()
+        elif self.options.settings['language']==2:
+            English.install()
+
+    def resetlanguage(self):
+        self.initlanguage()
+        self.retranslateUi(self.mainWindow)
+        self.resetplayertag()
+        self.counterui.retranslate()
+        
 
     def wheelupdown(self,direction):
         if self.ctrlpressed:
@@ -508,7 +529,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
             self.game.num,self.game.status=num,status
             windowsize=self.calwindowsize(self.game.row,self.game.column,self.gridsize)
             self.mainWindow.setFixedSize(windowsize[0],windowsize[1])
-            self.action_gridsize.setText(_('当前尺寸：%d')%(self.gridsize))
+            self.action_gridsize.setText(_('current size:%d')%(self.gridsize))
             self.action_griddown.setEnabled(True)
             if self.gridsize==48:
                 self.action_gridup.setEnabled(False)
@@ -523,7 +544,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
             self.game.num,self.game.status=num,status
             windowsize=self.calwindowsize(self.game.row,self.game.column,self.gridsize)
             self.mainWindow.setFixedSize(windowsize[0],windowsize[1])
-            self.action_gridsize.setText('当前尺寸：%d'%(self.gridsize))
+            self.action_gridsize.setText('current size:%d'%(self.gridsize))
             self.action_gridup.setEnabled(True)
             if self.gridsize==12:
                 self.action_griddown.setEnabled(False)
@@ -608,7 +629,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
             f.write(abf)
 
     def loadboard(self):
-        fname = QtWidgets.QFileDialog.getOpenFileName(self.mainWindow,_('载入局'), '', '(board file *.abf *.mbf)')
+        fname = QtWidgets.QFileDialog.getOpenFileName(self.mainWindow,_('load board'), '', '(board file *.abf *.mbf)')
         if fname[0]:
             f = open(fname[0], 'rb')
             with f:
@@ -638,7 +659,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.datas.makereplayfile(replay)
 
     def loadreplay(self):
-        fname = QtWidgets.QFileDialog.getOpenFileName(self.mainWindow,_('播放录像'), '', '(video file *.nvf)')
+        fname = QtWidgets.QFileDialog.getOpenFileName(self.mainWindow,_('play video'), '', '(video file *.nvf)')
         if fname[0]:
             f = open(fname[0], 'rb')
             replay=self.datas.picklereplay(f)

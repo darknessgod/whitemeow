@@ -3,7 +3,9 @@ import sys
 import mainWindowGUI 
 import mineSweeperGUI
 
+
 if __name__ == "__main__":
+    
     app = QtWidgets.QApplication (sys.argv)
 #    app.aboutToQuit.connect(app.deleteLater)
     MainWindow = mainWindowGUI.MainWindow ()
