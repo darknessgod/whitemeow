@@ -1,4 +1,5 @@
 class mousestatus(object):
+    # Step0. Parent class sends the key event: self.leftdown/leftup/rightdown/rightup()
     # Step1. Process mouse key events and return self.event which indicates the click attempt:
     #        0. nothing
     #        1. error
@@ -15,7 +16,7 @@ class mousestatus(object):
         # 4-9: left fail, left success, right fail, right success, chord fail, chord success
         self.clicks=[0]*10
 
-        if scheme==0: # left, right, left+right=chord
+        if scheme==0: # default: left, right, left+right=chord
             # mouse states
             # 0. initial state
             # 1. error
@@ -42,6 +43,12 @@ class mousestatus(object):
             self.Tcount  =[0,0,0,5,7,0,0,0,9, 9, 0]
             self.Fcount  =[0,0,0,4,0,0,0,0,8, 8, 0]
             self.event   =[0,1,0,2,3,0,0,0,4, 4, 0] # click attempt
+        elif scheme==1: # left, right, middle
+            # TODO
+            pass
+        elif scheme==2: # default but press to trigger
+            # TODO
+            pass
             
     def leftdown(self):
         s=self.status
