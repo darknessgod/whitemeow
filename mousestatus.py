@@ -7,7 +7,7 @@ class mousestatus(object):
     #        3. right attempt
     #        4. chord attempt
     # Step2. Parent class processes the click attempt and return True/False for success or not by calling self.clickresult(True/False)
-    # Step3. Process the click.
+    # Step3. Process the click result and update click counter.
     def __init__(self, scheme=0):
         self.scheme=scheme
         # click counter for universal use
