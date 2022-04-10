@@ -1,25 +1,29 @@
 from PyQt5 import QtCore, Qt, QtWidgets
 import time
 
+
+
+
 class Counter(object):
     def __init__(self,counterWindow,game):
         self.game=game
-        counterWindow.setWindowTitle("计数器") 
-        counterWindow.setEnabled(True)
-        counterWindow.setWindowFlags(QtCore.Qt.WindowCloseButtonHint)
-        counterWindow.setWindowFlags(QtCore.Qt.Drawer)
-        counterWindow.closeEvent2.connect(self.closecounter)
+        self.window=counterWindow
+        self.retranslate()
+        self.window.setEnabled(True)
+        self.window.setWindowFlags(QtCore.Qt.WindowCloseButtonHint)
+        self.window.setWindowFlags(QtCore.Qt.Drawer)
+        self.window.closeEvent2.connect(self.closecounter)
         self.columnwidth=[90,90]
         self.lineheight=18
         self.rowsnames=['RTime','Est time','3BV','3BV/s','QG','RQP','Ops','Isls','LRD','Flags','Cl','Ce','Path','IOE','Corr','ThrP','Games','Ranks']
         sumheight=self.lineheight*len(self.rowsnames)
-        counterWindow.setFixedSize(sum(self.columnwidth), sumheight+10)
+        self.window.setFixedSize(sum(self.columnwidth), sumheight+10)
         self.titlelabelarray=[0]*len(self.rowsnames)
         self.valuelabelarray=[0]*len(self.rowsnames)
         #gridlayout= QtWidgets.QGridLayout()
-        #counterWindow.setLayout(gridlayout)
+        #self.window.setLayout(gridlayout)
         for i in range(len(self.rowsnames)):
-            self.titlelabelarray[i]=QtWidgets.QLabel(counterWindow)
+            self.titlelabelarray[i]=QtWidgets.QLabel(self.window)
             self.titlelabelarray[i].resize=(self.columnwidth[0],self.lineheight)
             self.titlelabelarray[i].setText(' %s'%(self.rowsnames[i]))
             self.titlelabelarray[i].setAlignment(QtCore.Qt.AlignLeft)
@@ -27,7 +31,7 @@ class Counter(object):
             #titlelabelarray[i].setFrameShadow(QtWidgets.QFrame.Raised)
             #titlelabelarray[i].setStyleSheet('border-width: 1px;border-color: rgb(255, 255, 255)')
             self.titlelabelarray[i].move(0,self.lineheight*i)
-            self.valuelabelarray[i]=QtWidgets.QLabel(counterWindow)
+            self.valuelabelarray[i]=QtWidgets.QLabel(self.window)
             self.valuelabelarray[i].resize=(self.columnwidth[1],self.lineheight)
             self.valuelabelarray[i].setText('0')
             self.valuelabelarray[i].setAlignment(QtCore.Qt.AlignLeft)
@@ -35,6 +39,9 @@ class Counter(object):
             #valuelabelarray[i].setFrameShadow(QtWidgets.QFrame.Raised)
             #valuelabelarray[i].setStyleSheet('border-width: 1px;border-color: rgb(255, 255, 255)')
             self.valuelabelarray[i].move(self.columnwidth[0],self.lineheight*i)
+
+    def retranslate(self):
+        self.window.setWindowTitle(_("Counter")) 
 
     def refreshvalues(self,status):
         allclicks=sum(self.game.allclicks[0:3])

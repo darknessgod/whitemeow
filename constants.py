@@ -2,11 +2,15 @@ TEXTURE_PATH = "MS-Texture/svg/"
 CELL_PATH = TEXTURE_PATH + "cells/"
 FACE_PATH = TEXTURE_PATH + "faces/"
 ELEMENT_PATH = TEXTURE_PATH + "elements/"
+import gettext
+Chinese = gettext.translation('zh_CN', localedir='locale', languages=['zh'])
+English = gettext.translation('en', localedir='locale', languages=['en'])
+Chinese.install()
 
-defaultsettings={'showplayertag':True,'defaultplayertag':'请按F5设置标识','playername':'anonymous',
+defaultsettings={'showplayertag':True,'defaultplayertag':_('press F5 to set playertag'),'playername':'anonymous',
 'level1name':'beg','level2name':'int','level3name':'exp','level4name':'cus','enablerec':True,
 'defaultlevel':'int','timeringame':True,'showsafesquares':False,'instantclick':False,'disableright':False,
-'endflagall':True}
+'endflagall':True,'failrestart':False,'failrestart_percentage':100,'language':1}
 
 def adjacent(i,j,index,row,column):
     if j==0: # left edge

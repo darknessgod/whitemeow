@@ -136,3 +136,5 @@ media/1502586-20190508211324336-1412057359.png
 *.nvf
 *.zip
 *.dat
+.vscode/launch.json
+pygettext.py

@@ -1,5 +1,9 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+
+
+
+
 class news_Dialog (object):
     def __init__(self,geo,breakrecord,style):
         self.breakrecord=[*breakrecord]
@@ -19,7 +23,7 @@ class news_Dialog (object):
         self.label.setObjectName ("label")
         self.label.setFixedSize(260,80)
         self.label.move(20,20)
-        text='恭喜打破:\n%s '%(self.style)
+        text=(_('Congratulations with:\n%s ')%(self.style))
         textlist=['Time,','3bv/s,','QG,','RQP,','IOE']
         for i in range(len(textlist)):
             if self.breakrecord[i]==1:
@@ -29,7 +33,7 @@ class news_Dialog (object):
             text.pop()
             tmpstr=""
             text=tmpstr.join(text)
-        text+='成绩！'
+        text+=_('score')
         self.label.setText(text)
         self.label.setWordWrap(True)
         self.label.setAlignment(QtCore.Qt.AlignTop)
@@ -38,7 +42,7 @@ class news_Dialog (object):
         self.okbutton.setObjectName ("okbutton")
         self.okbutton.setFixedSize(130,30)
         self.okbutton.move(85,115)
-        self.okbutton.setText('OK')
+        self.okbutton.setText(_('OK'))
 
 
 
