@@ -1,5 +1,10 @@
 class mousestatus(object):
-    # Step1. Process mouse key events and return self.event which indicates the click attempt.
+    # Step1. Process mouse key events and return self.event which indicates the click attempt:
+    #        0. nothing
+    #        1. error
+    #        2. left attempt
+    #        3. right attempt
+    #        4. chord attempt
     # Step2. Parent class processes the click attempt and return True/False for success or not.
     # Step3. Process the click.
     def __init__(self, scheme=0):
@@ -8,7 +13,7 @@ class mousestatus(object):
         # 0: nothing
         # 1-3: left round, right round, middle round
         # 4-9: left fail, left success, right fail, right success, chord fail, chord success
-        self.clicks=[0]*13 
+        self.clicks=[0]*10
 
         if scheme==0: # left, right, left+right=chord
             # mouse states
@@ -24,26 +29,19 @@ class mousestatus(object):
             # 9. chord up by right and pending
             # 10. chord up by right
             #              0 1 2 3 4 5 6 7 8  9 10
-            self.LDstatus=[2,1,1,1,1,7,7,1,1, 1, 1]
+            self.LDstatus=[2,1,1,1,1,7,7,1,1, 1, 1] # status update
             self.LUstatus=[1,1,3,1,1,1,1,8,1, 1, 0]
             self.RDstatus=[4,1,7,1,1,1,1,1,1, 1, 7]
             self.RUstatus=[1,1,1,1,1,0,0,9,1, 1, 1]
             self.Tstatus =[1,1,1,0,5,1,1,1,5,10, 1]
             self.Fstatus =[1,1,1,0,6,1,1,1,5,10, 1]
-            self.LDcount =[1,0,0,0,0,1,1,0,0, 0, 0]
+            self.LDcount =[1,0,0,0,0,1,1,0,0, 0, 0] # counter update
             self.LUcount =[0,0,0,0,0,0,0,0,0, 0, 0]
             self.RDcount =[1,0,1,0,0,0,0,0,0, 0, 1]
             self.RUcount =[0,0,0,0,0,0,6,0,0, 0, 0]
             self.Tcount  =[0,0,0,5,7,0,0,0,9, 9, 0]
             self.Fcount  =[0,0,0,4,0,0,0,0,8, 8, 0]
-
-            self.event   =[0,1,0,2,3,0,0,0,4, 4, 0]
-            # return events
-            # 0. nothing
-            # 1. error
-            # 2. left attempt
-            # 3. right attempt
-            # 4. chord attempt
+            self.event   =[0,1,0,2,3,0,0,0,4, 4, 0] # click attempt
             
     def leftdown(self):
         s=self.status
