@@ -30,19 +30,21 @@ class mousestatus(object):
             # 9. chord up by right and pending
             # 10. chord up by right
             #              0 1 2 3 4 5 6 7 8  9 10
-            self.LDstatus=[2,1,1,1,1,7,7,1,1, 1, 1] # status update
-            self.LUstatus=[1,1,3,1,1,1,1,8,1, 1, 0]
-            self.RDstatus=[4,1,7,1,1,1,1,1,1, 1, 7]
-            self.RUstatus=[1,1,1,1,1,0,0,9,1, 1, 1]
-            self.Tstatus =[1,1,1,0,5,1,1,1,5,10, 1]
-            self.Fstatus =[1,1,1,0,6,1,1,1,5,10, 1]
-            self.LDcount =[1,0,0,0,0,1,1,0,0, 0, 0] # counter update
-            self.LUcount =[0,0,0,0,0,0,0,0,0, 0, 0]
-            self.RDcount =[1,0,1,0,0,0,0,0,0, 0, 1]
-            self.RUcount =[0,0,0,0,0,0,6,0,0, 0, 0]
-            self.Tcount  =[0,0,0,5,7,0,0,0,9, 9, 0]
-            self.Fcount  =[0,0,0,4,0,0,0,0,8, 8, 0]
-            self.event   =[0,1,0,2,3,0,0,0,4, 4, 0] # click attempt
+            self.LDstatus=(2,1,1,1,1,7,7,1,1, 1, 1) # status update
+            self.LUstatus=(1,1,3,1,1,1,1,8,1, 1, 0)
+            self.RDstatus=(4,1,7,1,1,1,1,1,1, 1, 7)
+            self.RUstatus=(1,1,1,1,1,0,0,9,1, 1, 1)
+            self.Tstatus =(1,1,1,0,5,1,1,1,5,10, 1)
+            self.Fstatus =(1,1,1,0,6,1,1,1,5,10, 1)
+            self.LDcount =(1,0,0,0,0,1,1,0,0, 0, 0) # counter update
+            self.LUcount =(0,0,0,0,0,0,0,0,0, 0, 0)
+            self.RDcount =(1,0,1,0,0,0,0,0,0, 0, 1)
+            self.RUcount =(0,0,0,0,0,0,6,0,0, 0, 0)
+            self.Tcount  =(0,0,0,5,7,0,0,0,9, 9, 0)
+            self.Fcount  =(0,0,0,4,0,0,0,0,8, 8, 0)
+            self.event   =(0,1,0,2,3,0,0,0,4, 4, 0) # click attempt
+            self.leftHold=(2,)
+            self.chordHold=(7,)
         elif scheme==1: # left, right, middle
             # TODO
             pass
@@ -95,3 +97,8 @@ class mousestatus(object):
         return self.lcl()+self.rcl()+self.dcl()
     def ce(self):
         return self.lce()+self.rce()+self.dce()
+
+    def isLeftHold(self):
+        return self.status in self.leftHold
+    def isChordHold(self):
+        return self.status in self.chordHold
