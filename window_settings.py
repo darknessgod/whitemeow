@@ -10,9 +10,6 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import statusLabel
 import copy
 
-
-
-
 class Ui_SettingDialog (object):
     def __init__(self,window,options):
         self.Dialog = window
@@ -153,8 +150,10 @@ class Ui_SettingDialog (object):
             self.horizontalLayout3.setSpacing(1)
             self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
             self.verticalLayout3.addWidget(self.coreframe2)
-            self.reccheckBox = self.createcheckbox(self.coreframe,_('enable recursive chord and quite flagging(recommended)'),self.tmpsettings['enablerec'])
+            self.reccheckBox = self.createcheckbox(self.coreframe,_('enable recursive chord and quick flagging(recommended)'),self.tmpsettings['enablerec'])
             self.verticalLayout3.addWidget(self.reccheckBox)
+            self.ngcheckBox = self.createcheckbox(self.coreframe,_('no guess mode'),self.tmpsettings['noguess'])
+            self.verticalLayout3.addWidget(self.ngcheckBox)
         elif menunum==1:
             self.titlelabel.setText(' %s'%(_('Game settings')))
             self.widgetbranch1 = QtWidgets.QWidget (self.coreframe)
@@ -228,6 +227,7 @@ class Ui_SettingDialog (object):
             self.tmpsettings['showplayertag']=self.freshcheckBox.isChecked()
             self.playertag.setEnabled(self.freshcheckBox.isChecked())
             self.tmpsettings['enablerec']=self.reccheckBox.isChecked()
+            self.tmpsettings['noguess']=self.ngcheckBox.isChecked()
         elif self.currentpage==1:
             self.tmpsettings['failrestart']=self.failrestartbox.isChecked()
             self.failrestartpercentage.setEnabled(self.failrestartbox.isChecked())
@@ -236,6 +236,7 @@ class Ui_SettingDialog (object):
         if page==0:
             self.tmpsettings['showplayertag']=self.freshcheckBox.isChecked()
             self.tmpsettings['enablerec']=self.reccheckBox.isChecked()
+            self.tmpsettings['noguess']=self.ngcheckBox.isChecked()
             self.tmpsettings['defaultplayertag']=self.playertag.text()
             self.tmpsettings['playername']=self.playername.text()
             self.tmpsettings['level1name']=(self.modenamelabels[0].text())

@@ -1,9 +1,6 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-
-
-
 class ui_recorddialog (object):
     def __init__(self,geo,record):
         self.record=[*record]

@@ -3,6 +3,7 @@ from PyQt5 import QtCore, QtWidgets
 class MainWindow(QtWidgets.QMainWindow):
   
     closeEvent_ = QtCore.pyqtSignal()
+    closeEvent2_ = QtCore.pyqtSignal()
     gridupdownEvent = QtCore.pyqtSignal(int)
     keypressEvent= QtCore.pyqtSignal(int)
     keyreleaseEvent= QtCore.pyqtSignal(int)
@@ -35,19 +36,27 @@ class MainWindow(QtWidgets.QMainWindow):
     def changeEvent(self, event):
         if event.type() == QtCore.QEvent.WindowStateChange:
             if self.windowState() & QtCore.Qt.WindowMinimized:
-                self.closeEvent_.emit()
+                print(2)
+                self.closeEvent2_.emit()
             else:
+                print(3)
                 self.minbackEvent.emit()
 
 class meowcounter(QtWidgets.QMainWindow):
 
     closeEvent2 = QtCore.pyqtSignal()
+    preview = QtCore.pyqtSignal()
     def closeEvent(self, event):
         self.closeEvent2.emit()
+    def getpreview(self):
+        self.preview.emit()
 
 class meowsettings(QtWidgets.QDialog):
     
-    closeEvent3 = QtCore.pyqtSignal()
+    closeEvent3=QtCore.pyqtSignal()
+    
+
     def closeEvent(self, event):
         self.closeEvent3.emit()
+
     

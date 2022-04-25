@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "POT-Creation-Date: 2022-04-09 22:57+0800\n"
-"PO-Revision-Date: 2022-04-10 00:15+0800\n"
+"PO-Revision-Date: 2022-04-26 02:18+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: zh_CN\n"
@@ -248,3 +248,14 @@ msgstr "如果完成度低于"
 #: constants.py:1
 msgid "press F5 to set playertag"
 msgstr "按F5设置标识"
+
+msgid "Preview replay"
+msgstr "回放"
+
+#: window_settings.py:1
+msgid "no guess mode"
+msgstr "无猜模式"
+
+#: window_replay:1
+msgid "replay control bar"
+msgstr "录像播放控制条"

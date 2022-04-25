@@ -1,9 +1,10 @@
 import random
 import time
-import sys
+import pickle
 from queue import Queue
 from readdata import *
 from constants import adjacent
+import ms_toollib as ms
 
 class gamestatus(object):
     def __init__(self,row,column,mines,settings):
@@ -12,6 +13,7 @@ class gamestatus(object):
         self.failed,self.timeStart,self.finish,self.mouseout,self.result=False,False,False,False,0 # some flags for events
         self.redmine=0 # blast
         self.oldCell=0
+        self.startcross=None
         self.replayboardinfo=[]
         self.tmplist=[i for i in range(self.column*self.row-1)]
         self.gamemode,self.gametype=self.modejudge(),1
@@ -22,9 +24,10 @@ class gamestatus(object):
         self.num0get,self.bvget=0,0
         self.ops,self.solvedops,self.bbbv,self.solvedbbbv,self.solvedelse,self.islands,self.solvedislands=0,0,0,0,0,0,0 # (solved) openings, (solved) bbbv, (solved) islands. solvedelse = solvedbbbv-solvedops
         self.allclicks,self.eclicks=[0,0,0,0],[0,0,0] # clicks and efficient clicks
-        self.operationlist,self.tracklist,self.replay,self.pathlist=[],[],[],[]
+        self.operationlist,self.tracklist,self.statelist,self.replay,self.pathlist=[],[],[],[],[]
+        self.clicklist,self.mousestatelist=[],[]
         self.replayoplist,self.replayislist=[],[] # contain indices of cells in each opening/island
-        self.replaynodes,self.cursorplace=[0,0],[0,0]
+        self.replaynodes,self.cursorplace=[0,0,0,0],[0,0]
         self.thisop,self.thisis=[],[]
         self.num = [0]*(self.row*self.column) # mine=-1, numbers=0,1,2,3,4,5,6,7,8
         self.status = [0]*(self.row*self.column) # covered=0, opened=1, flagged=2
@@ -34,6 +37,8 @@ class gamestatus(object):
 
     def recursive(self): # recursive chord
         return bool(self.gamemode&1)
+    def isnggame(self):
+        return bool(self.gamemode&2)
     def canflagnumber(self): # fast flag
         return bool(self.gamemode&1)
     def isreplaying(self):
@@ -58,33 +63,26 @@ class gamestatus(object):
         return self.num[index]==-1
     def isOpening(self,index):
         return self.num[index]==0
-        
+    def isGameFinished(self):
+        for i in range(self.row*self.column):
+            if not self.isOpened(i) and not self.isMine(i):
+                return False
+        return True        
     # cell operations
     def forceUncover(self,index):
         #print("uncovering ", index)
         self.status[index]=1
         self.pixmapindex[index]=self.num[index]
-        if self.isreplaying():
-            i=self.gridquality[index]
-            self.tocheck.add(i)
-            if i<0:
-                self.solvedelse+=1
-                self.replayislist[-i-1].remove(index)
-            elif i>0:
-                self.replayoplist[i-1].remove(index)
-            else:
-                for j in self.adjacent1(index):
-                    if self.isOpening(j):
-                        self.replayoplist[self.gridquality[j]-1].discard(index)
-                        self.tocheck.add(self.gridquality[j])
 
     def safeUncover(self,index):
         if self.isCovered(index):
             self.forceUncover(index)
-    def forceFlag(self,index):
+    def forceFlag(self,index,optime):
         self.status[index]=2
-    def forceUnflag(self,index):
+        self.addstate(index,2,optime)
+    def forceUnflag(self,index,optime):
         self.status[index]=0
+        self.addstate(index,0,optime)
 
     # in-border ranges
     def rowRange(self,top,bottom):
@@ -103,20 +101,31 @@ class gamestatus(object):
     # border check
     def outOfBorder(self, i, j):
         return i < 0 or i >= self.row or j < 0 or j >= self.column
-    def outOfBorder1(self,index):
-        return self.outOfBorder(self.getrow(index), self.getcolumn(index))
 
-    def createMine(self,mode):    
+
+    def createMine(self,gtype):    
         num = self.mineNum
         if len(self.tmplist)!=self.column*self.row-1:
             self.tmplist=[i for i in range(self.column*self.row-1)]
-        if mode==1:
-            random.shuffle(self.tmplist)
-            for i in range(num):
-                r= int(self.tmplist[i]/self.column)
-                c= self.tmplist[i]-r*self.column
-                self.num[self.getindex(r,c)]=-1
-                self.calnumbers(self.getindex(r,c))
+        if gtype==1:
+            if self.settings['noguess']:
+                startrow,startcolumn=int(self.row*random.random()),int(self.column*random.random())
+                result=ms.laymine_solvable_thread(self.row,self.column,self.mineNum,startrow,startcolumn,100000)
+                index=0
+                for i in range(self.row):
+                    for j in range(self.column):
+                        self.num[index]=result[0][i][j]
+                        index+=1
+                if result[1]:
+                    self.gamemode+=2
+                    self.startcross=(startcolumn,startrow)
+            else:
+                random.shuffle(self.tmplist)
+                for i in range(num):
+                    r= int(self.tmplist[i]/self.column)
+                    c= self.tmplist[i]-r*self.column
+                    self.num[self.getindex(r,c)]=-1
+                    self.calnumbers(self.getindex(r,c))
 
 
     def renewminearea(self):
@@ -129,21 +138,22 @@ class gamestatus(object):
         self.timeStart = False
         self.finish=False
         self.result=0
+        self.startcross=None
         self.solvedbbbv,self.solvedops,self.path=0,0,0
         self.intervaltime,self.oldinttime =0,0
         self.allclicks,self.eclicks=[0,0,0,0],[0,0,0]
         self.leftAndRightHeld,self.leftHeld,self.rightfirst,self.rightHeld=False,False,False,False
         self.gamemode=self.modejudge()
         if not self.isreplaying():
-            self.operationlist,self.tracklist=[],[],
+            self.operationlist,self.tracklist,self.statelist,self.clicklist,self.mousestatelist=[],[],[],[],[]
             self.bbbv,self.ops=0,0
 
-    def recursiveChord(self,index):
+    def recursiveChord(self,index,optime):
         q=Queue()
         q.put(index)
         while not q.empty():
             next=q.get()
-            if self.chordingFlag(next):
+            if self.chordingFlag(next) or self.isOpening(next):
                 for i in self.adjacent1(next):
                     if not self.isCovered(i):
                         continue
@@ -152,9 +162,10 @@ class gamestatus(object):
                         self.redmine=i
                     else:
                         self.forceUncover(i)
+                        self.addstate(i,1,optime)
                         q.put(i)
 
-    def getOpening(self,index):
+    def getOpening(self,index,optime):
         q=Queue()
         q.put(index)
         while not q.empty():
@@ -168,72 +179,77 @@ class gamestatus(object):
                         self.redmine=i
                     else:
                         self.forceUncover(i)
+                        self.addstate(i,1,optime)
                         q.put(i)
 
-    def doleft(self,index):
+    def doleft(self,index,optime):
         self.allclicks[0]+=1
+        self.clicklist.append(('l',optime))
         if self.isCovered(index):
             self.eclicks[0]+=1
+            self.clicklist.append(('le',optime))
             self.tocheck=set()
             if not self.isMine(index):
                 self.forceUncover(index)
+                self.addstate(index,1,optime)
                 if self.recursive():
-                    self.recursiveChord(index)
+                    self.recursiveChord(index,optime)
                 elif self.isOpening(index):
-                    self.getOpening(index)
+                    self.getOpening(index,optime)
             else:
-                if not self.timeStart and self.gametype==1 :#第一下不能为雷
+                if not self.timeStart and self.gametype==1 and not self.isnggame():#第一下不能为雷
                     self.exchange1tolast(index)
-                    self.doleft(index)    
+                    self.doleft(index,optime)    
                 else:
+                    self.addstate(index,1,optime)
                     self.failed=True
                     self.redmine=index
-            if self.isreplaying():
-                self.checkSolved()
 
-    def doright(self,index):
+    def doright(self,index,optime):
         self.allclicks[1]+=1
+        self.clicklist.append(('r',optime))
         self.rightfirst=True
         if self.isCovered(index):
-            self.flagonmine(index)
+            self.flagonmine(index,optime)
         elif self.isFlag(index):
-            self.unflagonmine(index)
+            self.unflagonmine(index,optime)
         elif self.isOpened(index) and not self.isOpening(index) and self.canflagnumber():
-            self.flagonnumber(index)
+            self.flagonnumber(index,optime)
 
     def pressdouble(self,index):
         pass
 
-    def dodouble(self,index):
+    def dodouble(self,index,optime):
         if self.rightfirst==True:
             self.allclicks[1]-=1
+            self.clicklist.append(('R',optime))
             self.rightfirst=False
         self.allclicks[2]+=1
+        self.clicklist.append(('d',optime))
         if self.chordingFlag(index):
             self.tocheck=set()
             self.eclicks[2]+=1
+            self.clicklist.append(('de',optime))
             if self.recursive():
-                self.recursiveChord(index)
+                self.recursiveChord(index,optime)
             else:
                 for i in self.adjacent1(index):
                     if self.isCovered(i):
                         if self.isMine(i):
+                            self.addstate(i,1,optime)
                             self.failed=True
                             self.redmine=i
                         elif self.isOpening(i):
                             self.forceUncover(i)
-                            self.getOpening(i)
+                            self.addstate(i,1,optime)
+                            self.getOpening(i,optime)
                         else:
                             self.forceUncover(i)
-                            
-
-                    
-
-            if self.isreplaying():
-                self.checkSolved()
+                            self.addstate(i,1,optime)
                         
-    def domove(self,index):
-        if not self.outOfBorder(self.getrow(index),self.getcolumn(index)):
+    def domove(self,i,j):
+        if not self.outOfBorder(i,j):
+            index=self.getindex(i,j)
             self.mouseout=False
             if index != self.oldCell and (self.leftAndRightHeld or self.leftHeld):
                 self.oldCell = index
@@ -241,6 +257,7 @@ class gamestatus(object):
             self.mouseout=True
 
     def dofinish(self):
+        self.leftAndRightHeld,self.leftHeld,self.rightHeld=False,False,False
         for i in range(self.row*self.column):
             self.finishpaint(i)
 
@@ -272,21 +289,23 @@ class gamestatus(object):
             return False
         return covered and count == self.num[index]
 
-    def flagonmine(self,index):
+    def flagonmine(self,index,optime):
         self.eclicks[1]+=1
+        self.clicklist.append(('re',optime))
         self.allclicks[3]+=1
         self.rightfirst=False
-        self.forceFlag(index)
+        self.forceFlag(index,optime)
         self.pixmapindex[index]=10
 
-    def unflagonmine(self,index):
+    def unflagonmine(self,index,optime):
         self.eclicks[1]+=1
+        self.clicklist.append(('re',optime))
         self.allclicks[3]-=1
         self.rightfirst=False
-        self.forceUnflag(index)
+        self.forceUnflag(index,optime)
         self.pixmapindex[index]=9
 
-    def flagonnumber(self,index):
+    def flagonnumber(self,index,optime):
         count=0
         for r in self.adjacent1(index):
             if self.isCovered(r) or self.isFlag(r):
@@ -295,13 +314,14 @@ class gamestatus(object):
             eright=False
             for r in self.adjacent1(index):
                 if self.isCovered(r):
-                    self.forceFlag(r)
+                    self.forceFlag(r,optime)
                     self.pixmapindex[r]=10
                     self.allclicks[3]+=1
                     self.rightfirst=False
                     eright=True
             if eright==True:
                 self.eclicks[1]+=1
+                self.clicklist.append(('re',optime))
 
     def cal_3bv(self):
         self.islands,self.solvedislands,self.ops,self.solvedops,self.solvedbbbv,self.solvedelse=0,0,0,0,0,0
@@ -429,12 +449,8 @@ class gamestatus(object):
             if not self.isMine(i):
                 self.num[i] += 1
 
-    def addoperation(self,num,i,j):
-        if self.timeStart==False:
-            optime=-1
-        else:
-            optime=int(1000*(time.time()-self.starttime))
-        self.operationlist.append((num,i,j,optime))
+    def addstate(self,index,state,optime):
+        self.statelist.append((index,state,optime))
 
     def addtrack(self,yy,xx):
         if self.timeStart==True:
@@ -453,9 +469,12 @@ class gamestatus(object):
         playertag,playername=self.settings['defaultplayertag'],self.settings['playername']
         st,et,deltat,bbbv=self.starttime,self.endtime,self.intervaltime,self.bbbv
         mode,type,level,style=self.gamemode,self.gametype,self.leveljudge(),self.stylejudge()
-        kept1,kept2,kept3,kept4,kept5,kept6,version=0,0,0,0,0,0,'v1.5'
+        redmine,kept1,kept2,kept3,kept4,kept5,version=self.redmine,0,0,0,0,0,'v1.5'
         leveldict={'BEG':self.settings['level1name'],'INT':self.settings['level2name'],'EXP':self.settings['level3name'],'CUS':self.settings['level4name']}
         levelname=leveldict[level[:3]]
+        if self.isreplaying():
+            deltat=self.replayboardinfo[5]
+            type=self.replayboardinfo[8]
         if self.failed==True:
             result=2
             prefix='#'
@@ -465,49 +484,76 @@ class gamestatus(object):
             prefix=''
             replayname='%s%s_%.2f_3bv=%d_3bvs=%.3f_%s.nvf'%(prefix,levelname,deltat,bbbv,bbbv/deltat,playername)
         boardinfo=[replayname,playertag,playername,st,et,deltat,bbbv]
-        boardinfo+=[mode,type,level,style,result,kept1,kept2,kept3,kept4,kept5,kept6,version]
+        boardinfo+=[mode,type,level,style,result,redmine,kept1,kept2,kept3,kept4,kept5,version]
         return boardinfo
 
     def dealreplay(self):
-        l1,l2,l3,l4=self.replay[0],self.replay[1],self.replay[2],self.replay[3]
-        if len(self.replay)!=4+l1+l2+l3+l4:
-            return 1
-        self.replayboardinfo=[*self.replay[4:4+l1]]
-        if self.replayboardinfo[8] not in[1,2] or self.replayboardinfo[11] not in [1,2]:
-            return 2
-        boardlist=[*self.replay[4+l1:4+l1+l2]]
-        boardlegal=self.dealboard(boardlist)
-        if boardlegal!=0:
-            return boardlegal
-        self.operationlist=[*self.replay[4+l1+l2:4+l1+l2+l3]]
         try:
-            for i in range(len(self.operationlist)):
-                if self.operationlist[i][0] not in [1,2,3,4,5,6]:
-                    return 3
-                if i!=len(self.operationlist)-1:
-                    if self.operationlist[i][3]>self.operationlist[i+1][3]:
-                        return 4
-                if self.operationlist[i][1]<0 or self.operationlist[i][1]>100*(self.row-1):
-                    return 5
-                if self.operationlist[i][2]<0 or self.operationlist[i][2]>100*(self.column-1):
-                    return 6
+            l1,l2,l3,l4,l5,l6=self.replay[0],self.replay[1],self.replay[2],self.replay[3],self.replay[4],self.replay[5]
+            if len(self.replay)!=6+l1+l2+l3+l4+l5+l6:
+                return 1
+            self.replayboardinfo=[*self.replay[6:6+l1]]
+            if self.replayboardinfo[8] not in[1,2] or self.replayboardinfo[11] not in [1,2]:
+                print(self.replayboardinfo)
+                return 2
+            boardlist=[*self.replay[6+l1:6+l1+l2]]
+            boardlegal=self.dealboard(boardlist)
+            if boardlegal!=0:
+                return boardlegal
         except:
-            return 7
-        self.tracklist=[*self.replay[4+l1+l2+l3:]]
+            return 3
         try:
+            self.tracklist=[*self.replay[6+l1+l2:6+l1+l2+l3]]
             for i in range(len(self.tracklist)):
                 if i!=len(self.tracklist)-1:
                     if self.tracklist[i][2]>self.tracklist[i+1][2]:
-                        return 8
+                        return 9
         except:
-            return 11
+            return 10
+        try:
+            self.statelist=[*self.replay[6+l1+l2+l3:6+l1+l2+l3+l4]]
+            for i in range(len(self.statelist)):
+                if self.statelist[i][0]<0 or self.statelist[i][0]>(self.row*self.column):
+                    return 11
+                if self.statelist[i][1] not in [0,1,2]:
+                    return 12
+                if i!=len(self.statelist)-1:
+                    if self.statelist[i][2]>self.statelist[i+1][2]:
+                        return 13
+        except:
+            return 14
+        try:
+            self.clicklist=[*self.replay[6+l1+l2+l3+l4:6+l1+l2+l3+l4+l5]]
+            for i in range(len(self.clicklist)):
+                if self.clicklist[i][0] not in ('l','r','d','le','re','de','R'):
+                    return 15
+                if i!=len(self.clicklist)-1:
+                    if self.clicklist[i][1]>self.clicklist[i+1][1]:
+                        return 16
+        except:
+            return 17
+        try:
+            self.mousestatelist=[*self.replay[6+l1+l2+l3+l4+l5:]]
+            for i in range(len(self.mousestatelist)):
+                if self.mousestatelist[i][0] not in ('lh','rh','dh','lr','rr','dr'):
+                    return 18
+                if i!=len(self.mousestatelist)-1:
+                    if self.mousestatelist[i][1]>self.mousestatelist[i+1][1]:
+                        return 19            
+        except:
+            return 20
+        self.calpath()
+        return 0
+
+    def calpath(self):
         self.pathlist=[0]
         for i in range(len(self.tracklist)-1):
             self.pathlist.append(self.pathlist[-1]+((self.tracklist[i][0]-self.tracklist[i+1][0])**2+(self.tracklist[i][1]-self.tracklist[i+1][1])**2)**0.5/100)
-        return 0
+       
 
     def initreplays(self):
         self.gamemode=self.replayboardinfo[7]
+        self.redmine=self.replayboardinfo[12]
 
     def dealboard(self,boardlist):
         if len(boardlist)<4:
@@ -532,31 +578,6 @@ class gamestatus(object):
             self.calnumbers(self.getindex(boardarea[2*i+1],boardarea[2*i]))
         return 0
 
-    def dopreoperations(self):
-        flags=[]
-        for i in range(0,len(self.operationlist)):
-            if self.operationlist[i][3]!=-1:
-                break
-            if self.operationlist[i][0]==3:
-                self.allclicks[1]+=1
-                self.eclicks[1]+=1
-                tempturple=(self.operationlist[i][1],self.operationlist[i][2])
-                if tempturple in flags:
-                    flags.remove(tempturple)
-                else:
-                    flags.append(tempturple)
-            elif self.operationlist[i][0]==6:
-                self.allclicks[2]+=1
-            elif self.operationlist[i][0]==2: 
-                tempturple=(self.operationlist[i][1],self.operationlist[i][2])
-                for s in flags:
-                    self.forceFlag(s[0],s[1])
-                    self.pixmapindex[self.getindex(s[0],s[1])]=10
-                return tempturple
-            self.replaynodes[0]+=1
-
-    
-
     def modejudge(self):
         mode=0
         if self.settings['enablerec']:
@@ -576,3 +597,34 @@ class gamestatus(object):
             if self.settings['endflagall']:
                 if self.isMine(index) and not self.isFlag(index):
                     self.pixmapindex[index]=14
+                    
+    def saveboard(self):
+        if self.finish==False:
+            return
+        boardlist=self.getboardlist()
+        abf=bytes(boardlist)
+        ft=list(time.localtime(time.time()))
+        filename='%dx%d_%dmines_%d_%d_%d_%d_%d_%d.abf'%(self.column,self.row,
+        self.mineNum,ft[0],ft[1],ft[2],ft[3],ft[4],ft[5])
+        with open(r"%s"%(filename),'wb') as f:
+            f.write(abf)
+
+    def savereplay(self):
+        if self.finish==False:
+            return
+        boardlist=self.getboardlist()
+        boardinfo=self.getboardinfo()
+        replay=[len(boardinfo),len(boardlist),len(self.tracklist),len(self.statelist),len(self.clicklist),len(self.mousestatelist)]
+        replay+=boardinfo
+        replay+=boardlist
+        replay+=self.tracklist
+        replay+=self.statelist
+        replay+=self.clicklist
+        replay+=self.mousestatelist
+        self.makereplayfile(replay)
+
+    def makereplayfile(self,replay):
+        filename=replay[6]
+        file=open('%s'%(filename),'wb')
+        pickle.dump(replay,file)
+        file.close()

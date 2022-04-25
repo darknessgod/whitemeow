@@ -18,7 +18,7 @@ class mineLabel (QtWidgets.QLabel):
         self.game=game
         self.leftAndRightClicked = False
         self.pixSize=pixsize
-        self.pixmaps=[0]*16
+        self.pixmaps=[0]*17
         self.setMouseTracking(True)
         self.resizepixmaps(self.pixSize)
         self.lastcell=None
@@ -35,10 +35,11 @@ class mineLabel (QtWidgets.QLabel):
         self.pixmaps[12]=QPixmap(CELL_PATH+"falsemine.svg")
         self.pixmaps[13]=QPixmap(CELL_PATH+"blast.svg")
         self.pixmaps[14]=QPixmap("media/svg/cellunflagged.svg")
-        self.pixmaps[15]=QPixmap(ELEMENT_PATH+"arrowcursor.svg")
-        for i in range(15):
+        self.pixmaps[15]=QPixmap(CELL_PATH+"greencross.svg")
+        self.pixmaps[16]=QPixmap(ELEMENT_PATH+"arrowcursor.svg")
+        for i in range(16):
             self.pixmaps[i]=self.pixmaps[i].scaled(targetsize,targetsize)
-        self.pixmaps[15]=self.pixmaps[15].scaled(targetsize,targetsize,transformMode=QtCore.Qt.SmoothTransformation)
+        self.pixmaps[16]=self.pixmaps[16].scaled(targetsize,targetsize,transformMode=QtCore.Qt.SmoothTransformation)
 
 
     def mousePressEvent(self, e):  # 重载一下鼠标点击事件
@@ -108,15 +109,19 @@ class mineLabel (QtWidgets.QLabel):
                 if index!=None:
                     painter.drawPixmap(j*size,i*size,self.pixmaps[index])
         if self.game.isreplaying():
-            painter.drawPixmap(self.game.cursorplace[1]*size//100,self.game.cursorplace[0]*size//100,self.pixmaps[15])
+            painter.drawPixmap(self.game.cursorplace[1]*size//100,self.game.cursorplace[0]*size//100,self.pixmaps[16])
+        elif self.game.isnggame() and not self.game.timeStart:
+            if self.game.startcross!=None:
+                painter.drawPixmap(self.game.startcross[0]*size,self.game.startcross[1]*size,self.pixmaps[15])
+
         painter.end()
         
     def getPixmapIndex(self,i,j,mouse):
         index=self.game.getindex(i,j)
         if self.game.isCovered(index) and self.game.leftAndRightHeld and smallfuc.linyu(i,j,mouse[0],mouse[1]) and not self.game.mouseout:
-                return 0
+            return 0
         elif self.game.isCovered(index) and self.game.leftHeld and i==mouse[0] and j==mouse[1] and not self.game.mouseout:
-                return 0
+            return 0
 
     
 

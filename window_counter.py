@@ -1,18 +1,20 @@
-from PyQt5 import QtCore, Qt, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets
 import time
 
-
-
-
 class Counter(object):
+
+    preview = QtCore.pyqtSignal()
     def __init__(self,counterWindow,game):
         self.game=game
         self.window=counterWindow
-        self.retranslate()
         self.window.setEnabled(True)
         self.window.setWindowFlags(QtCore.Qt.WindowCloseButtonHint)
         self.window.setWindowFlags(QtCore.Qt.Drawer)
         self.window.closeEvent2.connect(self.closecounter)
+        self.window.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.window.customContextMenuRequested.connect(self.create_rightmenu) 
+        self.window.setWindowTitle(_("Counter"))
+        self.create_rightmenu()
         self.columnwidth=[90,90]
         self.lineheight=18
         self.rowsnames=['RTime','Est time','3BV','3BV/s','QG','RQP','Ops','Isls','LRD','Flags','Cl','Ce','Path','IOE','Corr','ThrP','Games','Ranks']
@@ -41,13 +43,41 @@ class Counter(object):
             self.valuelabelarray[i].move(self.columnwidth[0],self.lineheight*i)
 
     def retranslate(self):
-        self.window.setWindowTitle(_("Counter")) 
+        self.window.setWindowTitle(_("Counter"))
+        self.action_replay.setText(_('Preview replay'))
+        self.action_sboard.setText(_('Save board'))
+        self.action_sreplay.setText(_('Save replay'))
 
+    def create_rightmenu(self):
+        self.menu=QtWidgets.QMenu()
+        self.action_replay=QtWidgets.QAction(self.window)
+        self.menu.addAction(self.action_replay)
+        self.action_sboard=QtWidgets.QAction(self.window)
+        self.menu.addAction(self.action_sboard)
+        self.action_sreplay=QtWidgets.QAction(self.window)
+        self.menu.addAction(self.action_sreplay)     
+        self.menu.popup(QtGui.QCursor.pos())
+        self.action_sreplay.triggered.connect(self.game.savereplay)
+        self.action_sboard.triggered.connect(self.game.saveboard)  
+        self.action_replay.triggered.connect(self.window.getpreview)   
+        self.retranslate()
+        if self.game.finish:
+            self.action_sboard.setEnabled(True)
+            self.action_sreplay.setEnabled(True)
+            self.action_replay.setEnabled(True)
+        else:
+            self.action_sboard.setEnabled(False)
+            self.action_sreplay.setEnabled(False)
+            self.action_replay.setEnabled(False)
+    
     def refreshvalues(self,status):
         allclicks=sum(self.game.allclicks[0:3])
         eclicks=sum(self.game.eclicks)
         if status==2:
-            rt=self.game.intervaltime
+            if self.game.isreplaying():
+                rt=max(0,min(self.game.replayboardinfo[5],round(self.game.intervaltime,2)))
+            else:
+                rt=self.game.intervaltime
             allbv=self.game.bbbv
             solvedbv=self.game.solvedelse+self.game.solvedops
             if eclicks==0:
@@ -58,12 +88,16 @@ class Counter(object):
                 est=999.99
             else:
                 est=rt/(solvedbv+2*self.game.solvedops)*(allbv+2*self.game.ops)
-            values=['%.2f'%(rt),'%.2f'%(est),'%d/%d'%(solvedbv,allbv),'%.3f'%(solvedbv/rt),'%.3f'%(pow(est,1.7)/allbv)]
+            if rt==0:
+                bvs,cls,ces=0,0,0
+            else:
+                bvs,cls,ces=solvedbv/rt,allclicks/rt,eclicks/rt
+            values=['%.2f'%(rt),'%.2f'%(est),'%d/%d'%(solvedbv,allbv),'%.3f'%(bvs),'%.3f'%(pow(est,1.7)/allbv)]
             values+=['%.2f'%(est*(est+1)/allbv),'%d/%d'%(self.game.solvedops,self.game.ops),'%d/%d'%(self.game.solvedislands,self.game.islands)]
             values+=['%d/%d/%d'%(self.game.allclicks[0],self.game.allclicks[1],self.game.allclicks[2])]
             values+=['%d'%(self.game.allclicks[3])]
-            values+=['%d@%.3f'%(allclicks,allclicks/rt)]
-            values+=['%d@%.3f'%(eclicks,eclicks/rt)]
+            values+=['%d@%.3f'%(allclicks,cls)]
+            values+=['%d@%.3f'%(eclicks,ces)]
             values+=['%.1f'%(self.game.path)]
             values+=['%.3f'%(ioe),'%.3f'%(corr),'%.3f'%(thrp)]
             values+=['%d'%(self.game.gamenum),'%d/%d/%d'%(self.game.ranks[0],self.game.ranks[1],self.game.ranks[2])]
@@ -96,23 +130,7 @@ class Counter(object):
     def closecounter(self):
         pass
 
-'''class calbbbvThread(Qt.QThread):  # 游戏过程中刷新计数器的线程
 
-    trigger = QtCore.pyqtSignal()
-
-    def __init__(self,game):
-        super(calbbbvThread, self).__init__()
-        self.game=game
-
-    def run(self):
-        k0,k1=0,0
-        while(1):
-            k1=self.game.replaynodes[0]
-            if k1!=k0:
-                self.game.cal_3bv()
-            else:
-                time.sleep(0.03)
-            k0=k1'''
 
 
 

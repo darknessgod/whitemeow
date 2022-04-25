@@ -10,7 +10,7 @@ Chinese.install()
 defaultsettings={'showplayertag':True,'defaultplayertag':_('press F5 to set playertag'),'playername':'anonymous',
 'level1name':'beg','level2name':'int','level3name':'exp','level4name':'cus','enablerec':True,
 'defaultlevel':'int','timeringame':True,'showsafesquares':False,'instantclick':False,'disableright':False,
-'endflagall':True,'failrestart':False,'failrestart_percentage':100,'language':1}
+'endflagall':True,'failrestart':False,'failrestart_percentage':100,'language':1,'noguess':False}
 
 def adjacent(i,j,index,row,column):
     if j==0: # left edge

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "POT-Creation-Date: 2022-04-09 22:57+0800\n"
-"PO-Revision-Date: 2022-04-10 14:21+0800\n"
+"PO-Revision-Date: 2022-04-26 02:17+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: en\n"
@@ -87,7 +87,7 @@ msgstr "Best scores"
 
 #: superGUI.py:37
 msgid "Beginner"
-msgstr "Best scores"
+msgstr "Beginner"
 
 #: superGUI.py:38
 msgid "Intermediate"
@@ -248,3 +248,14 @@ msgstr "if completion less than"
 #: constants.py:1
 msgid "press F5 to set playertag"
 msgstr "press F5 to set player identification text"
+
+msgid "Preview replay"
+msgstr "Preview replay"
+
+#: window_settings.py:1
+msgid "no guess mode"
+msgstr "no guess mode"
+
+#: window_replay:1
+msgid "replay control bar"
+msgstr "replay control bar"
