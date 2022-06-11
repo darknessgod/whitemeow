@@ -1,12 +1,8 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 import time
 
-
-
 class ui_replaydialog (object):
 
-    
-    
     def __init__(self,geo,window,game):
         self.game=game
         self.geo=geo

@@ -18,7 +18,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.mainWindow.setFixedSize(self.mainWindow.minimumSize())
         self.mainWindow.move(694,200)
         self.maxsize=[1000,800]
-        self.widthmargin,self.heightmargin=24,135
+        self.widthmargin,self.heightmargin=28,141
         self.initlanguage()
         self.setupUi(self.mainWindow)
         if self.options.settings['defaultlevel']=='beg':
@@ -27,6 +27,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
             self.game=gamestatus.gamestatus(16,30,99,self.options.settings)
         else:
             self.game=gamestatus.gamestatus(16,16,40,self.options.settings)
+        self.game.gamenum=self.gamescount()
         self.gridsize=32
         self.game.oldCell = 0  # 鼠标的上个停留位置，用于绘制按下去时的阴影
         self.counterWindow,self.counterui,self.replaywindow,self.replayui=None,None,None,None
@@ -78,7 +79,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
             w.setParent(None)
         #self.gridLayout.removeWidget(self.scrollArea)
         self.label = mineLabel.mineLabel(self.game,self.gridsize)
-        self.label.setMinimumSize(QtCore.QSize(self.gridsize*self.game.column-2, self.gridsize*self.game.row-2))
+        self.label.setMinimumSize(QtCore.QSize(self.gridsize*self.game.column, self.gridsize*self.game.row))
         self.label.leftPressed.connect(self.mineAreaLeftPressed)
         self.label.leftRelease.connect(self.mineAreaLeftRelease)
         self.label.leftAndRightPressed.connect(self.mineAreaLeftAndRightPressed)
@@ -86,13 +87,14 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.label.rightPressed.connect(self.mineAreaRightPressed)
         self.label.rightRelease.connect(self.mineAreaRightRelease)
         self.label.setObjectName("label")
-        self.label.resize(QtCore.QSize(self.gridsize*self.game.column-2, self.gridsize*self.game.row-2))
+        self.label.resize(QtCore.QSize(self.gridsize*self.game.column, self.gridsize*self.game.row))
+        self.label.setContentsMargins(0,0,0,0)
         self.scroll_area = QtWidgets.QScrollArea(self.mainWindow)
         self.scroll_area.setWidget(self.label)
         self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.scroll_area.setFixedWidth(min(self.maxsize[0]-self.widthmargin,self.game.column*self.gridsize))
-        self.scroll_area.setFixedHeight(min(self.maxsize[1]-self.heightmargin,self.game.row*self.gridsize))
+        self.scroll_area.setFixedWidth(min(self.maxsize[0]-self.widthmargin+2,self.game.column*self.gridsize+2))
+        self.scroll_area.setFixedHeight(min(self.maxsize[1]-self.heightmargin+2,self.game.row*self.gridsize+2))
         self.scroll_area.wheelEvent=self.wheelscroll
         #self.scrollbar = QtWidgets.QScrollBar(Qt.Horizontal)
         #self.scrollbar2 = QtWidgets.QScrollBar(Qt.Vertical)
@@ -102,6 +104,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         #self.gridLayout.addWidget(self.scrollbar,1,0,1,1)
         #self.gridLayout.addWidget(self.scrollbar2,0,1,1,1)
         self.gridLayout.setSpacing(0)
+        self.gridLayout.setContentsMargins(0,0,0,0)
         self.label.mouseMove.connect(self.mineMouseMove)
         
     def showface(self,scale):
@@ -364,14 +367,16 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         if result==1:
             if self.game.gametype==1:
                 self.game.gamenum+=1
-            #score=[self.game.intervaltime,self.game.bbbv/self.game.intervaltime,(self.game.intervaltime**1.7)/self.game.bbbv]
+                score=[self.game.intervaltime,self.game.bbbv/self.game.intervaltime,(self.game.intervaltime**1.7)/self.game.bbbv]
+                self.game.ranks=self.gamerank(score)
         self.changecounter(2)
         self.showtimenum(self.game.intervaltime)
         self.game.dofinish()
         self.label.update()
         self.game.finish=True
+        self.showface(8.5)
         if result==1 and self.game.gametype==1:
-            self.savethisgame()
+            self.savethisgame()   
         self.setshortcuts(True)
         if self.game.failed and self.options.settings['failrestart']:
             p=(self.game.solvedelse+self.game.solvedops)*100/self.game.bbbv
@@ -381,14 +386,14 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
 
 
     def gameWin(self,optime):
-        self.game.result=1
+        self.game.result=1        
         self.gameFinished(self.game.result,optime)
-        self.showface(8.5)
+        
 
     def gameFailed(self,optime):
         self.game.result=2
         self.gameFinished(self.game.result,optime)
-        self.showface(8.5)
+        
 
     def actionChecked(self, k):
         self.action_B.setChecked(False)
@@ -576,7 +581,6 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
                 self.game.savereplay()
                 self.shownews(breakrecord,self.game.stylejudge())
                 
-
     def gamescount(self):
         level=self.game.leveljudge()
         count=0
@@ -669,15 +673,16 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
             self.game.tracklist.append((0,0,-1))
         self.game.replaynodes=[0,0,0,0]
         mainpos=[self.mainWindow.x(),self.mainWindow.y(),self.mainWindow.width(),self.mainWindow.height()]
-        if self.replayui==None:
+
+        if  True:
+            #self.replayui!=None and self.replaywindow.isVisible():
+            #self.replaywindow.setVisible(True)
+            #self.replayui.acctime,self.replayui.pasttime,self.replayui.starttime,self.replayui.paused=0,0,0,False
+            #self.replayui.endtime=self.game.replayboardinfo[5]
+            #self.replayui.lastms=-2
+            #self.replayui.timetext.setText('%.2f/%.2f'%(0.00,self.replayui.endtime))
             self.replaywindow= QtWidgets.QMainWindow()
             self.replayui=window_replay.ui_replaydialog(mainpos,self.replaywindow,self.game)
-        else:
-            self.replaywindow.setVisible(True)
-            self.replayui.acctime,self.replayui.pasttime,self.replayui.starttime,self.replayui.paused=0,0,0,False
-            self.replayui.endtime=self.game.replayboardinfo[5]
-            self.replayui.lastms=-2
-            self.replayui.timetext.setText('%.2f/%.2f'%(0.00,self.replayui.endtime))
         self.game.replaynodes=[0,0,0,0]
         self.replayui.starttime=time.time()
         self.replayui.Dialog.show()
@@ -706,22 +711,6 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
             self.replayui.replayprogress.setEnabled(False)
         else:
             self.timer.start()
-        
-        
-
-    def dooperation(self,num,i,j):
-        if num==1:
-            self.mineAreaLeftPressed(i,j)
-        elif num==2:
-            self.mineAreaLeftRelease(i,j)
-        elif num==3:
-            self.mineAreaRightPressed(i,j)
-        elif num==4:
-            self.mineAreaRightRelease(i,j)
-        elif num==5:
-            self.mineAreaLeftAndRightPressed(i,j)
-        elif num==6:
-            self.mineAreaLeftAndRightRelease(i,j)
     
     def getoptime(self):
         if self.game.timeStart==False:

@@ -56,17 +56,16 @@ class StatusFrame (QtWidgets.QFrame):
     def __init__(self, parent=None):
         super (StatusFrame, self).__init__ (parent)
         self.setFrameShape (QtWidgets.QFrame.Panel)
-        self.setFrameShadow (QtWidgets.QFrame.Raised)
-        self.setLineWidth(1)
+        self.setFrameShadow (QtWidgets.QFrame.Sunken)
         #self.setAlignment (QtCore.Qt.AlignCenter)
 
     def mousePressEvent(self, e):  ##重载一下鼠标点击事件
         if e.button () == QtCore.Qt.LeftButton:
-            self.setFrameShadow (QtWidgets.QFrame.Sunken)
+            self.setFrameShadow (QtWidgets.QFrame.Raised)
 
     def mouseReleaseEvent(self, e):
         if e.button () == QtCore.Qt.LeftButton:
-            self.setFrameShadow (QtWidgets.QFrame.Raised)
+            self.setFrameShadow (QtWidgets.QFrame.Sunken)
             xx = int(e.localPos().x())
             yy = int(e.localPos().y())
             if xx<0 or xx>self.width() or yy<0 or yy>self.height():

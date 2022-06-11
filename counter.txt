@@ -1,0 +1,19 @@
+Rtime;[<rt>{2}];
+Est Rtime;[<est>{2}];
+3BV;[<bvdone>] / [<bv>];
+3BV/s;[<bvdone>/<rt>{3}];
+QG;[<qg>{3}];
+RQP;[<RQP>{3}];
+Ops;[<opdone>] / [<op>];
+Isls;[<isdone>] / [<is>];
+LRD;[<lcl>]/[<rcl>]/[<dcl>];
+Flags;[<flag>];
+Cl;[<cl>]@[<cl>/<rt>{3}];
+Ce;[<ce>]@[<ce>/<rt>{3}];
+Path;[<path>{1}];
+IOE;[<ioe>{3}];
+IOME;[<iome>{3}];
+Corr;[<corr>{3}];
+ThrP;[<thrp>{3}];
+Games;[<games>];
+Ranks;[<tallrank>]/[<ballrank>]/[<sallrank>]

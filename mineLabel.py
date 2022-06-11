@@ -18,7 +18,7 @@ class mineLabel (QtWidgets.QLabel):
         self.game=game
         self.leftAndRightClicked = False
         self.pixSize=pixsize
-        self.pixmaps=[0]*17
+        self.pixmaps=[0]*30
         self.setMouseTracking(True)
         self.resizepixmaps(self.pixSize)
         self.lastcell=None
@@ -37,6 +37,7 @@ class mineLabel (QtWidgets.QLabel):
         self.pixmaps[14]=QPixmap("media/svg/cellunflagged.svg")
         self.pixmaps[15]=QPixmap(CELL_PATH+"greencross.svg")
         self.pixmaps[16]=QPixmap(ELEMENT_PATH+"arrowcursor.svg")
+        self.pixmaps[17]=QPixmap("media/hint.png")
         for i in range(16):
             self.pixmaps[i]=self.pixmaps[i].scaled(targetsize,targetsize)
         self.pixmaps[16]=self.pixmaps[16].scaled(targetsize,targetsize,transformMode=QtCore.Qt.SmoothTransformation)
@@ -113,7 +114,21 @@ class mineLabel (QtWidgets.QLabel):
         elif self.game.isnggame() and not self.game.timeStart:
             if self.game.startcross!=None:
                 painter.drawPixmap(self.game.startcross[0]*size,self.game.startcross[1]*size,self.pixmaps[15])
-
+        safesquares=self.game.row*self.game.column-self.game.mineNum-self.game.status.count(1)
+        if safesquares==1 and not self.game.isreplaying() and not self.game.finish:
+            mb=None
+            for square in range(self.game.row*self.game.column):
+                if self.game.isCovered(square) and not self.game.isMine(square):
+                    mb=square
+                    break
+            if mb!=None:
+                #dis=((mouse[0]-self.game.getrow(mb)-0.5)**2+(mouse[1]-self.game.getcolumn(mb)-0.5)**2)**0.5
+                #diag=(self.game.row**2+self.game.column**2)**0.5
+                #if dis>0.25*diag:
+                hints=self.game.adjacent1(mb)
+                for grid in hints:
+                    if self.game.isOpened(grid):
+                        painter.drawPixmap(self.game.getcolumn(grid)*size,self.game.getrow(grid)*size,self.pixmaps[17])
         painter.end()
         
     def getPixmapIndex(self,i,j,mouse):

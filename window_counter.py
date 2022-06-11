@@ -1,11 +1,76 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-import time
+from math import *
+import re
+from constants import *
+
+maxlength=500
+
+
+class variable(object):
+    def __init__(self,name,vtype,strin):
+        self.expstr=strin
+        self.name=name
+        self.vtype=vtype#1:内部 2:外部
+        self.isvalid=True
+        self.parameter_exe()
+
+    def parameter_exe(self):
+        if len(self.expstr)>=maxlength:
+            self.expstr=self.expstr[:maxlength]
+        self.option={'precision':-1,'max':999999999,'min':-999999999,'exception':0,'opacity':False}
+        numdict={0:'precision',1:'max',2:'min',3:'exception',4:'opacity'}
+        leftbraket,rightbraket=None,None
+        for i in range(len(self.expstr)):
+            if self.expstr[i]=='{':
+                if leftbraket!=None:
+                    self.isvalid=False
+                    return
+                leftbraket=i
+            if self.expstr[i]=='}':
+                if rightbraket!=None:
+                    self.isvalid=False
+                    return
+                rightbraket=i
+        if leftbraket==None and rightbraket==None:
+            return
+        if leftbraket==None or rightbraket==None or leftbraket>=rightbraket:
+            self.isvalid=False
+            return
+        '''if self.vtype==2:
+            self.expstr=self.expstr.lower()
+            engs=re.findall('[a-z]+',self.expstr)
+            for s in engs:
+                if s not in['max','min']:
+                    self.isvalid=False
+                    return'''
+        opstr=self.expstr[leftbraket+1:rightbraket]
+        self.expstr=self.expstr[:leftbraket]
+        if opstr=='':
+            return
+        parameters=opstr.split(',')
+        for i in range(min(len(self.option),len(parameters))):
+            if parameters[i]=='':
+                continue
+            try:
+                if i ==0:
+                    parameter=int(parameters[i])
+                elif i in[1,2,3]:
+                    parameter=float(parameters[i])
+                elif i ==4:
+                    parameter=bool(parameters[i])
+            except:
+                continue
+            self.option[numdict[i]]=parameter
 
 class Counter(object):
 
     preview = QtCore.pyqtSignal()
     def __init__(self,counterWindow,game):
+        self.allvars=[]
         self.game=game
+        for var in invars:
+            variablein=variable(var[0],1,var[1])
+            self.allvars.append(variablein)
         self.window=counterWindow
         self.window.setEnabled(True)
         self.window.setWindowFlags(QtCore.Qt.WindowCloseButtonHint)
@@ -15,33 +80,127 @@ class Counter(object):
         self.window.customContextMenuRequested.connect(self.create_rightmenu) 
         self.window.setWindowTitle(_("Counter"))
         self.create_rightmenu()
-        self.columnwidth=[90,90]
-        self.lineheight=18
-        self.rowsnames=['RTime','Est time','3BV','3BV/s','QG','RQP','Ops','Isls','LRD','Flags','Cl','Ce','Path','IOE','Corr','ThrP','Games','Ranks']
-        sumheight=self.lineheight*len(self.rowsnames)
+        self.columnwidth=[100,140]
+        self.lineheight=22
+        self.getcountertext()
+        self.linesnum=(len(self.texts)+1)//2
+        sumheight=self.lineheight*self.linesnum
         self.window.setFixedSize(sum(self.columnwidth), sumheight+10)
-        self.titlelabelarray=[0]*len(self.rowsnames)
-        self.valuelabelarray=[0]*len(self.rowsnames)
+        self.valuelabelarray=[0]*self.linesnum*2
         #gridlayout= QtWidgets.QGridLayout()
         #self.window.setLayout(gridlayout)
-        for i in range(len(self.rowsnames)):
-            self.titlelabelarray[i]=QtWidgets.QLabel(self.window)
-            self.titlelabelarray[i].resize=(self.columnwidth[0],self.lineheight)
-            self.titlelabelarray[i].setText(' %s'%(self.rowsnames[i]))
-            self.titlelabelarray[i].setAlignment(QtCore.Qt.AlignLeft)
-#            self.titlelabelarray[i].setStyleSheet("font-size:12px;font-family:YF补 汉仪夏日体;")
-            #titlelabelarray[i].setFrameShadow(QtWidgets.QFrame.Raised)
-            #titlelabelarray[i].setStyleSheet('border-width: 1px;border-color: rgb(255, 255, 255)')
-            self.titlelabelarray[i].move(0,self.lineheight*i)
-            self.valuelabelarray[i]=QtWidgets.QLabel(self.window)
-            self.valuelabelarray[i].resize=(self.columnwidth[1],self.lineheight)
-            self.valuelabelarray[i].setText('0')
-            self.valuelabelarray[i].setAlignment(QtCore.Qt.AlignLeft)
-            #self.valuelabelarray[i].setStyleSheet("font-size:12px;")
-            #valuelabelarray[i].setFrameShadow(QtWidgets.QFrame.Raised)
-            #valuelabelarray[i].setStyleSheet('border-width: 1px;border-color: rgb(255, 255, 255)')
-            self.valuelabelarray[i].move(self.columnwidth[0],self.lineheight*i)
+        for i in range(self.linesnum):
+            for j in range(2):
+                self.valuelabelarray[2*i+j]=QtWidgets.QLabel(self.window)
+                self.valuelabelarray[2*i+j].resize=(self.columnwidth[j],self.lineheight)
+                self.valuelabelarray[2*i+j].setText(' ')
+                self.valuelabelarray[2*i+j].setAlignment(QtCore.Qt.AlignLeft)
+                self.valuelabelarray[2*i+j].setStyleSheet("font-size:18px;font-family:Arial;")
+                #valuelabelarray[i].setFrameShadow(QtWidgets.QFrame.Raised)
+                #valuelabelarray[i].setStyleSheet('border-width: 1px;border-color: rgb(255, 255, 255)')
+                self.valuelabelarray[2*i+j].move(self.columnwidth[0]*j,self.lineheight*i)
 
+    def getcountertext(self):
+        try:
+            #f=open("config/counter.txt",'r')
+            f=open("counter.txt",'r')
+            countertext=f.read()
+            f.close()
+        except:
+            countertext=''
+        countertext=countertext.replace('\t','')
+        countertext=countertext.replace('\n','')
+        countertext=countertext.replace('\b','')
+        self.texts=countertext.split(';')
+        
+    def calvariable(self,var,status,rt,est,solvedbv):
+        if status==1 and var.option['opacity']==True:
+            return '-'
+        try:
+            value=eval(var.expstr)
+            value=min(max(value,var.option['min']),var.option['max'])
+        except:
+            value=var.option['exception']
+        if var.option['precision']>=0:
+            try:
+                precision=int(var.option['precision'])
+                value=round(value,precision)
+            except:
+                pass
+        return value
+
+    def calexpression(self,exp,status,rt,est,solvedbv):
+        option={'precision':-1,'max':999999999,'min':-999999999,'exception':0,'opacity':False}
+        numdict={0:'precision',1:'max',2:'min',3:'exception',4:'opacity'}
+        exp=exp[1:-1]
+        exp_result=re.search('{(.*)}.*$',exp)
+        if exp_result==None:
+            expoptionstr=''
+        else:
+            expoptionstr=exp_result.group(1)
+            exp=exp.replace(exp_result.group(0),'',1)
+        variables=re.findall('<.*?>',exp)
+        if variables!=None:
+            for var1 in variables:
+                
+                var=var1[1:-1]
+                if var=='':
+                    var_value=0
+                    exp=exp.replace(var1,'0',1)
+                    continue
+                var=var.lower()
+                matched=False
+                for cvar in self.allvars:
+                    if var==cvar.name:
+                        matched=True
+                        if not cvar.isvalid:
+                            exp=exp.replace(var1,'0',1)
+                            break
+                        else:
+                            var_value=self.calvariable(cvar,status,rt,est,solvedbv)
+                            if var_value=='-':
+                                exp_value='-'
+                                return exp_value
+                            exp=exp.replace(var1,str(var_value),1)
+                    if matched:
+                        break
+                if not matched:
+                    exp=exp.replace(var1,'0',1)
+        parameters=expoptionstr.split(',')
+        for i in range(min(len(option),len(parameters))):
+            if parameters[i]=='':
+                continue
+            try:
+                if i ==0:
+                    parameter=int(parameters[i])
+                elif i in[1,2,3]:
+                    parameter=float(parameters[i])
+                elif i ==4:
+                    parameter=bool(parameters[i])
+            except:
+                continue
+            option[numdict[i]]=parameter
+        exp=exp.lower()
+        engs=re.findall('[a-z]+',exp)
+        if engs!=None:
+            for eng in engs:
+                if eng not in ['max','min','log']:
+                     exp_value=option['exception']
+                     return str(exp_value)
+        try:
+            exp_value=eval(exp)
+            exp_value=min(max(exp_value,option['min']),option['max'])
+        except:
+            exp_value=option['exception']
+        if option['precision']>=0:
+            try:
+                precision=int(option['precision'])
+                exp_value=round(exp_value,precision)
+                exp_value=format(exp_value,'.%df'%(precision))
+            except:
+                pass
+        return str(exp_value)
+        
     def retranslate(self):
         self.window.setWindowTitle(_("Counter"))
         self.action_replay.setText(_('Preview replay'))
@@ -71,61 +230,24 @@ class Counter(object):
             self.action_replay.setEnabled(False)
     
     def refreshvalues(self,status):
-        allclicks=sum(self.game.allclicks[0:3])
-        eclicks=sum(self.game.eclicks)
-        if status==2:
-            if self.game.isreplaying():
-                rt=max(0,min(self.game.replayboardinfo[5],round(self.game.intervaltime,2)))
+        rt=max(0,min(self.game.replayboardinfo[5],round(self.game.intervaltime,2))) if self.game.isreplaying() else self.game.intervaltime
+        solvedbv=self.game.solvedelse+self.game.solvedops
+        try:
+            est=rt/(solvedbv+2*self.game.solvedops)*(self.game.bbbv+2*self.game.ops)
+        except:
+            est=999.99
+        for i in range(len(self.texts)):
+            text=self.texts[i]
+            exps=re.findall('\[.*?\]',text)
+            if exps==None:
+                self.valuelabelarray[i].setText(' '+text)
+                continue
             else:
-                rt=self.game.intervaltime
-            allbv=self.game.bbbv
-            solvedbv=self.game.solvedelse+self.game.solvedops
-            if eclicks==0:
-                ioe,corr,thrp=0,0,0
-            else:
-                ioe,corr,thrp=solvedbv/allclicks,eclicks/allclicks,solvedbv/eclicks
-            if solvedbv==0:
-                est=999.99
-            else:
-                est=rt/(solvedbv+2*self.game.solvedops)*(allbv+2*self.game.ops)
-            if rt==0:
-                bvs,cls,ces=0,0,0
-            else:
-                bvs,cls,ces=solvedbv/rt,allclicks/rt,eclicks/rt
-            values=['%.2f'%(rt),'%.2f'%(est),'%d/%d'%(solvedbv,allbv),'%.3f'%(bvs),'%.3f'%(pow(est,1.7)/allbv)]
-            values+=['%.2f'%(est*(est+1)/allbv),'%d/%d'%(self.game.solvedops,self.game.ops),'%d/%d'%(self.game.solvedislands,self.game.islands)]
-            values+=['%d/%d/%d'%(self.game.allclicks[0],self.game.allclicks[1],self.game.allclicks[2])]
-            values+=['%d'%(self.game.allclicks[3])]
-            values+=['%d@%.3f'%(allclicks,cls)]
-            values+=['%d@%.3f'%(eclicks,ces)]
-            values+=['%.1f'%(self.game.path)]
-            values+=['%.3f'%(ioe),'%.3f'%(corr),'%.3f'%(thrp)]
-            values+=['%d'%(self.game.gamenum),'%d/%d/%d'%(self.game.ranks[0],self.game.ranks[1],self.game.ranks[2])]
-            for i in range(len(self.valuelabelarray)):
-                self.valuelabelarray[i].setText(values[i])
-        elif status==1:
-            rt=max(float('%.2f'%(self.game.intervaltime-0.005)),0.00)
-            allbv='-'
-            if eclicks==0:
-                corr=0
-            else:
-                corr=eclicks/allclicks
-            if rt==0:
-                cls='-'
-                ces='-'
-            else:
-                cls='%.3f'%(float(allclicks/rt))
-                ces='%.3f'%(float(eclicks/rt))
-            values=['%.2f'%(rt),'-','-','-','-','-','-','-']
-            values+=['%d/%d/%d'%(self.game.allclicks[0],self.game.allclicks[1],self.game.allclicks[2])]
-            values+=['%d'%(self.game.allclicks[3])]
-            values+=['%d@%s'%(allclicks,cls)]
-            values+=['%d@%s'%(eclicks,ces)]
-            values+=['%.1f'%(self.game.path)]
-            values+=['%s'%('-'),'%.3f'%(corr),'%s'%('-')]
-            values+=['%d'%(self.game.gamenum),'-/-/-']
-            for i in range(len(self.valuelabelarray)):
-                self.valuelabelarray[i].setText(values[i])
+                for exp in exps:
+                    expresult=self.calexpression(exp,status,rt,est,solvedbv)
+                    text=text.replace(exp,expresult,1)
+                self.valuelabelarray[i].setText(' '+text)
+                continue                
 
     def closecounter(self):
         pass

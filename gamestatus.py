@@ -251,8 +251,8 @@ class gamestatus(object):
         if not self.outOfBorder(i,j):
             index=self.getindex(i,j)
             self.mouseout=False
-            if index != self.oldCell and (self.leftAndRightHeld or self.leftHeld):
-                self.oldCell = index
+            #if index != self.oldCell and (self.leftAndRightHeld or self.leftHeld):
+            self.oldCell = index
         elif self.leftAndRightHeld or self.leftHeld:#拖到界外
             self.mouseout=True
 

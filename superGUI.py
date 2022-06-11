@@ -80,18 +80,26 @@ class Ui_MainWindow(object):
 
     def initui(self,MainWindow):
         self.initmainwindow(MainWindow)
-        #self.label.setFrameShape(QtWidgets.QFrame.WinPanel)
-        #self.label.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.frame1and2 = QtWidgets.QFrame(self.centralwidget)  
+        self.frame1and2.setFrameShape(QtWidgets.QFrame.Panel)
+        self.frame1and2.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.frame1and2.setLineWidth(5)
+        self.frame1and2.setMidLineWidth(5)
+        self.frame1and2.setContentsMargins(5,5,5,5)
+        self.frame1and2.setStyleSheet("background-color:#C0C0C0;")
+        self.halfverticalLayout=QtWidgets.QVBoxLayout(self.frame1and2)
         self.initialupperframe()#初始化顶端状态栏，即self.frame
-        self.verticalLayout.addWidget(self.frame) 
+        self.halfverticalLayout.addWidget(self.frame) 
         self.initialminearea()#初始化雷区，即self.frame_2
-        self.verticalLayout.addWidget(self.frame_2)
-        self.verticalLayout.addStretch(1)
+        self.halfverticalLayout.addWidget(self.frame_2)
+        self.halfverticalLayout.setContentsMargins(5,5,5,5)
+        self.verticalLayout.addWidget(self.frame1and2)
+        self.verticalLayout.setSpacing(0)
         self.initialbottomframe()#初始化底端，即self.frame_3
         #self.scroll = QtWidgets.QScrollArea()
         #self.scroll.setWidget(self.frame_2)
         self.verticalLayout.addWidget(self.frame_3)
-        self.verticalLayout.setContentsMargins(10, 10, 10, 10)
+        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         MainWindow.setCentralWidget(self.centralwidget)
         
         
@@ -144,12 +152,17 @@ class Ui_MainWindow(object):
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.centralwidget)#垂直布局
         self.verticalLayout.setObjectName("verticalLayout")
+        self.verticalLayout.setContentsMargins(0,0,0,0)
 
     def initialupperframe(self):
-        self.frame = statusLabel.StatusFrame(self.centralwidget)#QFrame是是基本控件的基类
+        self.frame = statusLabel.StatusFrame(self.frame1and2)#QFrame是是基本控件的基类
         self.frame.setFrameShape(QtWidgets.QFrame.Panel)
-        self.frame.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.frame.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.frame.setObjectName("frame")
+        self.frame.setLineWidth(3)
+        self.frame.setMidLineWidth(3)
+        self.frame.setContentsMargins(3,3,3,3)
+        self.frame.setFixedHeight(48)
         self.horizontalLayout = QtWidgets.QHBoxLayout(self.frame)#水平布局
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.horizontalLayout.setContentsMargins(1, 5, 1, 5)
@@ -163,20 +176,22 @@ class Ui_MainWindow(object):
         self.initialtimer()
 
     def initialminearea(self):
-        self.frame_2 = QtWidgets.QFrame(self.centralwidget)  
-        self.frame_2.setFrameShape(QtWidgets.QFrame.WinPanel)
+        self.frame_2 = QtWidgets.QFrame(self.frame1and2)  
+        self.frame_2.setFrameShape(QtWidgets.QFrame.Panel)
         self.frame_2.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.frame_2.setLineWidth(3)
+        self.frame_2.setMidLineWidth(3)
+        self.frame_2.setContentsMargins(3,3,3,3)
         self.frame_2.setObjectName("frame_2")
         self.gridLayout = QtWidgets.QGridLayout(self.frame_2)
         self.gridLayout.setContentsMargins(0, 0, 0, 0)
         self.gridLayout.setObjectName("gridLayout")
     def initialbottomframe(self):
         self.frame_3 = QtWidgets.QFrame(self.centralwidget)  
-        self.frame_3.setFrameShape(QtWidgets.QFrame.WinPanel)
-        self.frame_3.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.frame_3.setObjectName("frame_3")
         self.horizontalLayout3 = QtWidgets.QHBoxLayout(self.frame_3)
-        self.horizontalLayout3.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout3.setContentsMargins(5, 5, 5, 5)
+        self.frame_3.setStyleSheet("background-color:#606060;")
         self.labeltag = QtWidgets.QLabel(self.frame_3)#
         self.labeltag.setObjectName("labeltag")
         self.resetplayertag()
