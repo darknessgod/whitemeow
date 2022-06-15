@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "POT-Creation-Date: 2022-04-09 22:57+0800\n"
-"PO-Revision-Date: 2022-04-26 02:17+0800\n"
+"PO-Revision-Date: 2022-06-15 01:51+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: en\n"
@@ -225,13 +225,9 @@ msgstr "Show timer in game"
 msgid "Show num of safe tiles"
 msgstr "Show num of safe tiles"
 
-#: window_settings.py:182
-msgid "Click when press(confict with 1.5cl)"
-msgstr "Click when press(confict with 1.5cl)"
-
 #: window_settings.py:184
-msgid "Disable right"
-msgstr "Disable right"
+msgid "Disable right button"
+msgstr "Disable right button"
 
 #: window_settings.py:186
 msgid "Flag all mines after winning"
@@ -259,3 +255,47 @@ msgstr "no guess mode"
 #: window_replay:1
 msgid "replay control bar"
 msgstr "replay control bar"
+
+#: window_replay:1
+msgid "Miss block hint"
+msgstr "Miss block hint"
+
+#: window_replay:1
+msgid "Operation"
+msgstr "Operation"
+
+#: window_replay:1
+msgid "Operation settings"
+msgstr "Operation settings"
+
+#: window_replay:1
+msgid "Double left click to restart"
+msgstr "Double left click to restart"
+
+#: window_replay:1
+msgid "Left click when press"
+msgstr "Left click when press"
+
+#: window_replay:1
+msgid "Chord when press(confict with 1.5cl)"
+msgstr "Chord when press(confict with 1.5cl)"
+
+#: window_replay:1
+msgid "Left click when dragging"
+msgstr "Left click when dragging"
+
+#: window_replay:1
+msgid "Right click when dragging"
+msgstr "Right click when dragging"
+
+#: window_replay:1
+msgid "Chord when left click"
+msgstr "Chord when left click"
+
+#: window_replay:1
+msgid "Chord when dragging"
+msgstr "Chord when dragging"
+
+#: window_replay:1
+msgid "Mid click to restart"
+msgstr "Mid click to restart"

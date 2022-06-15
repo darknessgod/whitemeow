@@ -40,7 +40,7 @@ class Ui_SettingDialog (object):
         self.setmenuwidget = QtWidgets.QWidget (self.widget)
         self.setmenuwidget.setObjectName ("setmenuwidget")#主体部分，构成除去几个按钮以外的整个上半部分
         self.setmenuwidget.resize(135,500)
-        menunames=[_('Player'),_('Game'),_('Counter')]
+        menunames=[_('Player'),_('Game'),_('Operation'),_('Counter')]
         self.menulabels=[0]*len(menunames)
         self.verticalLayout2 = QtWidgets.QVBoxLayout (self.setmenuwidget)
         self.verticalLayout2.setObjectName ("verticalLayout2")
@@ -56,11 +56,11 @@ class Ui_SettingDialog (object):
             self.menulabels[i].resize=(100,25)
             self.menulabels[i].setText(' %s'%(menunames[i]))
             self.menulabels[i].setAlignment(QtCore.Qt.AlignLeft)
-            self.menulabels[i].setStyleSheet("font-size:18px;")
+            self.menulabels[i].setStyleSheet("font-size:18px;font-family:Arial;")
             self.menulabels[i].leftRelease.connect(self.showsettings)
             self.menulabels[i].menunum=i
             self.verticalLayout2.addWidget(self.menulabels[i])
-        self.menulabels[2].setEnabled(False)
+        self.menulabels[3].setEnabled(False)
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout2.addWidget (self.setmenuwidget)
         self.horizontalLayout2.addStretch(1)
@@ -111,12 +111,12 @@ class Ui_SettingDialog (object):
             self.tmpsavesettings(self.currentpage)
         for i in range(self.verticalLayout3.count()): 
             self.verticalLayout3.itemAt(i).widget().deleteLater()
-        self.menulabels[menunum].setStyleSheet("background-color:blue;color:white;font-size:18px;")
-        self.menulabels[self.currentpage].setStyleSheet("color:black;font-size:18px;")
+        self.menulabels[menunum].setStyleSheet("background-color:blue;color:white;font-size:18px;font-family:Arial;")
+        self.menulabels[self.currentpage].setStyleSheet("color:black;font-size:18px;font-family:Arial;")
         self.titlelabel=QtWidgets.QLabel(self.coreframe)
         self.titlelabel.setFixedSize(400,35)
         self.titlelabel.setAlignment(QtCore.Qt.AlignCenter)
-        self.titlelabel.setStyleSheet("font-size:22px;")
+        self.titlelabel.setStyleSheet("font-size:22px;font-family:Arial;")
         self.titlelabel.setFrameShape(QtWidgets.QFrame.Panel)
         self.titlelabel.setFrameShadow(QtWidgets.QFrame.Raised)
         self.verticalLayout3.addWidget(self.titlelabel)
@@ -178,25 +178,49 @@ class Ui_SettingDialog (object):
             self.verticalLayout3.addWidget(self.timerenableBox)
             self.safenumenableBox = self.createcheckbox(self.coreframe,_('Show num of safe tiles'),self.tmpsettings['showsafesquares'])
             self.verticalLayout3.addWidget(self.safenumenableBox)
-            self.oneshotBox = self.createcheckbox(self.coreframe,_('Click when press(confict with 1.5cl)'),self.tmpsettings['instantclick'])
-            self.verticalLayout3.addWidget(self.oneshotBox)
-            self.disablerbox=self.createcheckbox(self.coreframe,_('Disable right'),self.tmpsettings['disableright'])
-            self.verticalLayout3.addWidget(self.disablerbox)
+
+
             self.flagallbox=self.createcheckbox(self.coreframe,_('Flag all mines after winning'),self.tmpsettings['endflagall'])
             self.verticalLayout3.addWidget(self.flagallbox)
             self.failrestartbox=self.createcheckbox(self.coreframe,_('Start new game after fail'),self.tmpsettings['failrestart'])
             self.verticalLayout3.addWidget(self.failrestartbox)
             self.widgetbranch2=QtWidgets.QWidget (self.coreframe)
             self.horizontalLayout4=QtWidgets.QHBoxLayout (self.widgetbranch2)
+            self.horizontalLayout4.setContentsMargins(0, 0, 0, 0)
             self.frpercentagetext=QtWidgets.QLabel(self.widgetbranch2)
             self.frpercentagetext.setText(_('if completion less than'))
             self.horizontalLayout4.addWidget(self.frpercentagetext)
             self.failrestartpercentage=self.createspinbox(self.widgetbranch2,100,0,100,1)
             self.failrestartpercentage.setEnabled(self.tmpsettings['failrestart'])
+            self.failrestartpercentage.setValue(self.tmpsettings['failrestart_percentage'])
             self.horizontalLayout4.addWidget(self.failrestartpercentage)
             self.horizontalLayout4.setAlignment(QtCore.Qt.AlignLeft)
             self.verticalLayout3.addWidget(self.widgetbranch2)
+            self.mbhintbox=self.createcheckbox(self.coreframe,_('Miss block hint'),self.tmpsettings['missblock_hint'])
+            self.mbhintbox.setChecked(self.tmpsettings['missblock_hint'])
+            self.verticalLayout3.addWidget(self.mbhintbox)
+        elif menunum==2:
+            self.titlelabel.setText(' %s'%(_('Operation settings')))
+            self.loneshotBox = self.createcheckbox(self.coreframe,_('Left click when press'),self.tmpsettings['instantlclick'])
+            self.verticalLayout3.addWidget(self.loneshotBox)
+            self.doneshotBox = self.createcheckbox(self.coreframe,_('Chord when press(confict with 1.5cl)'),self.tmpsettings['instantdclick'])
+            self.verticalLayout3.addWidget(self.doneshotBox)
+            self.disablerbox=self.createcheckbox(self.coreframe,_('Disable right button'),self.tmpsettings['disableright'])
+            self.verticalLayout3.addWidget(self.disablerbox)
+            self.leftrestart = self.createcheckbox(self.coreframe,_('Double left click to restart'),self.tmpsettings['leftrestart'])
+            self.verticalLayout3.addWidget(self.leftrestart)
+            self.midrestart = self.createcheckbox(self.coreframe,_('Mid click to restart'),self.tmpsettings['midrestart'])
+            self.verticalLayout3.addWidget(self.midrestart)
+            self.leftdragclick = self.createcheckbox(self.coreframe,_('Left click when dragging'),self.tmpsettings['dragclickleft'])
+            self.verticalLayout3.addWidget(self.leftdragclick)
+            self.rightdragclick = self.createcheckbox(self.coreframe,_('Right click when dragging'),self.tmpsettings['dragclickright'])
+            self.verticalLayout3.addWidget(self.rightdragclick)
+            self.doubledragclick = self.createcheckbox(self.coreframe,_('Chord when dragging'),self.tmpsettings['dragclickdouble'])
+            self.verticalLayout3.addWidget(self.doubledragclick)
+            self.lefttodouble = self.createcheckbox(self.coreframe,_('Chord when left click'),self.tmpsettings['lefttodouble'])
+            self.verticalLayout3.addWidget(self.lefttodouble)
         self.currentpage=menunum
+        self.changesettings()
         self.initialized=True
             
     def createcheckbox(self,widget,text,defaultstate):
@@ -231,6 +255,15 @@ class Ui_SettingDialog (object):
         elif self.currentpage==1:
             self.tmpsettings['failrestart']=self.failrestartbox.isChecked()
             self.failrestartpercentage.setEnabled(self.failrestartbox.isChecked())
+        elif self.currentpage==2:
+            self.tmpsettings['dragclickleft']=self.leftdragclick.isChecked()
+            self.tmpsettings['dragclickdouble']=self.doubledragclick.isChecked()
+            if self.leftdragclick.isChecked():
+                self.loneshotBox.setChecked(True)
+            self.loneshotBox.setEnabled(not self.leftdragclick.isChecked())
+            if self.doubledragclick.isChecked():
+                self.doneshotBox.setChecked(True)
+            self.doneshotBox.setEnabled(not self.doubledragclick.isChecked())
 
     def tmpsavesettings(self,page):
         if page==0:
@@ -252,11 +285,20 @@ class Ui_SettingDialog (object):
                 self.tmpsettings['defaultlevel']='int'
             self.tmpsettings['timeringame']=self.timerenableBox.isChecked()
             self.tmpsettings['showsafesquares']=self.safenumenableBox.isChecked()
-            self.tmpsettings['instantclick']=self.oneshotBox.isChecked()
-            self.tmpsettings['disableright']=self.disablerbox.isChecked()
             self.tmpsettings['endflagall']=self.flagallbox.isChecked()
             self.tmpsettings['failrestart']=self.failrestartbox.isChecked()
             self.tmpsettings['failrestart_percentage']=self.failrestartpercentage.value()
+            self.tmpsettings['missblock_hint']=self.mbhintbox.isChecked()
+        elif page==2:
+            self.tmpsettings['instantlclick']=self.loneshotBox.isChecked()
+            self.tmpsettings['instantdclick']=self.doneshotBox.isChecked()
+            self.tmpsettings['disableright']=self.disablerbox.isChecked()
+            self.tmpsettings['leftrestart']=self.leftrestart.isChecked()
+            self.tmpsettings['midrestart']=self.midrestart.isChecked()
+            self.tmpsettings['dragclickleft']=self.leftdragclick.isChecked()
+            self.tmpsettings['dragclickright']=self.rightdragclick.isChecked()
+            self.tmpsettings['dragclickdouble']=self.doubledragclick.isChecked()
+            self.tmpsettings['lefttodouble']=self.lefttodouble.isChecked()
 
     def savesettings(self):
 

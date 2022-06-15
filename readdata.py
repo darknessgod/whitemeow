@@ -87,6 +87,10 @@ class readsettings(object):
             self.settings=pickle.load(file)
         except FileNotFoundError:
             self.settings=copy.deepcopy(defaultsettings)
+            self.writesettings()
+        if len(self.settings)!=len(defaultsettings):
+            self.settings=copy.deepcopy(defaultsettings)
+            self.writesettings()
             
 
     def writesettings(self):

@@ -11,7 +11,7 @@ if __name__ == "__main__":
     MainWindow = mainWindowGUI.MainWindow ()
     ui = mineSweeperGUI.MineSweeperGUI (MainWindow)
     MainWindow.show()
-    #ui.counterWindow.close()
+    #ui.counterWindow.clo;se()
     sys.exit(app.exec_())
     #app.exec_()
     #QtCore.QCoreApplication.instance().quit

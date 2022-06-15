@@ -127,7 +127,6 @@ class gamestatus(object):
                     self.num[self.getindex(r,c)]=-1
                     self.calnumbers(self.getindex(r,c))
 
-
     def renewminearea(self):
         self.status=[0]*(self.row*self.column)
         self.pixmapindex=[9]*(self.row*self.column)
@@ -142,7 +141,7 @@ class gamestatus(object):
         self.solvedbbbv,self.solvedops,self.path=0,0,0
         self.intervaltime,self.oldinttime =0,0
         self.allclicks,self.eclicks=[0,0,0,0],[0,0,0]
-        self.leftAndRightHeld,self.leftHeld,self.rightfirst,self.rightHeld=False,False,False,False
+        self.leftAndRightHeld,self.leftHeld,self.rightfirst,self.rightHeld,self.midHeld=False,False,False,False,False
         self.gamemode=self.modejudge()
         if not self.isreplaying():
             self.operationlist,self.tracklist,self.statelist,self.clicklist,self.mousestatelist=[],[],[],[],[]
@@ -248,16 +247,10 @@ class gamestatus(object):
                             self.addstate(i,1,optime)
                         
     def domove(self,i,j):
-        if not self.outOfBorder(i,j):
-            index=self.getindex(i,j)
-            self.mouseout=False
-            #if index != self.oldCell and (self.leftAndRightHeld or self.leftHeld):
-            self.oldCell = index
-        elif self.leftAndRightHeld or self.leftHeld:#拖到界外
-            self.mouseout=True
+        pass
 
     def dofinish(self):
-        self.leftAndRightHeld,self.leftHeld,self.rightHeld=False,False,False
+        self.leftAndRightHeld,self.leftHeld,self.rightHeld,self.rightfirst,self.midHeld=False,False,False,False,False
         for i in range(self.row*self.column):
             self.finishpaint(i)
 

@@ -7,10 +7,13 @@ Chinese = gettext.translation('zh_CN', localedir='locale', languages=['zh'])
 English = gettext.translation('en', localedir='locale', languages=['en'])
 Chinese.install()
 
-defaultsettings={'showplayertag':True,'defaultplayertag':_('press F5 to set playertag'),'playername':'anonymous',
+defaultsettings={
+'showplayertag':True,'defaultplayertag':_('press F5 to set playertag'),'playername':'anonymous',
 'level1name':'beg','level2name':'int','level3name':'exp','level4name':'cus','enablerec':True,
-'defaultlevel':'int','timeringame':True,'showsafesquares':False,'instantclick':False,'disableright':False,
-'endflagall':True,'failrestart':False,'failrestart_percentage':100,'language':1,'noguess':False}
+'defaultlevel':'int','timeringame':True,'showsafesquares':False,'instantlclick':False,'instantdclick':False,'disableright':False,
+'endflagall':True,'failrestart':False,'failrestart_percentage':100,'language':1,'noguess':False,'missblock_hint':True,
+'leftrestart':False,'dragclickleft':False,'dragclickright':False,'dragclickdouble':False,'midrestart':False,
+'lefttodouble':True}
 
 invars=(#成绩指标
         ('est','est{2,,0,999.99,1}'),

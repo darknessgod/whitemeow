@@ -5,12 +5,14 @@ import time
 
 
 class mineLabel (QtWidgets.QLabel):
-    leftRelease = QtCore.pyqtSignal (int, int)  # 定义信号
-    rightRelease = QtCore.pyqtSignal (int, int)
+    leftRelease = QtCore.pyqtSignal (int, int ,bool)  # 定义信号
+    rightRelease = QtCore.pyqtSignal (int, int,bool)
     leftPressed = QtCore.pyqtSignal (int, int)
     rightPressed = QtCore.pyqtSignal (int, int)
     leftAndRightPressed = QtCore.pyqtSignal (int, int)
-    leftAndRightRelease = QtCore.pyqtSignal (int, int)
+    MidPressed = QtCore.pyqtSignal (int, int)
+    MidRelease = QtCore.pyqtSignal (int, int)
+    leftAndRightRelease = QtCore.pyqtSignal (int, int,bool)
     mouseMove = QtCore.pyqtSignal (int, int)
 
     def __init__(self, game, pixsize, parent=None):
@@ -48,6 +50,8 @@ class mineLabel (QtWidgets.QLabel):
             xx = int(e.localPos().x())
             yy = int(e.localPos().y())
             # print('点下位置{}, {}'.format(xx, yy))
+            if int(e.buttons())&4==4:#中键
+                self.MidPressed.emit (yy//self.pixSize, xx//self.pixSize)
             if e.buttons () == QtCore.Qt.LeftButton | QtCore.Qt.RightButton:
                 self.leftAndRightPressed.emit (yy//self.pixSize, xx//self.pixSize)
                 self.leftAndRightClicked = True
@@ -62,17 +66,19 @@ class mineLabel (QtWidgets.QLabel):
         #每个标签的鼠标事件发射给槽的都是自身的坐标
         #所以获取释放点相对本标签的偏移量，矫正发射的信号
         # print('抬起位置{}, {}'.format(xx, yy))
-        if not self.game.isreplaying() and not self.game.settings['instantclick']:
+        if not self.game.isreplaying():
             xx = int(e.localPos().x())
             yy = int(e.localPos().y())
-            if self.leftAndRightClicked:
-                self.leftAndRightRelease.emit(yy//self.pixSize, xx//self.pixSize)
+            if int(e.button())&4==4:#中键
+                self.MidRelease.emit (yy//self.pixSize, xx//self.pixSize)
+            elif self.leftAndRightClicked:
+                self.leftAndRightRelease.emit(yy//self.pixSize, xx//self.pixSize,False)
                 self.leftAndRightClicked=False
             else:
                 if e.button () == QtCore.Qt.LeftButton:
-                    self.leftRelease.emit(yy//self.pixSize, xx//self.pixSize)
+                    self.leftRelease.emit(yy//self.pixSize, xx//self.pixSize,False)
                 elif e.button () == QtCore.Qt.RightButton:
-                    self.rightRelease.emit(yy//self.pixSize, xx//self.pixSize)
+                    self.rightRelease.emit(yy//self.pixSize, xx//self.pixSize,False)
             self.update()
 
     def mouseMoveEvent(self, e):
@@ -114,27 +120,31 @@ class mineLabel (QtWidgets.QLabel):
         elif self.game.isnggame() and not self.game.timeStart:
             if self.game.startcross!=None:
                 painter.drawPixmap(self.game.startcross[0]*size,self.game.startcross[1]*size,self.pixmaps[15])
-        safesquares=self.game.row*self.game.column-self.game.mineNum-self.game.status.count(1)
-        if safesquares==1 and not self.game.isreplaying() and not self.game.finish:
-            mb=None
-            for square in range(self.game.row*self.game.column):
-                if self.game.isCovered(square) and not self.game.isMine(square):
-                    mb=square
-                    break
-            if mb!=None:
-                #dis=((mouse[0]-self.game.getrow(mb)-0.5)**2+(mouse[1]-self.game.getcolumn(mb)-0.5)**2)**0.5
-                #diag=(self.game.row**2+self.game.column**2)**0.5
-                #if dis>0.25*diag:
-                hints=self.game.adjacent1(mb)
-                for grid in hints:
-                    if self.game.isOpened(grid):
-                        painter.drawPixmap(self.game.getcolumn(grid)*size,self.game.getrow(grid)*size,self.pixmaps[17])
+        
+        if self.game.settings['missblock_hint']:
+            safesquares=self.game.row*self.game.column-self.game.mineNum-self.game.status.count(1)
+            if safesquares==1 and not self.game.isreplaying() and not self.game.finish:
+                mb=None
+                for square in range(self.game.row*self.game.column):
+                    if self.game.isCovered(square) and not self.game.isMine(square):
+                        mb=square
+                        break
+                if mb!=None:
+                    #dis=((mouse[0]-self.game.getrow(mb)-0.5)**2+(mouse[1]-self.game.getcolumn(mb)-0.5)**2)**0.5
+                    #diag=(self.game.row**2+self.game.column**2)**0.5
+                    #if dis>0.25*diag:
+                    hints=self.game.adjacent1(mb)
+                    for grid in hints:
+                        if self.game.isOpened(grid):
+                            painter.drawPixmap(self.game.getcolumn(grid)*size,self.game.getrow(grid)*size,self.pixmaps[17])
         painter.end()
         
     def getPixmapIndex(self,i,j,mouse):
         index=self.game.getindex(i,j)
         if self.game.isCovered(index) and self.game.leftAndRightHeld and smallfuc.linyu(i,j,mouse[0],mouse[1]) and not self.game.mouseout:
             return 0
+        #elif self.game.settings['lefttodouble'] and self.game.isCovered(index) and self.game.leftHeld and smallfuc.linyu(i,j,mouse[0],mouse[1]) and not self.game.mouseout:
+        #    return 0
         elif self.game.isCovered(index) and self.game.leftHeld and i==mouse[0] and j==mouse[1] and not self.game.mouseout:
             return 0
 

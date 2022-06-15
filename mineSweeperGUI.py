@@ -33,6 +33,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.counterWindow,self.counterui,self.replaywindow,self.replayui=None,None,None,None
         self.label=None
         self.needtorefresh=True
+        self.leftrestartjudge=0
         self.ctrlpressed,self.zpressed=False,False
         self.resettimer()
         self.initMineArea()
@@ -86,6 +87,8 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.label.leftAndRightRelease.connect(self.mineAreaLeftAndRightRelease)
         self.label.rightPressed.connect(self.mineAreaRightPressed)
         self.label.rightRelease.connect(self.mineAreaRightRelease)
+        self.label.MidPressed.connect(self.mineAreaMidPressed)
+        self.label.MidRelease.connect(self.mineAreaMidRelease)
         self.label.setObjectName("label")
         self.label.resize(QtCore.QSize(self.gridsize*self.game.column, self.gridsize*self.game.row))
         self.label.setContentsMargins(0,0,0,0)
@@ -223,18 +226,28 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
             self.game.mousestatelist.append(('lh',optime))
             self.game.oldCell = self.game.getindex(i, j)
             self.label.update()
-            if self.options.settings['instantclick']:
-                self.mineAreaLeftRelease(i,j)
+            if self.options.settings['instantlclick']:
+                self.mineAreaLeftRelease(i,j,self.options.settings['dragclickleft'])
 
-    def mineAreaLeftRelease(self, i, j):
-        if self.game.leftHeld and not self.game.finish:
+    def mineAreaLeftRelease(self, i, j,instantclick=False):
+        if self.game.finish:
+            if self.game.settings['leftrestart']:
+                if time.time()-self.leftrestartjudge<0.25:
+                    self.newgameStart()
+                else:
+                    self.leftrestartjudge=time.time()
+        elif self.game.leftHeld:
             optime=self.getoptime()
-            self.game.leftHeld = False  # 防止双击中的左键弹起被误认为真正的左键弹起
+            if not instantclick:
+                self.game.leftHeld = False  
             if not self.game.isreplaying():
                 self.game.mousestatelist.append(('lr',optime))
             if not self.game.outOfBorder(i, j) and not self.game.finish:
                 self.game.failed=False
-                self.game.doleft(self.game.getindex(i, j),optime)
+                if self.game.isOpened(self.game.getindex(i,j)) and self.options.settings['lefttodouble']:
+                    self.game.dodouble(self.game.getindex(i, j),optime)
+                else:
+                    self.game.doleft(self.game.getindex(i, j),optime)
                 self.changecounter(1)
                 if not self.game.timeStart:
                     self.game.timeStart = True
@@ -253,17 +266,20 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
     def mineAreaRightPressed(self, i, j):
         if not self.game.finish and not self.game.settings['disableright']:
             optime=self.getoptime()
+            self.game.rightHeld=True
             self.game.mousestatelist.append(('rh',optime))
             self.game.doright(self.game.getindex(i, j),optime)
             self.label.update()
             if not self.options.settings['showsafesquares']:
                 self.showminenum(self.game.mineNum-self.game.allclicks[3])
             self.changecounter(1)
-            if self.options.settings['instantclick']:
-                self.mineAreaRightRelease(i,j)
+            if self.options.settings['dragclickright']:
+                self.mineAreaRightRelease(i,j,True)
             
-    def mineAreaRightRelease(self, i, j):
+    def mineAreaRightRelease(self, i, j,instantclick=False):
         if not self.game.finish and not self.game.settings['disableright']:
+            if not instantclick:
+                self.game.rightHeld = False  
             optime=self.getoptime()
             self.game.mousestatelist.append(('rr',optime))
 
@@ -275,14 +291,15 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
             self.game.oldCell = self.game.getindex(i, j)
             self.game.pressdouble(self.game.getindex(i, j))
             self.label.update()
-            if self.options.settings['instantclick']:
-                self.mineAreaLeftAndRightRelease(i,j)
+            if self.options.settings['instantdclick']:
+                self.mineAreaLeftAndRightRelease(i,j,self.options.settings['dragclickdouble'])
 
-    def mineAreaLeftAndRightRelease(self, i, j):
+    def mineAreaLeftAndRightRelease(self, i, j,instantclick=False):
         if not self.game.finish:
-            self.game.leftAndRightHeld = False
+            if not instantclick:
+                self.game.leftAndRightHeld = False
+                self.game.leftHeld = False
             optime=self.getoptime()
-            self.game.leftHeld = False
             self.game.mousestatelist.append(('dr',optime))
             self.game.mousestatelist.append(('lr',optime))
             if not self.game.outOfBorder(i, j):
@@ -298,10 +315,38 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
                     if self.game.isGameFinished()==True:
                         self.gameWin(optime)
                 
+    def mineAreaMidPressed(self,i,j):
+        if not self.game.finish:
+            self.game.midHeld=True
+
+    def mineAreaMidRelease(self,i,j):
+        if self.game.finish:
+            if self.options.settings['midrestart']:
+                self.newgameStart()
+        else:
+            self.game.midHeld=False
                     
     def mineMouseMove(self, i, j):
         if not self.game.finish:
-            self.game.domove(i,j)
+            if not self.game.outOfBorder(i,j):
+                index=self.game.getindex(i,j)
+                self.game.mouseout=False
+                if index!=self.game.oldCell:
+                    if self.game.leftAndRightHeld:
+                        if self.options.settings['dragclickdouble']:
+                            self.mineAreaLeftAndRightRelease(i,j,True)
+                    elif self.game.leftHeld:
+                        if self.options.settings['dragclickleft']:
+                            self.mineAreaLeftRelease(i,j,True)
+                    elif self.game.rightHeld:
+                        if self.options.settings['dragclickright']:
+                            self.mineAreaRightPressed(i,j)
+                            self.mineAreaRightRelease(i,j,True)
+                #if index != self.oldCell and (self.leftAndRightHeld or self.leftHeld):
+                self.game.oldCell = index
+                
+            elif self.game.leftAndRightHeld or self.game.leftHeld:#拖到界外
+                self.game.mouseout=True
             self.label.update()
  
     def gamereStart(self):
@@ -358,10 +403,10 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         
         
     def gameFinished(self,result,optime):
-        self.game.endtime=time.time()
-        self.timer.stop()
         if self.game.finish==True:
             return
+        self.game.endtime=time.time()
+        self.timer.stop()
         self.game.intervaltime=max(float('%.2f'%(optime/1000-0.005)),0.01)
         self.game.cal_3bv_solved()
         if result==1:
@@ -373,6 +418,7 @@ class MineSweeperGUI(superGUI.Ui_MainWindow):
         self.showtimenum(self.game.intervaltime)
         self.game.dofinish()
         self.label.update()
+        self.leftrestartjudge=0
         self.game.finish=True
         self.showface(8.5)
         if result==1 and self.game.gametype==1:

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "POT-Creation-Date: 2022-04-09 22:57+0800\n"
-"PO-Revision-Date: 2022-04-26 02:18+0800\n"
+"PO-Revision-Date: 2022-06-15 01:50+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: zh_CN\n"
@@ -225,12 +225,8 @@ msgstr "游戏中显示计时器"
 msgid "Show num of safe tiles"
 msgstr "计雷器显示剩余安全格数"
 
-#: window_settings.py:182
-msgid "Click when press(confict with 1.5cl)"
-msgstr "一触即发（与1.5cl冲突）"
-
 #: window_settings.py:184
-msgid "Disable right"
+msgid "Disable right button"
 msgstr "禁用右键"
 
 #: window_settings.py:186
@@ -259,3 +255,47 @@ msgstr "无猜模式"
 #: window_replay:1
 msgid "replay control bar"
 msgstr "录像播放控制条"
+
+#: window_replay:1
+msgid "Miss block hint"
+msgstr "漏雷提示"
+
+#: window_replay:1
+msgid "Operation"
+msgstr "操作设置"
+
+#: window_replay:1
+msgid "Operation settings"
+msgstr "操作设置"
+
+#: window_replay:1
+msgid "Double left click to restart"
+msgstr "左键双击重开"
+
+#: window_replay:1
+msgid "Left click when press"
+msgstr "左键一触即发"
+
+#: window_replay:1
+msgid "Chord when press(confict with 1.5cl)"
+msgstr "双键一触即发（与1.5cl冲突）"
+
+#: window_replay:1
+msgid "Left click when dragging"
+msgstr "左键拖动连击"
+
+#: window_replay:1
+msgid "Right click when dragging"
+msgstr "右键拖动连击"
+
+#: window_replay:1
+msgid "Chord when left click"
+msgstr "左键点击数字时双键"
+
+#: window_replay:1
+msgid "Chord when dragging"
+msgstr "双键拖动连击"
+
+#: window_replay:1
+msgid "Mid click to restart"
+msgstr "中键重开"

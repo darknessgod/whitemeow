@@ -4,6 +4,8 @@ import re
 from constants import *
 
 maxlength=500
+maxtext=60
+maxcountertext=100000
 
 
 class variable(object):
@@ -108,10 +110,14 @@ class Counter(object):
             f.close()
         except:
             countertext=''
+        if len(countertext)>maxcountertext:
+            countertext=countertext[:maxcountertext]
         countertext=countertext.replace('\t','')
         countertext=countertext.replace('\n','')
         countertext=countertext.replace('\b','')
         self.texts=countertext.split(';')
+        if len(self.texts)>maxtext:
+            self.texts=self.texts[maxtext]
         
     def calvariable(self,var,status,rt,est,solvedbv):
         if status==1 and var.option['opacity']==True:
