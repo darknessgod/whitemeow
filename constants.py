@@ -13,7 +13,8 @@ defaultsettings={
 'defaultlevel':'int','timeringame':True,'showsafesquares':False,'instantlclick':False,'instantdclick':False,'disableright':False,
 'endflagall':True,'failrestart':False,'failrestart_percentage':100,'language':1,'noguess':False,'missblock_hint':True,
 'leftrestart':False,'dragclickleft':False,'dragclickright':False,'dragclickdouble':False,'midrestart':False,
-'lefttodouble':True}
+'lefttodouble':True,'showdetail_timer':True,'ingame_cal':True,'columnwidth1':100,'columnwidth2':140,'rowheight':22,
+'tower_monster':False}
 
 invars=(#成绩指标
         ('est','est{2,,0,999.99,1}'),
@@ -52,6 +53,14 @@ invars=(#成绩指标
         ('ballrank','self.game.ranks[1]{-1,,0,0}'),
         ('sallrank','self.game.ranks[2]{-1,,0,0}')
         )
+
+default_counter='Rtime;[<rt>{2}];\nEst Rtime;[<est>{2}];\n3BV;[<bvdone>] / [<bv>];\n'
+default_counter+='3BV/s;[<bvdone>/<rt>{3}];\nQG;[<qg>{3}];RQP;[<RQP>{3}];\n'
+default_counter+='Ops;[<opdone>] / [<op>];\nIsls;[<isdone>] / [<is>];\n'
+default_counter+='LRD;[<lcl>]/[<rcl>]/[<dcl>];\nFlags;[<flag>];\n'
+default_counter+='Cl;[<cl>]@[<cl>/<rt>{3}];\nCe;[<ce>]@[<ce>/<rt>{3}];\n'
+default_counter+='Path;[<path>{1}];\nIOE;[<ioe>{3}];\nIOME;[<iome>{3}];\nCorr;[<corr>{3}];\n'
+default_counter+='ThrP;[<thrp>{3}];\nGames;[<games>];\nRanks;[<tallrank>]/[<ballrank>]/[<sallrank>]'
 
 def adjacent(i,j,index,row,column):
     if j==0: # left edge

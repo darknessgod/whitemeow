@@ -11,7 +11,7 @@ class mineLabel (QtWidgets.QLabel):
     rightPressed = QtCore.pyqtSignal (int, int)
     leftAndRightPressed = QtCore.pyqtSignal (int, int)
     MidPressed = QtCore.pyqtSignal (int, int)
-    MidRelease = QtCore.pyqtSignal (int, int)
+    MidRelease = QtCore.pyqtSignal (int, int,bool)
     leftAndRightRelease = QtCore.pyqtSignal (int, int,bool)
     mouseMove = QtCore.pyqtSignal (int, int)
 
@@ -27,10 +27,11 @@ class mineLabel (QtWidgets.QLabel):
 
     def resizepixmaps(self,num):
         targetsize=num
-        for i in range(1,9):
-            pngname=CELL_PATH+"cell"+str(i)+".svg"
+        for i in range(1,8):
+            pngname=CELL_PATH+"cat"+str(i)+".svg"
             self.pixmaps[i]=QPixmap(pngname)
         self.pixmaps[0]=QPixmap(CELL_PATH+"celldown.svg")
+        self.pixmaps[8]=QPixmap(CELL_PATH+"cell8.svg")
         self.pixmaps[9]=QPixmap(CELL_PATH+"cellup.svg")
         self.pixmaps[10]=QPixmap(CELL_PATH+"cellflag.svg")
         self.pixmaps[11]=QPixmap(CELL_PATH+"cellmine.svg")
@@ -52,7 +53,7 @@ class mineLabel (QtWidgets.QLabel):
             # print('点下位置{}, {}'.format(xx, yy))
             if int(e.buttons())&4==4:#中键
                 self.MidPressed.emit (yy//self.pixSize, xx//self.pixSize)
-            if e.buttons () == QtCore.Qt.LeftButton | QtCore.Qt.RightButton:
+            if int(e.buttons ())%4==3: 
                 self.leftAndRightPressed.emit (yy//self.pixSize, xx//self.pixSize)
                 self.leftAndRightClicked = True
             else:
@@ -70,7 +71,7 @@ class mineLabel (QtWidgets.QLabel):
             xx = int(e.localPos().x())
             yy = int(e.localPos().y())
             if int(e.button())&4==4:#中键
-                self.MidRelease.emit (yy//self.pixSize, xx//self.pixSize)
+                self.MidRelease.emit (yy//self.pixSize, xx//self.pixSize,False)
             elif self.leftAndRightClicked:
                 self.leftAndRightRelease.emit(yy//self.pixSize, xx//self.pixSize,False)
                 self.leftAndRightClicked=False
@@ -141,7 +142,7 @@ class mineLabel (QtWidgets.QLabel):
         
     def getPixmapIndex(self,i,j,mouse):
         index=self.game.getindex(i,j)
-        if self.game.isCovered(index) and self.game.leftAndRightHeld and smallfuc.linyu(i,j,mouse[0],mouse[1]) and not self.game.mouseout:
+        if self.game.isCovered(index) and (self.game.leftAndRightHeld or self.game.midHeld) and smallfuc.linyu(i,j,mouse[0],mouse[1]) and not self.game.mouseout:
             return 0
         #elif self.game.settings['lefttodouble'] and self.game.isCovered(index) and self.game.leftHeld and smallfuc.linyu(i,j,mouse[0],mouse[1]) and not self.game.mouseout:
         #    return 0

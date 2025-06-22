@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "POT-Creation-Date: 2022-04-09 22:57+0800\n"
-"PO-Revision-Date: 2022-06-15 01:50+0800\n"
+"PO-Revision-Date: 2022-07-11 21:37+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: zh_CN\n"
@@ -36,6 +36,10 @@ msgstr "喵喵扫雷"
 #: superGUI.py:24
 msgid "Game"
 msgstr "游戏"
+
+#: superGUI.py:24
+msgid "Game_settings"
+msgstr "游戏设置"
 
 #: superGUI.py:25
 msgid "Options"
@@ -121,6 +125,14 @@ msgstr "退出"
 msgid "Counter"
 msgstr "计数器"
 
+#: superGUI.py:42
+msgid "Counter_settings"
+msgstr "计数器设置"
+
+#: superGUI.py:42
+msgid "Counter settings"
+msgstr "计数器设置"
+
 #: superGUI.py:43
 msgid "Settings"
 msgstr "设置"
@@ -147,7 +159,7 @@ msgid ""
 "%s "
 msgstr ""
 "恭喜打破:\n"
-"%s "
+"%s！"
 
 #: window_news.py:32
 msgid "score"
@@ -170,7 +182,7 @@ msgid "Overall"
 msgstr "总纪录"
 
 #: window_settings.py:46
-msgid "Player"
+msgid "Player_settings"
 msgstr "玩家设置"
 
 #: window_settings.py:107
@@ -261,7 +273,7 @@ msgid "Miss block hint"
 msgstr "漏雷提示"
 
 #: window_replay:1
-msgid "Operation"
+msgid "Operation_settings"
 msgstr "操作设置"
 
 #: window_replay:1
@@ -299,3 +311,17 @@ msgstr "双键拖动连击"
 #: window_replay:1
 msgid "Mid click to restart"
 msgstr "中键重开"
+
+#: window_replay:1
+msgid "Show precise time in timer"
+msgstr "计时器显示小数"
+
+#: window_replay:1
+msgid "Calculate while playing"
+msgstr "游戏中计算计数器数据"
+
+#~ msgid "Player"
+#~ msgstr "玩家设置"
+
+#~ msgid "Operation"
+#~ msgstr "操作设置"

@@ -7,7 +7,6 @@ maxlength=500
 maxtext=60
 maxcountertext=100000
 
-
 class variable(object):
     def __init__(self,name,vtype,strin):
         self.expstr=strin
@@ -82,8 +81,8 @@ class Counter(object):
         self.window.customContextMenuRequested.connect(self.create_rightmenu) 
         self.window.setWindowTitle(_("Counter"))
         self.create_rightmenu()
-        self.columnwidth=[100,140]
-        self.lineheight=22
+        self.columnwidth=[self.game.settings['columnwidth1'],self.game.settings['columnwidth2']]
+        self.lineheight=self.game.settings['rowheight']
         self.getcountertext()
         self.linesnum=(len(self.texts)+1)//2
         sumheight=self.lineheight*self.linesnum
@@ -94,13 +93,13 @@ class Counter(object):
         for i in range(self.linesnum):
             for j in range(2):
                 self.valuelabelarray[2*i+j]=QtWidgets.QLabel(self.window)
-                self.valuelabelarray[2*i+j].resize=(self.columnwidth[j],self.lineheight)
                 self.valuelabelarray[2*i+j].setText(' ')
                 self.valuelabelarray[2*i+j].setAlignment(QtCore.Qt.AlignLeft)
-                self.valuelabelarray[2*i+j].setStyleSheet("font-size:18px;font-family:Arial;")
+                self.valuelabelarray[2*i+j].setStyleSheet("font-size:%dpx;font-family:Arial;"%(int(0.8*self.lineheight)))
                 #valuelabelarray[i].setFrameShadow(QtWidgets.QFrame.Raised)
                 #valuelabelarray[i].setStyleSheet('border-width: 1px;border-color: rgb(255, 255, 255)')
                 self.valuelabelarray[2*i+j].move(self.columnwidth[0]*j,self.lineheight*i)
+                self.valuelabelarray[2*i+j].resize(self.columnwidth[j],self.lineheight)
 
     def getcountertext(self):
         try:
@@ -244,7 +243,7 @@ class Counter(object):
             est=999.99
         for i in range(len(self.texts)):
             text=self.texts[i]
-            exps=re.findall('\[.*?\]',text)
+            exps=re.findall(r'\[.*?\]',text)
             if exps==None:
                 self.valuelabelarray[i].setText(' '+text)
                 continue
@@ -257,17 +256,3 @@ class Counter(object):
 
     def closecounter(self):
         pass
-
-
-
-
-
-                    
-                
-                
-        
-       
-    
-        
-        
-            

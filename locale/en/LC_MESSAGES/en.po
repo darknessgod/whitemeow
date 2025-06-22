@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "POT-Creation-Date: 2022-04-09 22:57+0800\n"
-"PO-Revision-Date: 2022-06-15 01:51+0800\n"
+"PO-Revision-Date: 2022-07-11 21:38+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: en\n"
@@ -35,6 +35,10 @@ msgstr "Meowsweeper Arbiter"
 
 #: superGUI.py:24
 msgid "Game"
+msgstr "Game"
+
+#: superGUI.py:24
+msgid "Game_settings"
 msgstr "Game"
 
 #: superGUI.py:25
@@ -121,6 +125,14 @@ msgstr "Exit"
 msgid "Counter"
 msgstr "Counter"
 
+#: superGUI.py:42
+msgid "Counter_settings"
+msgstr "Counter"
+
+#: superGUI.py:42
+msgid "Counter settings"
+msgstr "Counter settings"
+
 #: superGUI.py:43
 msgid "Settings"
 msgstr "Settings"
@@ -170,7 +182,7 @@ msgid "Overall"
 msgstr "Overall"
 
 #: window_settings.py:46
-msgid "Player"
+msgid "Player_settings"
 msgstr "Player"
 
 #: window_settings.py:107
@@ -261,7 +273,7 @@ msgid "Miss block hint"
 msgstr "Miss block hint"
 
 #: window_replay:1
-msgid "Operation"
+msgid "Operation_settings"
 msgstr "Operation"
 
 #: window_replay:1
@@ -299,3 +311,17 @@ msgstr "Chord when dragging"
 #: window_replay:1
 msgid "Mid click to restart"
 msgstr "Mid click to restart"
+
+#: window_replay:1
+msgid "Show precise time in timer"
+msgstr "Show precise time in timer"
+
+#: window_replay:1
+msgid "Calculate while playing"
+msgstr "Calculate while playing"
+
+#~ msgid "Player"
+#~ msgstr "Player"
+
+#~ msgid "Operation"
+#~ msgstr "Operation"

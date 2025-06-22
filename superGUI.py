@@ -65,7 +65,19 @@ class Ui_MainWindow(object):
             
     def showtimenum(self,intervaltime):
         ledlist=['-','-','-']
-        minenum=int(intervaltime+0.9999)
+        if self.options.settings['showdetail_timer']:
+            if intervaltime<10:
+                minenum=int(intervaltime*100)
+                scale=(13,16,16)
+            elif intervaltime<100:
+                minenum=int(intervaltime*10)
+                scale=(13,13,16)
+            else:
+                minenum=int(intervaltime+0.9999)
+                scale=(13,13,13)
+        else:
+            minenum=int(intervaltime+0.9999)
+            scale=(13,13,13)
         ledlist[0]=str(minenum//100)
         ledlist[1]=str((minenum%100)//10)
         ledlist[2]=str((minenum)%10)
@@ -75,7 +87,7 @@ class Ui_MainWindow(object):
             filename+='.png'
             pixmap = QtGui.QPixmap(filename)
             size=pixmap.size()
-            scaled_pixmap=pixmap.scaled(size/13)
+            scaled_pixmap=pixmap.scaled(size/scale[i])
             self.labeltime[i].setPixmap(scaled_pixmap)
 
     def initui(self,MainWindow):

@@ -40,7 +40,7 @@ class Ui_SettingDialog (object):
         self.setmenuwidget = QtWidgets.QWidget (self.widget)
         self.setmenuwidget.setObjectName ("setmenuwidget")#主体部分，构成除去几个按钮以外的整个上半部分
         self.setmenuwidget.resize(135,500)
-        menunames=[_('Player'),_('Game'),_('Operation'),_('Counter')]
+        menunames=[_('Player_settings'),_('Game_settings'),_('Operation_settings'),_('Counter_settings')]
         self.menulabels=[0]*len(menunames)
         self.verticalLayout2 = QtWidgets.QVBoxLayout (self.setmenuwidget)
         self.verticalLayout2.setObjectName ("verticalLayout2")
@@ -60,7 +60,7 @@ class Ui_SettingDialog (object):
             self.menulabels[i].leftRelease.connect(self.showsettings)
             self.menulabels[i].menunum=i
             self.verticalLayout2.addWidget(self.menulabels[i])
-        self.menulabels[3].setEnabled(False)
+        #self.menulabels[3].setEnabled(False)
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout2.addWidget (self.setmenuwidget)
         self.horizontalLayout2.addStretch(1)
@@ -114,13 +114,13 @@ class Ui_SettingDialog (object):
         self.menulabels[menunum].setStyleSheet("background-color:blue;color:white;font-size:18px;font-family:Arial;")
         self.menulabels[self.currentpage].setStyleSheet("color:black;font-size:18px;font-family:Arial;")
         self.titlelabel=QtWidgets.QLabel(self.coreframe)
-        self.titlelabel.setFixedSize(400,35)
         self.titlelabel.setAlignment(QtCore.Qt.AlignCenter)
         self.titlelabel.setStyleSheet("font-size:22px;font-family:Arial;")
         self.titlelabel.setFrameShape(QtWidgets.QFrame.Panel)
         self.titlelabel.setFrameShadow(QtWidgets.QFrame.Raised)
         self.verticalLayout3.addWidget(self.titlelabel)
-        if menunum==0:#0：玩家设置 1：游戏设置 2：计数器设置
+        self.titlelabel.setFixedSize(400,35)
+        if menunum==0:#0：玩家设置 1：游戏设置 2：操作设置 3：计数器设置
             self.titlelabel.setText(' %s'%(_('Player settings')))
             self.freshcheckBox=self.createcheckbox(self.coreframe,_('Show player tag'),self.tmpsettings['showplayertag'])
             self.verticalLayout3.addWidget(self.freshcheckBox)
@@ -154,6 +154,8 @@ class Ui_SettingDialog (object):
             self.verticalLayout3.addWidget(self.reccheckBox)
             self.ngcheckBox = self.createcheckbox(self.coreframe,_('no guess mode'),self.tmpsettings['noguess'])
             self.verticalLayout3.addWidget(self.ngcheckBox)
+            self.towermonstercheckBox = self.createcheckbox(self.coreframe,_('tower monster'),self.tmpsettings['tower_monster'])
+            self.verticalLayout3.addWidget(self.towermonstercheckBox)
         elif menunum==1:
             self.titlelabel.setText(' %s'%(_('Game settings')))
             self.widgetbranch1 = QtWidgets.QWidget (self.coreframe)
@@ -178,8 +180,8 @@ class Ui_SettingDialog (object):
             self.verticalLayout3.addWidget(self.timerenableBox)
             self.safenumenableBox = self.createcheckbox(self.coreframe,_('Show num of safe tiles'),self.tmpsettings['showsafesquares'])
             self.verticalLayout3.addWidget(self.safenumenableBox)
-
-
+            self.showdetailtimer=self.createcheckbox(self.coreframe,_('Show precise time in timer'),self.tmpsettings['showdetail_timer'])
+            self.verticalLayout3.addWidget(self.showdetailtimer)
             self.flagallbox=self.createcheckbox(self.coreframe,_('Flag all mines after winning'),self.tmpsettings['endflagall'])
             self.verticalLayout3.addWidget(self.flagallbox)
             self.failrestartbox=self.createcheckbox(self.coreframe,_('Start new game after fail'),self.tmpsettings['failrestart'])
@@ -219,6 +221,36 @@ class Ui_SettingDialog (object):
             self.verticalLayout3.addWidget(self.doubledragclick)
             self.lefttodouble = self.createcheckbox(self.coreframe,_('Chord when left click'),self.tmpsettings['lefttodouble'])
             self.verticalLayout3.addWidget(self.lefttodouble)
+        elif menunum==3:
+            self.titlelabel.setText(' %s'%(_('Counter settings')))
+            self.ingamecalBox = self.createcheckbox(self.coreframe,_('Calculate while playing'),self.tmpsettings['ingame_cal'])
+            self.verticalLayout3.addWidget(self.ingamecalBox)
+            self.widgetbranch=QtWidgets.QWidget (self.coreframe)
+            self.horizontalLayout4=QtWidgets.QHBoxLayout (self.widgetbranch)
+            self.horizontalLayout4.setContentsMargins(0, 0, 0, 0)
+            self.widthtext=QtWidgets.QLabel(self.widgetbranch)
+            self.widthtext.setText(_('Column widths:'))
+            self.horizontalLayout4.addWidget(self.widthtext)
+            self.columnwidth1box=self.createspinbox(self.widgetbranch,300,20,100,1)
+            self.columnwidth1box.setValue(self.tmpsettings['columnwidth1'])
+            self.horizontalLayout4.addWidget(self.columnwidth1box)
+            self.columnwidth2box=self.createspinbox(self.widgetbranch,300,20,140,1)
+            self.columnwidth2box.setValue(self.tmpsettings['columnwidth2'])
+            self.horizontalLayout4.addWidget(self.columnwidth2box)
+            self.horizontalLayout4.setAlignment(QtCore.Qt.AlignLeft)
+            self.verticalLayout3.addWidget(self.widgetbranch)
+            self.widgetbranch2=QtWidgets.QWidget (self.coreframe)
+            self.widgetbranch2.setContentsMargins(0, 0, 0, 0)
+            self.horizontalLayout5=QtWidgets.QHBoxLayout (self.widgetbranch2)
+            self.horizontalLayout5.setContentsMargins(0, 0, 0, 0)
+            self.heighttext=QtWidgets.QLabel(self.widgetbranch2)
+            self.heighttext.setText(_('Row height:'))
+            self.horizontalLayout5.addWidget(self.heighttext)
+            self.rowheightbox=self.createspinbox(self.widgetbranch2,60,10,22,1)
+            self.rowheightbox.setValue(self.tmpsettings['rowheight'])
+            self.horizontalLayout5.addWidget(self.rowheightbox)
+            self.horizontalLayout5.setAlignment(QtCore.Qt.AlignLeft)
+            self.verticalLayout3.addWidget(self.widgetbranch2)
         self.currentpage=menunum
         self.changesettings()
         self.initialized=True
@@ -252,6 +284,10 @@ class Ui_SettingDialog (object):
             self.playertag.setEnabled(self.freshcheckBox.isChecked())
             self.tmpsettings['enablerec']=self.reccheckBox.isChecked()
             self.tmpsettings['noguess']=self.ngcheckBox.isChecked()
+            self.tmpsettings['tower_monster']=self.towermonstercheckBox.isChecked()
+            if self.towermonstercheckBox.isChecked():
+                self.ngcheckBox.setChecked(False)
+            self.ngcheckBox.setEnabled(not self.towermonstercheckBox.isChecked())
         elif self.currentpage==1:
             self.tmpsettings['failrestart']=self.failrestartbox.isChecked()
             self.failrestartpercentage.setEnabled(self.failrestartbox.isChecked())
@@ -270,6 +306,7 @@ class Ui_SettingDialog (object):
             self.tmpsettings['showplayertag']=self.freshcheckBox.isChecked()
             self.tmpsettings['enablerec']=self.reccheckBox.isChecked()
             self.tmpsettings['noguess']=self.ngcheckBox.isChecked()
+            self.tmpsettings['tower_monster']=self.towermonstercheckBox.isChecked()
             self.tmpsettings['defaultplayertag']=self.playertag.text()
             self.tmpsettings['playername']=self.playername.text()
             self.tmpsettings['level1name']=(self.modenamelabels[0].text())
@@ -289,6 +326,7 @@ class Ui_SettingDialog (object):
             self.tmpsettings['failrestart']=self.failrestartbox.isChecked()
             self.tmpsettings['failrestart_percentage']=self.failrestartpercentage.value()
             self.tmpsettings['missblock_hint']=self.mbhintbox.isChecked()
+            self.tmpsettings['showdetail_timer']=self.showdetailtimer.isChecked()
         elif page==2:
             self.tmpsettings['instantlclick']=self.loneshotBox.isChecked()
             self.tmpsettings['instantdclick']=self.doneshotBox.isChecked()
@@ -299,6 +337,11 @@ class Ui_SettingDialog (object):
             self.tmpsettings['dragclickright']=self.rightdragclick.isChecked()
             self.tmpsettings['dragclickdouble']=self.doubledragclick.isChecked()
             self.tmpsettings['lefttodouble']=self.lefttodouble.isChecked()
+        elif page==3:
+            self.tmpsettings['ingame_cal']=self.ingamecalBox.isChecked()
+            self.tmpsettings['columnwidth1']=self.columnwidth1box.value()
+            self.tmpsettings['columnwidth2']=self.columnwidth2box.value()
+            self.tmpsettings['rowheight']=self.rowheightbox.value()
 
     def savesettings(self):
 

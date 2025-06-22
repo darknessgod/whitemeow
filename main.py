@@ -1,4 +1,4 @@
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtWidgets
 import sys
 import mainWindowGUI 
 import mineSweeperGUI
@@ -11,7 +11,7 @@ if __name__ == "__main__":
     MainWindow = mainWindowGUI.MainWindow ()
     ui = mineSweeperGUI.MineSweeperGUI (MainWindow)
     MainWindow.show()
-    #ui.counterWindow.clo;se()
+    #ui.counterWindow.close()
     sys.exit(app.exec_())
     #app.exec_()
     #QtCore.QCoreApplication.instance().quit

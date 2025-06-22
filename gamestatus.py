@@ -5,6 +5,7 @@ from queue import Queue
 from readdata import *
 from constants import adjacent
 import ms_toollib as ms
+import encoder
 
 class gamestatus(object):
     def __init__(self,row,column,mines,settings):
@@ -17,7 +18,7 @@ class gamestatus(object):
         self.replayboardinfo=[]
         self.tmplist=[i for i in range(self.column*self.row-1)]
         self.gamemode,self.gametype=self.modejudge(),1
-        self.leftHeld,self.rightHeld,self.leftAndRightHeld,self.rightfirst=False,False,False,False # mouse status
+        self.leftHeld,self.rightHeld,self.leftAndRightHeld,self.rightfirst,self.midHeld=False,False,False,False,False # mouse status
         self.path,self.gamenum,self.ranks=0,0,[0,0,0]
         self.starttime,self.intervaltime,self.endtime,self.oldinttime=0,0,0,0
         self.num0seen,self.islandseen,self.isbv=[],[],[]
@@ -29,7 +30,7 @@ class gamestatus(object):
         self.replayoplist,self.replayislist=[],[] # contain indices of cells in each opening/island
         self.replaynodes,self.cursorplace=[0,0,0,0],[0,0]
         self.thisop,self.thisis=[],[]
-        self.num = [0]*(self.row*self.column) # mine=-1, numbers=0,1,2,3,4,5,6,7,8
+        self.num = [0]*(self.row*self.column) # mine=-1, -2, ..., numbers=0,1,2,3,4,5,6,7,8
         self.status = [0]*(self.row*self.column) # covered=0, opened=1, flagged=2
         self.pixmapindex = [9]*(self.row*self.column)
         self.counter=None
@@ -218,8 +219,8 @@ class gamestatus(object):
     def pressdouble(self,index):
         pass
 
-    def dodouble(self,index,optime):
-        if self.rightfirst==True:
+    def dodouble(self,index,optime,mid=False):
+        if not mid and self.rightfirst==True:
             self.allclicks[1]-=1
             self.clicklist.append(('R',optime))
             self.rightfirst=False
@@ -528,7 +529,7 @@ class gamestatus(object):
         try:
             self.mousestatelist=[*self.replay[6+l1+l2+l3+l4+l5:]]
             for i in range(len(self.mousestatelist)):
-                if self.mousestatelist[i][0] not in ('lh','rh','dh','lr','rr','dr'):
+                if self.mousestatelist[i][0] not in ('lh','rh','dh','mh','lr','rr','dr','mr'):
                     return 18
                 if i!=len(self.mousestatelist)-1:
                     if self.mousestatelist[i][1]>self.mousestatelist[i+1][1]:
@@ -621,3 +622,9 @@ class gamestatus(object):
         file=open('%s'%(filename),'wb')
         pickle.dump(replay,file)
         file.close()
+        #encoder.encode(file)
+
+    def makereplayfile2(self,replay):
+        filename=replay[6]
+        input=pickle.dumps(replay)
+        encoder.encode(replay)

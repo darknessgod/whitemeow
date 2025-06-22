@@ -82,10 +82,12 @@ class readsettings(object):
         self.settings={}
 
     def readsettings(self):
+        print(1)
         try:
             file=open('settings.dat','rb')
             self.settings=pickle.load(file)
-        except FileNotFoundError:
+        except FileNotFoundError as e:
+            print(str(e))
             self.settings=copy.deepcopy(defaultsettings)
             self.writesettings()
         if len(self.settings)!=len(defaultsettings):

@@ -253,8 +253,12 @@ class ui_replaydialog (object):
             if i[0]=='dh':
                 self.game.leftAndRightHeld=True
             elif i[0]=='dr':
-                self.game.leftAndRightHeld=False    
-            self.game.replaynodes[3]+=1    
+                self.game.leftAndRightHeld=False
+            if i[0]=='mh':
+                self.game.midHeld=True
+            elif i[0]=='mr':
+                self.game.midHeld=False 
+            self.game.replaynodes[3]+=1 
 
     def switchback_init(self):
         for i in range(self.game.row*self.game.column):
